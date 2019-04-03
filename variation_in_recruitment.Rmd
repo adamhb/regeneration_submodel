@@ -1,0 +1,293 @@
+---
+title: "variation_in_recruitment"
+author: "Adam Hanbury-Brown"
+date: "April 3, 2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+
+##Loading required packages
+```{r}
+library(tidyverse)
+library(raster)
+library(tmap)
+library(tmaptools)
+library(sp)
+```
+
+##Loading required data
+```{r}
+load("data/bcifull.RData")
+load("data/condit_shade.rdata")
+bci_polygon <- raster::shapefile("data/BCI_50Ha.shp")
+pfts <- read_csv("data/pfts2019-04-03.csv")
+```
+
+##Creating a raster of mean shade index (2005-2010) for the Barro Colorado Island 50 ha plot
+```{r}
+#setting the coordinate system to UTM (zone 17N for Panama)
+utm_pan <- CRS("+init=epsg:32617")
+bci_polygon <- spTransform(bci_polygon, CRSobj =  utm_pan)
+
+#converting the simple XY coordinates in the light data to be in units that correspond to UTM zone 17 N
+light_map_data <- canopyht5x5 %>%
+  mutate(utm_e = x + 625774, utm_n = y + 1011743)
+
+#calculating the mean shade index for 2005 to 2010
+light_map_data <- light_map_data %>%
+  rowwise() %>%
+  mutate(mean_05_09 = mean(c(s2005,s2006,s2007,s2008)))
+
+#creating a raster that shows the mean shade index in each 5X5 meter quadrat between 2005 and 2010
+light_map <- rasterFromXYZ(as.data.frame(light_map_data)[, c("utm_e", "utm_n", "mean_05_09")], crs = utm_pan)
+
+#visualizing the raster
+tm_shape(light_map)+
+  tm_raster()
+```
+
+
+#cleaning up the demography data and merging with a file that assigns each species to a particular plant functional types. This code also selects only species that will make it into the canopy (i.e. the ones we care about)
+```{r}
+bci.full <- pfts %>%
+  dplyr::select(Latin, sp, e_vs_l, dpft) %>%
+  mutate(pft = paste0(e_vs_l,dpft)) %>%
+  right_join(bci.full, by = "sp") %>%
+  drop_na(pft)
+```
+
+
+##calculating the number of new recruits emerging between the 2005 and 2010 censuses in each 5 X 5 meter quadrat on BCI. Recruitment rates are stratified by four plant functional types that vary along two life history axes: 1. early successional vs. late successional and 2. drought tolerant vs. drought intolerant
+
+
+
+```{r}
+
+#new recruits are trees that were alive in 2010, but not yet alive in 2005
+not_alive2005 <- bci.full %>%
+  dplyr::select(treeID, bid, status) %>%
+  na.omit() %>%
+  filter(bid == 6, status == "P") %>% .$treeID
+
+alive2010 <- bci.full %>%
+  dplyr::select(treeID, bid, status) %>%
+  na.omit() %>%
+  filter(bid == 7, status == "A") %>% .$treeID
+
+
+#getting the IDs of the new recruits 
+recruitIDs <- bci.full$treeID[(bci.full$treeID %in% not_alive2005) & (bci.full$treeID %in% alive2010)]
+
+#creating a dataframe of the new recruits
+recruits <- bci.full %>%
+  filter(bid == 7,
+         treeID %in% recruitIDs) 
+
+#adding utm coordinates 
+recruits <- recruits %>%
+  mutate(utm_e = gx + 625774, 
+         utm_n = gy + 1011743)
+```
+
+#Mapping the new recruits onto the light data
+```{r}
+
+recruitSpatial <- recruits
+coordinates(recruitSpatial) <- ~ utm_e + utm_n
+crs(recruitSpatial) <- utm_pan
+
+
+tm_shape(light_map)+
+  tm_raster()+
+tm_shape(recruitSpatial) +
+  tm_dots()
+
+length(values(light_map))
+#names(recruitSpatial)
+```
+
+#creating a raster layer of recruitment rates for each plant functional type
+```{r}
+#latedi
+pfts_names <- unique(recruits$pft)
+
+rec_latedi <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == "latedi",c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+
+names(rec_latedi) <- "latedi"
+
+#latedt
+
+rec_latedt <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == "latedt",c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+
+names(rec_latedt) <- "latedt"
+
+#earlydt
+
+rec_earlydt <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == "earlydt",c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+
+names(rec_earlydt) <- "earlydt"
+
+
+#earlydi
+rec_earlydi <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == "earlydi",c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+
+names(rec_earlydi) <- "earlydi"
+
+light_vs_rec <- stack(rec_earlydi, rec_earlydt, rec_latedi, rec_latedt, light_map)
+```
+
+
+
+Seeing if light levels predict recruitment rates
+```{r}
+test <- aggregate(x = light_vs_rec, fact = 10, fun = sum)
+test
+
+test.df <- data.frame(na.omit(values(test)))
+attach(test.df)
+plot(earlydi ~ mean_05_09)
+plot(earlydt ~ mean_05_09)
+plot(latedi ~ mean_05_09)
+plot(latedt ~ mean_05_09)
+
+
+summary(lm(earlydi ~ mean_05_09))
+summary(lm(earlydt ~ mean_05_09))
+summary(lm(latedi ~ mean_05_09))
+summary(lm(latedt ~ mean_05_09))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for(i in 2:4){
+  tmp <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == pfts_names[i],c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+  
+ 
+  rec_stack[[i]] <- tmp
+}
+  
+}
+rec_latedi <- rasterize(x = SpatialPoints(coords = recruits[recruits$pft == "latedi",c("utm_e", "utm_n")], proj4string = utm_pan), y = projectExtent(object = light_map, crs = utm_pan), fun = "count")
+
+names(rec_latedi) <- "latedi"
+
+
+
+```{r}
+
+#points_to_raster(shp = recruitSpatial, N = 17100, by = pft)
+
+light_map
+light_rec <- stack(light_map,recruitSpatial[recruitSpatial@data$pft == "earlydt",])
+for(p in unique(recruitSpatial@data$pft)[-1]){
+  light_rec <- stack(light_rec,light_map,recruitSpatial[recruitSpatial@data$pft == p,]) 
+}
+
+
+r <- projectExtent(object = light_map, crs = utm_pan)
+r[] <- 0
+tab <- table(cellFromXY(light_map, recruitSpatial))
+r[as.numeric(names(tab))] <- tab
+plot(r)
+
+test <- stack(light_map,r)
+test <- aggregate(x = test, fact = 5, fun = median)
+
+test.df <- data.frame(na.omit(values(test)))
+attach(test.df)
+plot(layer ~ mean_05_09)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
