@@ -1,2 +1,2 @@
-# recruitment_submodel
-a recruitment submodel for vegetation demographic models
+# regeneration_submodel
+a regeneration submodel for vegetation demographic models
