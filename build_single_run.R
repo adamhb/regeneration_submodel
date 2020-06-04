@@ -14,7 +14,7 @@ library(reshape2)
 
 
 #name the run
-run_name <- "test_run2"
+run_name <- "test_run6"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
@@ -34,10 +34,10 @@ model_area <- 10000 #area in square meters
 
 #source parameter values
 source("parameter_files/parameters.R")
-
 #run model
 source("model/regeneration_submodel.R")
-
+#generate output
+source("create_output/create_output.R")
 
 
 
