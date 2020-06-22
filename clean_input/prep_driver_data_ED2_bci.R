@@ -1,5 +1,7 @@
 print(paste("Preparing Input Data...",Sys.time()))
 
+###This script is based off of Tom Powell's 
+
 ### This version begins from 1/13/20
 ### 
 ### Code to calculate AGB for a specific patch age over several years.
