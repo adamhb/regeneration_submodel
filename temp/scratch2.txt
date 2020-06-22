@@ -1,0 +1,13 @@
+'BA_SCPF', 'DDBH_CANOPY_SCPF', 'AGB_SCPF', 'NPLANT_SCPF', 'NPLANT_CAPF', 'DDBH_UNDERSTORY_SCPF', ''NPP_SEED_SCPF', 'NPP_SCPF', 'NPLANT_SCAGPFT'
+
+'NPP_SCPF', 'NPP_SEED_SCPF', 'NPP_STOR_SCPF', 'MORTALITY_CANOPY_SCAG', 'MORTALITY_UNDERSTORY_SCAG'
+
+
+
+/scratch/clmed-cases/testing.Cfe16302fc-F7c065e21.2020-06-15/run/lnd/hist/testing.Cfe16302fc-F7c065e21.2020-06-15.clm2.h0.1902-08.nc
+
+
+adamhb@lobata.lbl.gov:/home/adamhb/scratch/clmed-cases/testing.Cfe16302fc-F7c065e21.2020-06-15/run/lnd/hist/testing.Cfe16302fc-F7c065e21.2020-06-15.clm2.h0.1902-08.nc /home/adam/cloud/gdrive/rec_submodel/data/FATES_data/
+
+
+/home/adamhb/scratch/clmed-cases/testing.Cfe16302fc-F7c065e21.2020-06-15/run/lnd/hist

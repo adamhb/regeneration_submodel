@@ -14,13 +14,13 @@ library(reshape2)
 
 
 #name the run
-run_name <- "bci_ED2_test"
+run_name <- "test_run8"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
 
 #set path to driver data
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output"
+driver_data_path <- "~/cloud/gdrive/rec_submodel/data/FATES_output_May_2018/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output"
 
 #site and scenario params
