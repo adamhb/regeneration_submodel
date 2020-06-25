@@ -1,3 +1,5 @@
+
+#rm(list = ls())
 ###----------------------------------------------------------####
 ###  LIBRARIES                                               ####
 ###----------------------------------------------------------####
@@ -123,8 +125,8 @@ for (fl in files[-c(1:2)]){
   tmp_ED2_data <- data.frame(pft = pft, patchID = tmp1, cohort_area = area.tmp, nplant_per_co_m2 = nplant.tmp1,
              npp_co_per_ind = MMEAN_NPPDAILY_CO, npp_seed_co_per_ind = MMEAN_NPPSEEDS_CO, dbh_co = DBH_CO, bseeds_co_m2 = BSEEDS_CO) %>%
     mutate(nplant_per_co = nplant_per_co_m2 * cohort_area * 10000) %>%
-    mutate(npp_co_mo = npp_co_per_ind * nplant_per_co / 12) %>% #(NPP per cohort, per month, Kg C month per cohort) divide by 12 because units of MMEAN_NPPDAILY_CO are KgC yr-1
-    mutate(nppseed_co_mo = npp_seed_co_per_ind * nplant_per_co / 12) %>%
+    mutate(npp_co_mo = npp_co_per_ind * nplant_per_co / (12 * 10000)) %>% #(NPP, KgC per cohort per m2, per month,divide by 12 because units of MMEAN_NPPDAILY_CO are KgC yr-1
+    mutate(nppseed_co_mo = npp_seed_co_per_ind * nplant_per_co / (12 * 10000)) %>% # same units as above
     mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000) %>% #total Kg of seed per cohort on a 1 ha simulation plot
     group_by(pft) %>%
     summarise(npp_pft_mo = sum(npp_co_mo), #Kg C per pft per month
@@ -254,10 +256,15 @@ input_data <- ED2_data_daily1 %>%
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
   rename(day_of_month = day) %>%
   rowid_to_column(var = "day") %>%
-  dplyr::select(-day_of_month) 
+  dplyr::select(-day_of_month) %>%
+  mutate(pft2 = case_when(
+    pft == 2 ~ "earlydt",
+    pft == 4 ~ "latedt",
+    pft == 25 ~ "earlydi",
+    pft == 26 ~ "latedi"
+  )) %>% dplyr::select(-pft) %>% rename(pft = pft2)
 
 
-FATES_vars <- input_data
 
 
 

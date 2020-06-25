@@ -1,5 +1,5 @@
 
-
+#source("parameter_files/parameters.R")
 
 print(paste("Running regeneration submodel",Sys.time()))
 
@@ -111,25 +111,25 @@ rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, avg_l.x = av
 #generating water deficit values for the time series
 water_def <- c()
 for(PFT in pft_names){
-  water_def <- append(water_def, def_func(soil_moist = FATES_state_vars[FATES_state_vars$pft == PFT,]$SMP, thresh.x = thresh.xx[PFT], window = window.x))
+  water_def <- append(water_def, def_func(soil_moist = input_data[input_data$pft == PFT,]$SMP, thresh.x = thresh.xx[PFT], window = window.x))
 }
 
 #adding water deficit to the input data
-FATES_vars$water_def <- water_def
+input_data$water_def <- water_def
 
 #applying the H20 mortality function to the time series
-FATES_vars <- FATES_vars %>%
-  mutate(H20_mort_rate = base::mapply(FUN = H20_mort, deficit_days = FATES_vars$water_def, pft.x = FATES_vars$pft))
+input_data <- input_data %>%
+  mutate(H20_mort_rate = base::mapply(FUN = H20_mort, deficit_days = input_data$water_def, pft.x = input_data$pft))
 
 
-FATES_vars <- FATES_vars %>%
-  mutate(e_frac = base::mapply(FUN = efrac, N = (FATES_vars$N_co), co_dbh_ind = (FATES_vars$dbh), PFT = FATES_vars$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
+input_data <- input_data %>%
+  mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
   mutate(c_repro = e_frac * NPP * model_area/n_PFTs) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare)
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
   arrange(., day,pft) %>%
   mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
 
-
+#str(input_data)
 
 output <- list()
 j <- 1
@@ -137,7 +137,7 @@ j <- 1
 for(PFT in pft_names){
     
     
-    input_vars <- FATES_vars %>% filter(pft == PFT)
+    input_vars <- input_data %>% filter(pft == PFT)
     
     #pfts
     PFT_record <- c()
@@ -189,7 +189,7 @@ for(PFT in pft_names){
       
       #allocation dynamics are captured above, outside the for loops, because they don't rely on previous time steps
       
-      
+     
       #seedbank dynamics
       seedbank[i+1] <- seedbank[i] %>%
         - (decay_rate/365 * seedbank[i]) %>%

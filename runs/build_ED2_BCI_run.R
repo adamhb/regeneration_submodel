@@ -1,5 +1,5 @@
-rm(list = ls())
-gc()
+#rm(list = ls())
+#gc()
 
 #load libraries
 library(ncdf4)
@@ -28,16 +28,17 @@ avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
 avg_SMP <- -60326 #
 avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
 percent_light <- 0.03
-dbh.x <- 500 #dbh in mm
-N_co.x <- 800  #the number of individuals in a cohort
+#dbh.x <- 500 #dbh in mm
+#N_co.x <- 800  #the number of individuals in a cohort
 model_area <- 10000 #area in square meters
 
 #source parameter values
 source("parameter_files/parameters.R")
-#run model
 source("model/regeneration_submodel.R")
+#run model
+#source("model/regeneration_submodel.R")
 #generate output
-source("create_output/create_output.R")
+#source("create_output/create_output.R")
 
 
 

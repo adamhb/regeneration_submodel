@@ -70,6 +70,8 @@ FATES_flux_vars <- FATES_vars %>%
 FATES_vars <- cbind(FATES_state_vars, FATES_flux_vars[,-c(1,2)]) #combining the state vars and the flux vars
 #add_column(water_def = append(def_func(soil_moist = FATES_state_vars$SMP, thresh.x = thresh.xx, window = window.x, dPFT = "DI"), def_func(soil_moist = FATES_state_vars$SMP, thresh.x = thresh.xx, window = window.x, dPFT = "DT"))) %>% #adding water deficit
 
+input_data <- FATES_vars
+
 print(paste("Finished preparing input data.",Sys.time()))
 
 

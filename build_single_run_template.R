@@ -14,10 +14,11 @@ library(reshape2)
 
 
 #name the run
-run_name <- "test_run8"
+run_name <- "test_run_basic"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
+
 
 #set path to driver data
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/FATES_output_May_2018/"
@@ -34,6 +35,10 @@ model_area <- 10000 #area in square meters
 
 #source parameter values
 source("parameter_files/parameters.R")
+
+#clean input
+source("clean_input/prep_driver_data.R")
+
 #run model
 source("model/regeneration_submodel.R")
 #generate output
