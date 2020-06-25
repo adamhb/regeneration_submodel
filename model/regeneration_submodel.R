@@ -1,6 +1,5 @@
 
-#prepare the input data
-source("clean_input/prep_driver_data.R")
+
 
 print(paste("Running regeneration submodel",Sys.time()))
 
@@ -128,7 +127,7 @@ FATES_vars <- FATES_vars %>%
   mutate(c_repro = e_frac * NPP * model_area/n_PFTs) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare)
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
   arrange(., day,pft) %>%
-  mutate(light = FSDS * percent_light / 1e6) 
+  mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
 
 
 
