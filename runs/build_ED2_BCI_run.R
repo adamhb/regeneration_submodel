@@ -1,5 +1,5 @@
-#rm(list = ls())
-#gc()
+rm(list = ls())
+gc()
 
 #load libraries
 library(ncdf4)
@@ -34,6 +34,10 @@ model_area <- 10000 #area in square meters
 
 #source parameter values
 source("parameter_files/parameters.R")
+
+#clean input data
+source("clean_input/prep_driver_data_ED2_bci.R")
+
 source("model/regeneration_submodel.R")
 #run model
 #source("model/regeneration_submodel.R")

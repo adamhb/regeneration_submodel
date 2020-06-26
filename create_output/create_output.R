@@ -1,3 +1,4 @@
+
 print(paste("generating output figures...",Sys.time()))
 
 
@@ -37,23 +38,36 @@ adams_theme <- theme(plot.title = element_text(hjust = 0.5, size = 20),
                      axis.text.y = element_text (size = 14, colour = "black"),
                      legend.text = element_text (size = 15))
 
-year_axis <-  scale_x_date(breaks = date_breaks("2 years"), labels = date_format("%Y"))
+start_yr <- substr(lubridate::ymd(as.Date(min(full_output$date))), start = 1, stop = 4)
+end_yr <- substr(lubridate::ymd(as.Date(max(full_output$date))), start = 1, stop = 4)
+yrs <- as.numeric(end_yr) - as.numeric(start_yr)
+
+if(yrs > 40){
+  date_breaks_custom <- "10 years"
+} else{
+  date_breaks_custom <- "2 years"
+}
+
+year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%Y"))
 smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
 smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .1, se = F)
 smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
 
 
-
+# NPP comes out in g C per day per PFT
 # NPP for each PFT 
-NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP*10000, color = pft)) +
+
+#str(full_output)
+NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP/1000 * 365, color = pft)) +
   labs(title = "NPP") +
   theme_classic()+
   smooth_line +
   year_axis +
-  ylab(expression(paste("NPP ", "(g C ha"^"-1","day"^"-1",")")))+
+  ylab(expression(paste("NPP ", "(Kg C m"^"-2","year"^"-1",")")))+
   xlab(bquote('year'))+
-  adams_theme +
-  theme(legend.position = "none")
+  scale_color_manual(values = pft.cols) +
+  adams_theme 
+  #theme(legend.position = "none")
 
 png(paste0(path_to_this_run_output,"/01_NPP.png"), height=5, width=8, units="in", res = 100)
 print(NPP_g)
@@ -83,10 +97,10 @@ dev.off()
 
 
 #graphing the carbon allocated to reproduction
-p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft)) +
+p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro/1000 * 365, color = pft)) +
   smooth_line +
   year_axis +
-  ylab(expression(paste("carbon for repro.", "(g C day"^"-1","ha"^"-1",")")))+
+  ylab(expression(paste("carbon for repro.", "(Kg C year"^"-1","m"^"-2",")")))+
   xlab(bquote('year'))+
   labs(title = "C allocated to reproduction per day") +
   theme_classic() +

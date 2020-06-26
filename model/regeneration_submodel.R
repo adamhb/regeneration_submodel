@@ -124,7 +124,7 @@ input_data <- input_data %>%
 
 input_data <- input_data %>%
   mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
-  mutate(c_repro = e_frac * NPP * model_area/n_PFTs) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare)
+  mutate(c_repro = e_frac * NPP) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare)
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
   arrange(., day,pft) %>%
   mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
