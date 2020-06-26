@@ -80,8 +80,8 @@ p1 <- ggplot(data = full_output, aes(x = as.Date(date), y = e_frac, color = pft)
   year_axis +
   ylab(bquote('fraction of NPP going to reproduction'))+
   xlab(bquote('year'))+
-  geom_text(mapping = aes(x = median(as.Date(date)), y = 0.2), data = full_output, label = paste("early",full_output$e_frac %>% head(.,n=1)), color = "black") +
-  geom_text(mapping = aes(x = median(as.Date(date)), y = 0.17), data = full_output, label = paste("late",full_output$e_frac %>% tail(.,n=1)), color = "black") +
+#   geom_text(mapping = aes(x = median(as.Date(date)), y = 0.2), data = full_output, label = paste("early",full_output$e_frac %>% head(.,n=1)), color = "black") +
+#   geom_text(mapping = aes(x = median(as.Date(date)), y = 0.17), data = full_output, label = paste("late",full_output$e_frac %>% tail(.,n=1)), color = "black") +
   labs(title = "The frac. of NPP allocated to repro.") +
   theme_classic()+
   adams_theme+
