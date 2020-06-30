@@ -76,7 +76,9 @@ ED2_data <- data.frame()
 
 #The following code extracts the data from each hdf5 file and then compiles the data into a dataframe.
 j = 2
-files <- head(list.files(driver_data_path),120)
+
+files <- head(list.files(driver_data_path),100)
+
 for (fl in files[-c(1:2)]){
   #yr = 2000
   j              = j + 1

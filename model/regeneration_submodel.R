@@ -114,6 +114,8 @@ for(PFT in pft_names){
   water_def <- append(water_def, def_func(soil_moist = input_data[input_data$pft == PFT,]$SMP, thresh.x = thresh.xx[PFT], window = window.x))
 }
 
+
+
 #adding water deficit to the input data
 input_data$water_def <- water_def
 

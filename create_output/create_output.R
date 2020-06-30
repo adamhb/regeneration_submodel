@@ -13,6 +13,28 @@ path_to_this_run_output <- paste0(path_to_output,"/",run_name,"_",sub(pattern = 
 dir.create(path = path_to_this_run_output)
 
 
+
+
+if(run_type == "ED2"){
+  dbh.x <- full_output %>%
+    group_by(pft) %>%
+    summarise(mean_dbh_pft = mean(dbh)) %>%
+    pull(mean_dbh_pft) %>%
+    round() %>%
+    paste0(collapse = ",")
+  
+  N_co.x <- full_output %>%
+    group_by(pft) %>%
+    summarise(mean_N_co = mean(N_co)) %>%
+    pull(mean_N_co) %>%
+    round() %>%
+    paste0(collapse = ",")
+}
+
+
+
+str(full_output)
+
 #record the params
 paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 
                                           "a_emerg", "b_emerg", "a_rec", "b_rec", "percent_light", "thresh", "window.x", "seedbank_0", "seedpool_0", "litter_0", "gitCommit"), 
@@ -356,6 +378,6 @@ png(paste0(path_to_this_run_output,"/16_Recruitment_Annual_Sums.png"), height=5,
 print(Submodel_annual_rec)
 dev.off()
 
-print(paste("Finished generation output",Sys.time(), "Figures are in", path_to_this_run_output))
+print(paste("Finished generating output",Sys.time(), "Figures are in", path_to_this_run_output))
 
 

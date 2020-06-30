@@ -14,6 +14,7 @@ library(reshape2)
 
 
 #name the run
+run_type <- "ED2"
 run_name <- "bci_ED2_test"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
@@ -35,14 +36,13 @@ model_area <- 10000 #area in square meters
 #source parameter values
 source("parameter_files/parameters.R")
 
-#clean input data
 source("clean_input/prep_driver_data_ED2_bci.R")
 
 source("model/regeneration_submodel.R")
 #run model
 #source("model/regeneration_submodel.R")
 #generate output
-#source("create_output/create_output.R")
+source("create_output/create_output.R")
 
 
 

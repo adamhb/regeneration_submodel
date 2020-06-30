@@ -14,7 +14,8 @@ library(reshape2)
 
 
 #name the run
-run_name <- "test_run_basic_v2"
+run_type <- "FATES"
+run_name <- "test_run_basic_v3"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
