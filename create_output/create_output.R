@@ -80,12 +80,16 @@ smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = 
 # NPP for each PFT 
 
 #str(full_output)
-NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP/1000 * 365, color = pft)) +
+
+ggplot(data = full_output, mapping = aes(x = ))
+
+NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP*10000, color = pft)) +
+  geom_line() +
   labs(title = "NPP") +
   theme_classic()+
-  smooth_line +
+  #smooth_line +
   year_axis +
-  ylab(expression(paste("NPP ", "(Kg C m"^"-2","year"^"-1",")")))+
+  ylab(expression(paste("NPP ", "(g C ha"^"-2","day"^"-1",")")))+
   xlab(bquote('year'))+
   scale_color_manual(values = pft.cols) +
   adams_theme 
@@ -119,10 +123,11 @@ dev.off()
 
 
 #graphing the carbon allocated to reproduction
-p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro/1000 * 365, color = pft)) +
-  smooth_line +
+p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft)) +
+  geom_line() +
+  #smooth_line +
   year_axis +
-  ylab(expression(paste("carbon for repro.", "(Kg C year"^"-1","m"^"-2",")")))+
+  ylab(expression(paste("carbon for repro.", "(g C day"^"-1","ha"^"-2",")")))+
   xlab(bquote('year'))+
   labs(title = "C allocated to reproduction per day") +
   theme_classic() +
