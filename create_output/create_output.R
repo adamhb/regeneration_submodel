@@ -72,7 +72,7 @@ if(yrs > 40){
 
 year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%Y"))
 smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
-smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .1, se = F)
+smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .05, se = F)
 smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
 
 
@@ -84,10 +84,10 @@ smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = 
 ggplot(data = full_output, mapping = aes(x = ))
 
 NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP*10000, color = pft)) +
-  geom_line() +
+  #geom_line() +
   labs(title = "NPP") +
   theme_classic()+
-  #smooth_line +
+  smoother_line +
   year_axis +
   ylab(expression(paste("NPP ", "(g C ha"^"-2","day"^"-1",")")))+
   xlab(bquote('year'))+
@@ -124,8 +124,8 @@ dev.off()
 
 #graphing the carbon allocated to reproduction
 p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft)) +
-  geom_line() +
-  #smooth_line +
+  #geom_line() +
+  smoother_line +
   year_axis +
   ylab(expression(paste("carbon for repro.", "(g C day"^"-1","ha"^"-2",")")))+
   xlab(bquote('year'))+
@@ -143,7 +143,8 @@ dev.off()
 
 #graphing seedbank size
 p3 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedbank, color = pft)) +
-  geom_line(size = 1.8)+
+  smoother_line +
+  #geom_line(size = 1.8)+
   year_axis +
   ylab(expression(paste("seedbank size ", " (g C ","ha"^"-1",")")))+
   xlab(bquote('year'))+
@@ -161,8 +162,9 @@ dev.off()
 #add precip to this on a second axis
 #graphing the fraction of the seedbank emerging each day
 p4 <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_emerging, color = pft)) +
-  #geom_line()
-  geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
+  #geom_line() +
+  smoother_line +
+  #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
   year_axis +
   ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
   xlab(bquote('year'))+
@@ -180,7 +182,8 @@ dev.off()
 
 #graphing the seedling pool
 p5 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = seedpool, color = pft)) +
-  geom_line(size = 1.8)+
+  smoother_line +
+  #geom_line(size = 1.8)+
   year_axis +
   ylab(bquote('seedling pool size (gC)'))+
   xlab(bquote('year'))+
@@ -297,7 +300,8 @@ dev.off()
 
 #graphing the fraction recruiting from the seedling pool to the adult size class
 p8 <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_rec.t, color = pft)) +
-  smooth_line +
+  geom_line() +
+  #smooth_line +
   year_axis +
   ylab(expression(paste('rec. rate (% of seedling pool'," day"^"-1",")")))+
   xlab(bquote('year'))+
@@ -338,7 +342,8 @@ dev.off()
 #rec_bench_totals.df <- data.frame(bench = rec_bench_totals[-1], date = as.Date(c("2007-06-01", "2012-06-01")))
 
 p10 <- full_output %>% filter(date >= as.POSIXct("2005-01-01")) %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
-  smooth_line +
+  geom_line() +
+  #smooth_line +
   year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," yr"^"-1")))+
   xlab(bquote('year'))+
