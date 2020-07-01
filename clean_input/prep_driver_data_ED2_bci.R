@@ -264,8 +264,8 @@ input_data <- ED2_data_daily1 %>%
     pft == 4 ~ "latedt",
     pft == 25 ~ "earlydi",
     pft == 26 ~ "latedi"
-  )) %>% dplyr::select(-pft) %>% rename(pft = pft2) %>%
-  mutate_at(.vars = "dbh", .funs = function(x){x*5}) # delete this line
+  )) %>% dplyr::select(-pft) %>% rename(pft = pft2) #%>%
+ #mutate_at(.vars = "dbh", .funs = function(x){x*5}) # delete this line
 
 
 
