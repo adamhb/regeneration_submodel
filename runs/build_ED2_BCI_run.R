@@ -16,7 +16,7 @@ library(reshape2)
 #name the run
 run_type <- "ED2"
 
-run_name <- "bci_ED2_working"
+run_name <- "bci_ED2_working_master_branch"
 
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
