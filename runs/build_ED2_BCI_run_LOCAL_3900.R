@@ -1,5 +1,5 @@
-rm(list = ls())
-gc()
+#rm(list = ls())
+#gc()
 
 #load libraries
 library(ncdf4)
@@ -15,9 +15,7 @@ library(reshape2)
 
 #name the run
 run_type <- "ED2"
-
-run_name <- "bci_ED2_working"
-
+run_name <- "bci_ED2_test_master"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
@@ -37,9 +35,7 @@ model_area <- 10000 #area in square meters
 
 #source parameter values
 source("parameter_files/parameters.R")
-
 source("clean_input/prep_driver_data_ED2_bci.R")
-
 source("model/regeneration_submodel.R")
 #run model
 #source("model/regeneration_submodel.R")
