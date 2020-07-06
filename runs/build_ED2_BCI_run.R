@@ -15,7 +15,7 @@ library(reshape2)
 
 #name the run
 run_type <- "ED2"
-run_name <- "bci_ED2_test"
+run_name <- "bci_ED2_working"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
