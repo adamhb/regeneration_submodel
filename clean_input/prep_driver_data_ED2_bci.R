@@ -77,7 +77,7 @@ ED2_data <- data.frame()
 #The following code extracts the data from each hdf5 file and then compiles the data into a dataframe.
 j = 2
 
-files <- head(list.files(driver_data_path),100)
+files <- head(list.files(driver_data_path),200)
 
 for (fl in files[-c(1:2)]){
   #yr = 2000
@@ -206,7 +206,7 @@ ED2_data_daily <- tibble(day = day_vector, month = month_vector, date = date_vec
 lyr <- c()
 lmo <- c()
 MMEAN_RSHORT <- c()
-files <- head(list.files(driver_data_path),1000)
+files <- head(list.files(driver_data_path),200)
 j <- 0
 for (fl in files[-c(1:2)]){
   j <- j + 1
@@ -252,8 +252,10 @@ ED2_data_daily1 <- ED2_data_daily %>% left_join(envData, by = c("yr","month"))
 # mydata1[["MMEAN_RLONG_GND"]][] #at ground
 
 
+#added year month here
+
 input_data <- ED2_data_daily1 %>%
-  select(day, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
+  select(day, yr, month, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
   rename(day_of_month = day) %>%

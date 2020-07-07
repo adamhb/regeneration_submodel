@@ -45,7 +45,14 @@ source("parameter_files/parameters.R")
 source("clean_input/prep_driver_data_ED2_bci.R")
 
 if(run_type == "multiPatch"){
-  source("patch_level_simulations.R")
+  source("clean_input/patch_level_simulations.R")
+}
+
+
+
+for(bin_num in 1:10){
+  input_data <- input_data %>%
+    filter(bin == bin_num) %>% str()
 }
 
 source("model/regeneration_submodel.R")
