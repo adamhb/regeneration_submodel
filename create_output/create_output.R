@@ -10,8 +10,12 @@ model_run_time_stamp <- Sys.time() %>%
 
 #create folder to store output
 path_to_this_run_output <- paste0(path_to_output,"/",run_name,"_",sub(pattern = " ", replacement = "",x = model_run_time_stamp))
-dir.create(path = path_to_this_run_output)
 
+if(patch_run_type == "many"){
+  paste0(path_to_this_run_output,"bin_num-",bin_num)
+}
+
+dir.create(path = path_to_this_run_output)
 
 
 
@@ -33,7 +37,7 @@ if(run_type == "ED2"){
 
 
 if(patch_run_type == "many"){
-  percent_light <- mean(patch_level_light$lightZ0)
+  percent_light <- mean(tmp_patch_data$lightZ0)
 }
 
 #record the params

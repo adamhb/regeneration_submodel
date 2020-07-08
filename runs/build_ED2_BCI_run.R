@@ -19,6 +19,7 @@ run_name <- "bci_ED2_test_after_fixing_date_issues"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
+soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output"

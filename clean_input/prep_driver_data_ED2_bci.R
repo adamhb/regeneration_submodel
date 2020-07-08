@@ -259,7 +259,7 @@ for (fl in files[-c(1:2)]){
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
   mydata1        = h5file(myfile)
-  tmp <- mydata1[["MMEAN_SOIL_MSTPOT"]][15,] #second shallowest layer?
+  tmp <- mydata1[["MMEAN_SOIL_MSTPOT"]][soil_layer,] #shallowest layer (as evidenced by SLZ)
   MMEAN_SOIL_MSTPOT <- append(MMEAN_SOIL_MSTPOT,tmp)
   #lyr[j] <- unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")) 
   #lmo[j] <- unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)"))

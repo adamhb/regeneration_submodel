@@ -16,10 +16,11 @@ library(reshape2)
 #name the run
 run_type <- "ED2" # keep this as ED2
 patch_run_type <- "many"
-run_name <- "bci_ED2_working"
+run_name <- "bin_10_test"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
+soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output"
@@ -50,7 +51,7 @@ if(patch_run_type == "many"){
 
 
 
-for(bin_num in 1){
+for(bin_num in c(1,5,10)){
   
   tmp_patch_data <- patch_level_light %>% filter(bin == bin_num)
   
@@ -59,14 +60,16 @@ for(bin_num in 1){
     dplyr::select(-dateChar, -DateLubr)
   
   source("model/regeneration_submodel.R")
-  
+  source("create_output/create_output.R")
+  #pick up with:
+  #need to add the summary of recruitment here over the timeframe
 }
 
 
 #run model
 #source("model/regeneration_submodel.R")
 #generate output
-source("create_output/create_output.R")
+
 
 
 
