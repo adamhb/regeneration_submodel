@@ -50,21 +50,36 @@ if(patch_run_type == "many"){
 }
 
 
-
-for(bin_num in c(1,5,10)){
+summary_data <- tibble()
+  
+for(bin_num in c(1,10)){
   
   tmp_patch_data <- patch_level_light %>% filter(bin == bin_num)
   
-  input_data <- input_data %>%
+  input_data <- input_data1 %>%
     left_join(tmp_patch_data, by = c("yr","month")) %>% 
     dplyr::select(-dateChar, -DateLubr)
   
-  source("model/regeneration_submodel.R")
-  source("create_output/create_output.R")
-  #pick up with:
-  #need to add the summary of recruitment here over the timeframe
+ source("model/regeneration_submodel.R")
+  
+ temp_summary <- full_output %>%
+    group_by(pft) %>%
+    summarise(
+      start_date = as.Date(min(date)),
+      end_date = as.Date(max(date)),
+      bin = mean(bin),
+      mean_pct_light = mean(lightZ0),
+      sd_pct_light = sd(lightZ0),
+      patch_age = mean(patch_age),
+      R_avg = mean(R) # recruits per day per ha
+    )
+  
+ summary_data <- rbind(summary_data,temp_summary)
+  
+#source("create_output/create_output.R") # just run this if you want to see full details of output within age bins
+  
 }
-
+source("create_output/figure_recruitment_versus_light.R")
 
 #run model
 #source("model/regeneration_submodel.R")

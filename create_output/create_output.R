@@ -1,4 +1,4 @@
-
+source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
 
@@ -12,7 +12,7 @@ model_run_time_stamp <- Sys.time() %>%
 path_to_this_run_output <- paste0(path_to_output,"/",run_name,"_",sub(pattern = " ", replacement = "",x = model_run_time_stamp))
 
 if(patch_run_type == "many"){
-  paste0(path_to_this_run_output,"bin_num-",bin_num)
+  path_to_this_run_output <- paste0(path_to_this_run_output,"bin_num-",bin_num)
 }
 
 dir.create(path = path_to_this_run_output)
@@ -51,19 +51,6 @@ paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax
 #put the param used for run in the output folder
 write.csv(paramsOFrun, file = paste0(path_to_this_run_output,"/params.csv"))
 
-
-pft.cols <- c("darkolivegreen2","darkolivegreen4","lightskyblue", "midnightblue")
-
-#set theme for the plots
-adams_theme <- theme(plot.title = element_text(hjust = 0.5, size = 20),
-                     strip.text.x = element_text(size = 18),
-                     legend.title = element_blank (),
-                     axis.title.x = element_text (size = 15), # change the axis title
-                     axis.title.y = element_text (size = 15),
-                     axis.title.y.right = element_text (size = 15, color = pft.cols[2]),
-                     axis.text.x = element_text (size = 14, colour = "black"),
-                     axis.text.y = element_text (size = 14, colour = "black"),
-                     legend.text = element_text (size = 15))
 
 start_yr <- substr(lubridate::ymd(as.Date(min(full_output$date))), start = 1, stop = 4)
 end_yr <- substr(lubridate::ymd(as.Date(max(full_output$date))), start = 1, stop = 4)
@@ -369,7 +356,11 @@ dev.off()
 
 
 #creating table of the annual number of recruits per year per PFT
-N_recs_per_year_pfts <- full_output %>% mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>% group_by(year, pft) %>% summarise(N_rec = sum(R)) 
+N_recs_per_year_pfts <- full_output %>% 
+  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>% 
+  group_by(year, pft) %>% 
+  summarise(N_rec = sum(R)) 
+
 N_recs_per_year_pfts$year <- as.Date(paste0((as.numeric(N_recs_per_year_pfts$year)+1), "-01-01"))
 
 

@@ -24,4 +24,5 @@ NPPwood <- mydata1[["MMEAN_NPPWOOD"]][]
 
 sum(NPPcroot, NPPfroot, NPPleaf, NPPsapwood,NPPseeds, NPPwood)
 
+AGE            = mydata1[["SLZ"]][]
 

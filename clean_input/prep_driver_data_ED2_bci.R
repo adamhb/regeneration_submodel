@@ -304,6 +304,9 @@ input_data <- ED2_data_daily2 %>%
   )) %>% dplyr::select(-pft) %>% rename(pft = pft2) #%>%
  #mutate_at(.vars = "dbh", .funs = function(x){x*5}) # delete this line
 
+if(patch_run_type == "many"){
+  input_data1 <- input_data
+}
 
 
 
