@@ -14,7 +14,8 @@ library(reshape2)
 
 
 #name the run
-run_type <- "multiPatch"
+run_type <- "ED2" # keep this as ED2
+patch_run_type <- "many"
 run_name <- "bci_ED2_working"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
@@ -29,10 +30,9 @@ avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
 avg_SMP <- -60326 #
 avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
 
-if(run_type != "multiPatch"){
+if(patch_run_type != "many"){
   percent_light <- 0.03
 }
-
 
 
 #dbh.x <- 500 #dbh in mm
@@ -44,18 +44,25 @@ source("parameter_files/parameters.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
-if(run_type == "multiPatch"){
+if(patch_run_type == "many"){
   source("clean_input/patch_level_simulations.R")
 }
 
 
 
-for(bin_num in 1:10){
+for(bin_num in 1){
+  
+  tmp_patch_data <- patch_level_light %>% filter(bin == bin_num)
+  
   input_data <- input_data %>%
-    filter(bin == bin_num) %>% str()
+    left_join(tmp_patch_data, by = c("yr","month")) %>% 
+    dplyr::select(-dateChar, -DateLubr)
+  
+  source("model/regeneration_submodel.R")
+  
 }
 
-source("model/regeneration_submodel.R")
+
 #run model
 #source("model/regeneration_submodel.R")
 #generate output

@@ -32,7 +32,9 @@ if(run_type == "ED2"){
 }
 
 
-
+if(patch_run_type == "many"){
+  percent_light <- mean(patch_level_light$lightZ0)
+}
 
 #record the params
 paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 

@@ -57,6 +57,10 @@ for (fl in files[-c(1:2)]){
  
 }
 
+
+#str(patch_level_light)
+
+#str(input_data)
 # input_data <- patch_level_light %>%
 #    left_join(input_data, by = c("yr","month")) 
 
