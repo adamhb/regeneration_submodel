@@ -33,7 +33,6 @@ if(run_type == "ED2"){
 
 
 
-str(full_output)
 
 #record the params
 paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 

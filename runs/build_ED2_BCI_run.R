@@ -14,8 +14,8 @@ library(reshape2)
 
 
 #name the run
-run_type <- "multiPatch"
-run_name <- "bci_ED2_working"
+run_type <- "single"
+run_name <- "bci_ED2_test_after_fixing_date_issues"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
