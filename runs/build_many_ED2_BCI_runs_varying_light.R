@@ -16,9 +16,9 @@ library(reshape2)
 #name the run
 run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
-patch_run_type <- "many"
-synthetic_patches <- T
-run_name <- "recruitment_versus_light"
+patch_run_type <- "one" #"many" #one or "many"
+synthetic_patches <- F  # T or F
+run_name <- "soil moisture"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
@@ -34,7 +34,7 @@ avg_SMP <- -60326 #
 avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
 
 if(patch_run_type != "many"){
-  percent_light <- 0.03
+  percent_light <- 0.5
 }
 
 
@@ -51,10 +51,15 @@ if(emulate_ED2 == T){
   source('model/ED2_emulation.R')
 }
 
-if(patch_run_type == "many"){
-  source("clean_input/patch_level_simulations.R")
-}
+if(patch_run_type != "many"){
+  source("model/regeneration_submodel.R")
+  source("create_output/create_output.R")
+  }
 
+
+if(patch_run_type == "many"){
+
+source("clean_input/patch_level_simulations.R")
 
 summary_data <- tibble()
   
@@ -87,7 +92,7 @@ for(bin_num in c(1:20)){
   
 }
 source("create_output/figure_recruitment_versus_light.R")
-
+}
 
 
 
