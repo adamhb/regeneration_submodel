@@ -131,7 +131,7 @@ for (fl in files[-c(1:2)]){
     mutate(nppseed_co_mo = npp_seed_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% # same units as above
     mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000) %>% #total Kg of seed per cohort on a 1 ha simulation plot
     group_by(pft) %>%
-    summarise(npp_pft_mo = sum(npp_co_mo), #Kg C per pft per month
+    summarise(npp_pft_mo = sum(npp_co_mo), #g C per pft per month
               nppseed_pft_mo = sum(nppseed_co_mo),
               bseeds_pft_mo = sum(bseeds_co_total), # Kg C per pft
               dbh_pft = mean(dbh_co),

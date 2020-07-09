@@ -9,9 +9,11 @@ model_run_time_stamp <- Sys.time() %>%
 
 
 Rvsl <- summary_data %>%
-  ggplot(aes(x = mean_pct_light, y = R_avg * 365, color = pft)) +
+  rename(submodel = R_avg, ED2 = R_avg_ED2) %>%
+  gather(submodel:ED2, key = "model", value = "R") %>%
+  ggplot(aes(x = mean_pct_light, y = R * 365, color = pft, shape = model)) +
   #geom_point() +
-  geom_point(size = 2.5, stroke = 1, alpha = 0.5) +
+  geom_point(size = 2.5, stroke = 1, alpha = 1) +
   scale_color_manual(values = pft.cols) +
   scale_shape_manual(values = rep(c(21,24),2)) +
   ylab(expression(paste('avg. rec. rate'," (# indv. ha"^"-1", "yr"^"-1", ")"))) +

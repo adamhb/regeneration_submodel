@@ -15,8 +15,10 @@ library(reshape2)
 
 #name the run
 run_type <- "ED2" # keep this as ED2
+emulate_ED2 <- T
 patch_run_type <- "many"
-run_name <- "bin_10_test"
+synthetic_patches <- T
+run_name <- "recruitment_versus_light"
 start_date <- "2003-01-01"
 end_date <- "2015-12-29"
 n_PFTs <- 4
@@ -45,6 +47,10 @@ source("parameter_files/parameters.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
+if(emulate_ED2 == T){
+  source('model/ED2_emulation.R')
+}
+
 if(patch_run_type == "many"){
   source("clean_input/patch_level_simulations.R")
 }
@@ -52,7 +58,7 @@ if(patch_run_type == "many"){
 
 summary_data <- tibble()
   
-for(bin_num in c(1,10)){
+for(bin_num in c(1:20)){
   
   tmp_patch_data <- patch_level_light %>% filter(bin == bin_num)
   
@@ -71,7 +77,8 @@ for(bin_num in c(1,10)){
       mean_pct_light = mean(lightZ0),
       sd_pct_light = sd(lightZ0),
       patch_age = mean(patch_age),
-      R_avg = mean(R) # recruits per day per ha
+      R_avg = mean(R),
+      R_avg_ED2 = mean(ED2_R) # recruits per day per ha
     )
   
  summary_data <- rbind(summary_data,temp_summary)
@@ -80,6 +87,14 @@ for(bin_num in c(1,10)){
   
 }
 source("create_output/figure_recruitment_versus_light.R")
+
+
+
+
+
+
+
+
 
 #run model
 #source("model/regeneration_submodel.R")

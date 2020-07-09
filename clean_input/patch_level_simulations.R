@@ -40,7 +40,7 @@ for (fl in files[-c(1:2)]){
  temp <- tibble(patch = tmp1, light = MMEAN_LIGHT_LEVEL) %>%
     group_by(patch) %>%
     summarise(light_at_smallest_cohort = min(light)) %>%
-    left_join(ageDF) %>% #print(n= 100)
+    left_join(ageDF, by = "patch") %>% #print(n= 100)
     mutate(bin = ntile(x = AGE, n = 10)) %>%
     group_by(bin) %>%
     summarise(lightZ0 = mean(light_at_smallest_cohort),
@@ -56,6 +56,21 @@ for (fl in files[-c(1:2)]){
  patch_level_light <- rbind(temp,patch_level_light)
  
 }
+
+
+#adding synthetic patches (i.e. ones not from ED2) with higher light (bins 11-20)
+synthetic_patch_level_light <- patch_level_light %>%
+  mutate_at(.vars = "bin", .funs = function(x){x + 10}) %>%
+  mutate(lightZ0 = rep(seq(from = 0.05,to = 1,length.out = 10),nrow(patch_level_light)/10)) %>%
+  mutate(patch_age = 9999) 
+
+if(synthetic_patches == T){
+  patch_level_light <- rbind(patch_level_light, synthetic_patch_level_light)
+}
+
+  
+
+
 
 
 #str(patch_level_light)
