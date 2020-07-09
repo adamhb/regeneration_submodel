@@ -12,15 +12,16 @@ library(plotrix)
 library(ggplot2)
 library(reshape2)
 
+source("utils/supporting_funcs.R")
 
 #name the run
 run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "soil moisture"
-start_date <- "2003-01-01"
-end_date <- "2015-12-29"
+run_name <- "soil_moisture_date_test"
+start_date <- "2010-01-01"
+end_date <- "2015-12-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 

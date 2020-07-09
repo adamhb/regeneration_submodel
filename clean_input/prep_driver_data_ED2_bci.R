@@ -75,11 +75,12 @@ daymax <- function(month,year){
 ED2_data <- data.frame()
 
 #The following code extracts the data from each hdf5 file and then compiles the data into a dataframe.
-j = 2
 
-files <- head(list.files(driver_data_path),200)
+inDateRange <- dateFromFile(list.files(path = driver_data_path)) %in% seq(ymd(start_date), ymd(end_date), by = "months")
+files <- list.files(driver_data_path)[inDateRange]
 
-for (fl in files[-c(1:2)]){
+j = 0
+for (fl in files){
   #yr = 2000
   j              = j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
