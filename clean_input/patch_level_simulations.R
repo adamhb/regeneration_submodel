@@ -11,16 +11,12 @@ library(lubridate)
 
 
 
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
-path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 inputref  = paste0(driver_data_path,"BCI_Xu")
 outpath   = path_to_output
 
-files <- head(list.files(driver_data_path),200)
-
 patch_level_light <- tibble()
 
-for (fl in files[-c(1:2)]){
+for (fl in files){
 
   
   myfile         = paste0(driver_data_path,fl) #build the names of each input file

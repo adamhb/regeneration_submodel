@@ -36,8 +36,7 @@ legcol      = 1
 ###specify the location of the raw data.  
 ###the first 3 characters of each input file.
 
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
-path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+
 inputref  = paste0(driver_data_path,"BCI_Xu")
 outpath   = path_to_output
 
@@ -242,9 +241,8 @@ ED2_data_daily1 <- ED2_data_daily %>%
 lyr <- c()
 lmo <- c()
 MMEAN_RSHORT <- c()
-files <- head(list.files(driver_data_path),200)
 j <- 0
-for (fl in files[-c(1:2)]){
+for (fl in files){
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
   mydata1        = h5file(myfile)
@@ -256,7 +254,7 @@ for (fl in files[-c(1:2)]){
 
 MMEAN_SOIL_MSTPOT <- c()
 j <- 0
-for (fl in files[-c(1:2)]){
+for (fl in files){
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
   mydata1        = h5file(myfile)

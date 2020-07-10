@@ -9,7 +9,7 @@ model_run_time_stamp <- Sys.time() %>%
   sub(pattern = " ", replacement = "-")
 
 #create folder to store output
-path_to_this_run_output <- paste0(path_to_output,"/",run_name,"_",sub(pattern = " ", replacement = "",x = model_run_time_stamp))
+path_to_this_run_output <- paste0(path_to_output,run_name,"_",sub(pattern = " ", replacement = "",x = model_run_time_stamp))
 
 if(patch_run_type == "many"){
   path_to_this_run_output <- paste0(path_to_this_run_output,"bin_num-",bin_num)
@@ -42,30 +42,39 @@ if(patch_run_type == "many"){
 
 #record the params
 paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 
-                                          "a_emerg", "b_emerg", "a_rec", "b_rec", "percent_light", "thresh", "window.x", "seedbank_0", "seedpool_0", "litter_0", "gitCommit"), 
+                                          "a_emerg", "b_emerg", "a_rec", "b_rec", "percent_light", "thresh", "window.x", 
+                                          "seedbank_0", "seedpool_0", "litter_0", "gitCommit", "start_date", "end_date", "driver_data"), 
                           param_vals = c(model_area, dbh.x, N_co.x, paste0(Dmax, collapse = ","),paste0(frac_repro, collapse = ","), 
                                          seed_frac, decay_rate, paste0(a_emerg, collapse = ","), paste0(b_emerg, collapse = ","), 
                                          paste0(a_rec, collapse = ","), paste0(b_rec, collapse = ","), 
                                          percent_light, paste0(thresh.xx, collapse = ","), 
-                                         window.x, seedbank_0, seedpool_0, litter_0, system("git rev-parse HEAD", intern=TRUE)))
+                                         window.x, seedbank_0, seedpool_0, litter_0, system("git rev-parse HEAD", intern=TRUE),
+                                         start_date, end_date, basename(driver_data_path)))
 #put the param used for run in the output folder
 write.csv(paramsOFrun, file = paste0(path_to_this_run_output,"/params.csv"))
+
+
+smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
+smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .05, se = F)
+smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
 
 
 start_yr <- substr(lubridate::ymd(as.Date(min(full_output$date))), start = 1, stop = 4)
 end_yr <- substr(lubridate::ymd(as.Date(max(full_output$date))), start = 1, stop = 4)
 yrs <- as.numeric(end_yr) - as.numeric(start_yr)
 
+
 if(yrs > 40){
   date_breaks_custom <- "10 years"
+  custom_line <- smoother_line
 } else{
   date_breaks_custom <- "2 years"
+  custom_line <- geom_line()
 }
 
+
 year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%Y"))
-smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
-smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .05, se = F)
-smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
+
 
 
 # NPP comes out in g C per day per PFT
@@ -76,10 +85,10 @@ smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = 
 ggplot(data = full_output, mapping = aes(x = ))
 
 NPP_g <- ggplot(data = full_output, aes(x = as.Date(date), y = NPP*10000, color = pft)) +
-  #geom_line() +
+  custom_line +
   labs(title = "NPP") +
   theme_classic()+
-  smoother_line +
+  #smoother_line +
   year_axis +
   ylab(expression(paste("NPP ", "(g C ha"^"-2","day"^"-1",")")))+
   xlab(bquote('year'))+
@@ -94,7 +103,7 @@ dev.off()
 
 #graphing the fraction of NPP going to reproduction
 p1 <- ggplot(data = full_output, aes(x = as.Date(date), y = e_frac, color = pft)) +
-  geom_line(size = 1.8)+
+  custom_line +
   year_axis +
   ylab(bquote('fraction of NPP going to reproduction'))+
   xlab(bquote('year'))+
@@ -116,8 +125,8 @@ dev.off()
 
 #graphing the carbon allocated to reproduction
 p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft)) +
-  #geom_line() +
-  smoother_line +
+  custom_line +
+  #smoother_line +
   year_axis +
   ylab(expression(paste("carbon for repro.", "(g C day"^"-1","ha"^"-2",")")))+
   xlab(bquote('year'))+
@@ -135,8 +144,8 @@ dev.off()
 
 #graphing seedbank size
 p3 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedbank, color = pft)) +
-  smoother_line +
-  #geom_line(size = 1.8)+
+  #smoother_line +
+  custom_line +
   year_axis +
   ylab(expression(paste("seedbank size ", " (g C ","ha"^"-1",")")))+
   xlab(bquote('year'))+
@@ -154,8 +163,8 @@ dev.off()
 #add precip to this on a second axis
 #graphing the fraction of the seedbank emerging each day
 p4 <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_emerging, color = pft)) +
-  #geom_line() +
-  smoother_line +
+  custom_line +
+  #smoother_line +
   #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
   year_axis +
   ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
@@ -174,7 +183,7 @@ dev.off()
 
 #graphing the seedling pool
 p5 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = seedpool, color = pft)) +
-  smoother_line +
+  custom_line +
   #geom_line(size = 1.8)+
   year_axis +
   ylab(bquote('seedling pool size (gC)'))+
@@ -193,7 +202,7 @@ dev.off()
 
 #graphing the light mortality rate
 p6 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = light_mort_rate, color = pft)) +
-  geom_line(size = 1.8)+
+  custom_line +
   year_axis +
   ylab(bquote('daily mort rate (% of seedling pool)'))+
   xlab(bquote('year'))+
@@ -212,7 +221,7 @@ dev.off()
 
 #graphing H20 mortality rate
 p7 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = H20_mort_rate, color = pft)) +
-  geom_line(size = 1.8)+
+  custom_line +
   year_axis +
   ylab(expression(paste('H20 Mort. Rate'," (day)"^"-1"))) +
   #ylab(bquote('H20 mort rate'))+
@@ -274,7 +283,7 @@ water_def_g <- ggplot(data = full_output, aes(x = as.Date(date), y = water_def, 
   labs(title = "Water Deficit Days") +
   theme_classic()+
   geom_line(size = 1.8)+
-  smooth_line +
+  custom_line +
   year_axis +
   ylab(expression(paste("Deficit Days (cum. sum of SMP deficit)")))+
   xlab(bquote('year'))+
@@ -292,7 +301,7 @@ dev.off()
 
 #graphing the fraction recruiting from the seedling pool to the adult size class
 p8 <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_rec.t, color = pft)) +
-  geom_line() +
+  custom_line +
   #smooth_line +
   year_axis +
   ylab(expression(paste('rec. rate (% of seedling pool'," day"^"-1",")")))+
@@ -310,7 +319,7 @@ dev.off()
 
 #graphing the daily recruitment rate without the total
 p9 <- full_output %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
-  smoother_line +
+  custom_line +
   year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
   xlab(bquote('year'))+
@@ -366,7 +375,7 @@ N_recs_per_year_pfts$year <- as.Date(paste0((as.numeric(N_recs_per_year_pfts$yea
 
 
 Submodel_annual_rec <- ggplot() +
-  smoother_line +
+  custom_line +
   ylab(expression(paste('N recruits'," ha"^"-1"," yr"^"-1")))+
   xlab(bquote('year'))+
   labs(title = 'Trends in Annual PFT-specific Recruitment') +

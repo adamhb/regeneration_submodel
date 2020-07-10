@@ -19,14 +19,14 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "soil_moisture_date_test"
-start_date <- "2010-01-01"
-end_date <- "2015-12-01"
+run_name <- "testENSO"
+start_date <- "2027-01-01"
+end_date <- "2032-12-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output"
+driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output"
 
 #site and scenario params
@@ -35,7 +35,7 @@ avg_SMP <- -60326 #
 avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
 
 if(patch_run_type != "many"){
-  percent_light <- 0.5
+  percent_light <- 0.03
 }
 
 
@@ -96,15 +96,6 @@ source("create_output/figure_recruitment_versus_light.R")
 }
 
 
-
-
-
-
-
-
-#run model
-#source("model/regeneration_submodel.R")
-#generate output
 
 
 

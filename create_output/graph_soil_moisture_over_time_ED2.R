@@ -5,21 +5,22 @@ library(hdf5r)
 library(tidyverse)
 library(stringr)
 
-
+start_date <- "2005-01-01" 
+end_date <- "2051-01-01"
 
 soil_layer <- 15
 
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
+driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
-files <- list.files(driver_data_path)
+inDateRange <- dateFromFile(list.files(path = driver_data_path)) %in% seq(ymd(start_date), ymd(end_date), by = "months")
+files <- list.files(driver_data_path)[inDateRange]
 
 MMEAN_SOIL_MSTPOT <- c()
 date <- c()
 j <- 0
 
-
-for (fl in files[-c(1:2)]){
+for (fl in files){
   
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
@@ -35,10 +36,15 @@ for (fl in files[-c(1:2)]){
 
 out <- tibble(date = date, soil_moisture = MMEAN_SOIL_MSTPOT)
 
-out %>%
-  ggplot(mapping = aes(date,soil_moisture)) +
+SMP_fig <- out %>%
+  ggplot(mapping = aes(date,soil_moisture/100)) +
   geom_line() +
-  adams_theme
+  adams_theme +
+  ylab("Matric Pot. (MPa)")
+
+makePNG(fig = SMP_fig, file_name = "SMP_fig")
+
+
 
 
 # 

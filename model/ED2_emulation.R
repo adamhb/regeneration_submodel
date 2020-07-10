@@ -24,7 +24,7 @@ dbh2ba <- function(dbh, #
                    q = 1,
                    b1Bs_small = 0,
                    b2Bs_small = 0){
-  dbh2bl(dbh) * (1 + q) * 2
+  dbh2bl(dbh) * (1 + q) #* 2 #NOTE I TOOK OUT THIS x2 BECAUSE IT SEEMS THAT THE C2B CONVERSION NEVER HAPPENS FOR THESE VERY SMALL TREES BECAUSE THE B1BL PARAM IN THE LEAVE BIOMASS EQUATION IS 0 FOR SMALL TREES
 }
                   
 #recruitment rate per m2 per ha per year
@@ -40,8 +40,6 @@ ED2_recruitment <- function(NPPseed, min_dbh = 1){ #input is npp to seed per pft
   ((NPPseed + (seed_rain * 1000 / 30.4)) * (1 - seedling_mortality) / (dbh2ba(min_dbh) * 1000)) #seed_rain adds 0.1 kg of C of seed every timestep 
 }
 #ED2_recruitment(NPPseed = 0.195) 
-
-
 
 
 
