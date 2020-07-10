@@ -36,8 +36,7 @@ legcol      = 1
 ###specify the location of the raw data.  
 ###the first 3 characters of each input file.
 
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
-path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+
 inputref  = paste0(driver_data_path,"BCI_Xu")
 outpath   = path_to_output
 
@@ -75,11 +74,12 @@ daymax <- function(month,year){
 ED2_data <- data.frame()
 
 #The following code extracts the data from each hdf5 file and then compiles the data into a dataframe.
-j = 2
 
-files <- head(list.files(driver_data_path),100)
+inDateRange <- dateFromFile(list.files(path = driver_data_path)) %in% seq(ymd(start_date), ymd(end_date), by = "months")
+files <- list.files(driver_data_path)[inDateRange]
 
-for (fl in files[-c(1:2)]){
+j = 0
+for (fl in files){
   #yr = 2000
   j              = j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
@@ -131,7 +131,7 @@ for (fl in files[-c(1:2)]){
     mutate(nppseed_co_mo = npp_seed_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% # same units as above
     mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000) %>% #total Kg of seed per cohort on a 1 ha simulation plot
     group_by(pft) %>%
-    summarise(npp_pft_mo = sum(npp_co_mo), #Kg C per pft per month
+    summarise(npp_pft_mo = sum(npp_co_mo), #g C per pft per month
               nppseed_pft_mo = sum(nppseed_co_mo),
               bseeds_pft_mo = sum(bseeds_co_total), # Kg C per pft
               dbh_pft = mean(dbh_co),
@@ -162,37 +162,72 @@ for (fl in files[-c(1:2)]){
 }
 
 
-#convert to daily timestep
+#add date
 ED2_data1 <- ED2_data %>%
   mutate(date = paste(yr, month, "01" ,sep = "-")) %>%
   mutate_at(.vars = "date",.funs = as.character) %>%
-  arrange(pft) %>% 
+  #arrange(pft) %>% 
   mutate(Date = ymd(date)) 
 
-#create a vector of days
-day_vector <- c() 
-date_vector <- c()
-month_vector <- c()
 
-for(i in 1:nrow(ED2_data1)){
-  daysInMonth <- days_in_month(ED2_data1$Date[i])
-  day_vector <- append(day_vector, 
-                  seq(from = 1, to = daysInMonth, by = 1))
-  month_vector <- append(month_vector,
-                         rep(substr(ED2_data1$Date[i],start = 6,stop = 7),daysInMonth))
-  date_vector <- append(date_vector, paste(substr(ED2_data1$Date[i],start = 1,stop = 7),str_pad(string = seq(1:daysInMonth),width = 2,side = "left", pad ="0"),sep = "-"))
+#converting to daily timestep
+ED2_data_daily <- tibble()
+for(pft.x in PFTs){
+  
+  df <- ED2_data1 %>% filter(pft == pft.x) 
+  
+  daily_temp <- df %>% mutate(Date = ymd(Date)) %>%
+    group_by(Date) %>%
+    expand(Date = seq(floor_date(Date, unit = "month"),
+                      ceiling_date(Date, unit="month")-days(1), 
+                      by="day"),
+           pft,
+           npp_pft_mo, 
+           nppseed_pft_mo,
+           bseeds_pft_mo,
+           dbh_pft,
+           n_per_pft,
+           yr,
+           month) %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "day")
+  
+  ED2_data_daily <- rbind(ED2_data_daily,daily_temp)
+  
 }
 
-#ED2 data (excludes environmental vars (H20 and light))
-ED2_data_daily <- tibble(day = day_vector, month = month_vector, date = date_vector) %>%
-  mutate(yr = substr(date,start = 1,stop = 4)) %>%
-  left_join(ED2_data1,by = c("month","yr")) %>%
-  dplyr::select(-date.x,-date.y) %>%
+ED2_data_daily1 <- ED2_data_daily %>% 
   mutate(npp_pft_day = npp_pft_mo / lubridate::days_in_month(Date),
-         nppseed_pft_day = nppseed_pft_mo / lubridate::days_in_month(Date)) %>% #npp per pft per m2 per day (gC)
+       nppseed_pft_day = nppseed_pft_mo / lubridate::days_in_month(Date)) %>% #npp per pft per m2 per day (gC)
   arrange(pft,Date) %>%
-  mutate_at(.vars = "dbh_pft", .funs = function(x){x*10}) %>%
+  mutate_at(.vars = "dbh_pft", .funs = function(x){x*10}) %>% 
   rename(date = Date, NPP = npp_pft_day, N_co = n_per_pft, dbh = dbh_pft)
+
+
+#up to here looks good, need to convert to a daily time step now.
+
+#create a vector of days
+# day_vector <- c() 
+# date_vector <- c()
+# month_vector <- c()
+# 
+# for(i in 1:nrow(ED2_data1)){
+#   daysInMonth <- days_in_month(ED2_data1$Date[i])
+#   day_vector <- append(day_vector, 
+#                   seq(from = 1, to = daysInMonth, by = 1))
+#   month_vector <- append(month_vector,
+#                          rep(substr(ED2_data1$Date[i],start = 6,stop = 7),daysInMonth))
+#   date_vector <- append(date_vector, paste(substr(ED2_data1$Date[i],start = 1,stop = 7),str_pad(string = seq(1:daysInMonth),width = 2,side = "left", pad ="0"),sep = "-"))
+# }
+# 
+# #ED2 data (excludes environmental vars (H20 and light))
+# ED2_data_daily <- tibble(day = day_vector, month = month_vector, date = date_vector) %>%
+#   mutate(yr = substr(date,start = 1,stop = 4)) %>% 
+#   left_join(ED2_data1,by = c("month","yr")) %>%
+#   dplyr::select(-date.y,-Date) %>%
+#   mutate_at(.vars = "date.x",.funs = as.Date) %>%
+#   rename(Date = date.x) %>%
+  
 
 
 
@@ -206,9 +241,8 @@ ED2_data_daily <- tibble(day = day_vector, month = month_vector, date = date_vec
 lyr <- c()
 lmo <- c()
 MMEAN_RSHORT <- c()
-files <- head(list.files(driver_data_path),1000)
 j <- 0
-for (fl in files[-c(1:2)]){
+for (fl in files){
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
   mydata1        = h5file(myfile)
@@ -220,11 +254,11 @@ for (fl in files[-c(1:2)]){
 
 MMEAN_SOIL_MSTPOT <- c()
 j <- 0
-for (fl in files[-c(1:2)]){
+for (fl in files){
   j <- j + 1
   myfile         = paste0(driver_data_path,fl) #build the names of each input file
   mydata1        = h5file(myfile)
-  tmp <- mydata1[["MMEAN_SOIL_MSTPOT"]][15,] #second shallowest layer?
+  tmp <- mydata1[["MMEAN_SOIL_MSTPOT"]][soil_layer,] #shallowest layer (as evidenced by SLZ)
   MMEAN_SOIL_MSTPOT <- append(MMEAN_SOIL_MSTPOT,tmp)
   #lyr[j] <- unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")) 
   #lmo[j] <- unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)"))
@@ -232,7 +266,7 @@ for (fl in files[-c(1:2)]){
 
 envData <- data.frame(yr = lyr, month = lmo, FSDS = MMEAN_RSHORT * 3600 * 24, SMP = MMEAN_SOIL_MSTPOT * 1000)
 
-ED2_data_daily1 <- ED2_data_daily %>% left_join(envData, by = c("yr","month"))
+ED2_data_daily2 <- ED2_data_daily1 %>% left_join(envData, by = c("yr","month"))
 
 
 #get soil moisture
@@ -252,13 +286,15 @@ ED2_data_daily1 <- ED2_data_daily %>% left_join(envData, by = c("yr","month"))
 # mydata1[["MMEAN_RLONG_GND"]][] #at ground
 
 
-input_data <- ED2_data_daily1 %>%
-  select(day, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
+#added year month here
+
+input_data <- ED2_data_daily2 %>%
+  dplyr::select(yr, month, day, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
-  rename(day_of_month = day) %>%
-  rowid_to_column(var = "day") %>%
-  dplyr::select(-day_of_month) %>%
+  #rename(day_of_month = day) %>%
+  #rowid_to_column(var = "day") %>%
+  #dplyr::select(-day_of_month) %>%
   mutate(pft2 = case_when(
     pft == 2 ~ "earlydt",
     pft == 4 ~ "latedt",
@@ -267,6 +303,9 @@ input_data <- ED2_data_daily1 %>%
   )) %>% dplyr::select(-pft) %>% rename(pft = pft2) #%>%
  #mutate_at(.vars = "dbh", .funs = function(x){x*5}) # delete this line
 
+if(patch_run_type == "many"){
+  input_data1 <- input_data
+}
 
 
 

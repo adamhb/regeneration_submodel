@@ -48,7 +48,7 @@ a_rec <- rep(0.0002,4)
 names(a_rec) <- pft_names
 b_rec <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_rec) <- pft_names
-Z0 <- 165
+Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 
 #initial conditions
 seedbank_0 = 22750 #the initial mass of carbon in the seedbank (g C)

@@ -1,6 +1,6 @@
 
 C2B <- 2 #carbon to biomass ratio used in ED2
-seed_rain <- 0.01 # kgC / m2 / month./init/ed_params.f90:3278/3279
+seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
 seedling_mortality <- 0.95 # mortality rate in every (monthly?) time step taken from ./init/ed_params.f90:2089
 
 #sapling height to dbh function
@@ -24,7 +24,7 @@ dbh2ba <- function(dbh, #
                    q = 1,
                    b1Bs_small = 0,
                    b2Bs_small = 0){
-  dbh2bl(dbh) * (1 + q) * 2
+  dbh2bl(dbh) * (1 + q) #* 2 #NOTE I TOOK OUT THIS x2 BECAUSE IT SEEMS THAT THE C2B CONVERSION NEVER HAPPENS FOR THESE VERY SMALL TREES BECAUSE THE B1BL PARAM IN THE LEAVE BIOMASS EQUATION IS 0 FOR SMALL TREES
 }
                   
 #recruitment rate per m2 per ha per year
@@ -36,11 +36,14 @@ ED2_recruitment_bseeds <- function(bseeds, min_dbh = 1){ #bseeds (KgC / m2); dbh
 #0.5 KgC of seed per m2 = 781.25 recruits per ha
 
 
-ED2_recruitment <- function(NPPseed, min_dbh = 1){ #NPPseed in units of Kg C per pft per day (in a 1 ha simulation)
-  ((NPPseed + seed_rain / 365 * 1e4) * (1 - seedling_mortality) / dbh2ba(min_dbh)) #seed_rain adds 0.1 kg of C of seed every timestep 
+ED2_recruitment <- function(NPPseed, min_dbh = 1){ #input is npp to seed per pft per m2 per day (gC)
+  ((NPPseed + (seed_rain * 1000 / 30.4)) * (1 - seedling_mortality) / (dbh2ba(min_dbh) * 1000)) #seed_rain adds 0.1 kg of C of seed every timestep 
 }
+#ED2_recruitment(NPPseed = 0.195) 
 
-ED2_R <- ED2_recruitment(input_data$nppseed_pft_day)
+
+
+
 
 
 

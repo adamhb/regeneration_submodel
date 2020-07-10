@@ -126,10 +126,25 @@ input_data <- input_data %>%
 
 input_data <- input_data %>%
   mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
-  mutate(c_repro = e_frac * NPP * 10000) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare)
+  mutate(c_repro = e_frac * NPP * model_area) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare). Because NPP is input in units of per m2
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
-  arrange(., day,pft) %>%
+  arrange(., day,pft) 
+
+if(emulate_ED2 == T){
+  input_data <- input_data %>%
+    mutate(ED2_R = ED2_recruitment(NPPseed = nppseed_pft_day * model_area))
+}
+
+
+if(patch_run_type != "many"){
+  input_data <- input_data %>%
   mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
+}
+
+if(patch_run_type == "many"){
+  input_data <- input_data %>%
+    mutate(light = FSDS * lightZ0 / 1e6)
+}
 
 #str(input_data)
 
