@@ -21,13 +21,13 @@ patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
 run_name <- "ENSO_run_for_partitioning"
 start_date <- "2005-01-01"
-end_date <- "2051-12-01"
+end_date <- "2020-12-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
-path_to_output <- "~/cloud/gdrive/rec_submodel/output"
+path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #site and scenario params
 avg_precip <- 71 #precipitation in mm over two weeks (the annual average)

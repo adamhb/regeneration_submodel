@@ -19,9 +19,9 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "many" #"many" #one or "many"
 synthetic_patches <- T  # T or F
-run_name <- "light_based_rec_demo"
+run_name <- "light_based_rec_demo_master"
 start_date <- "2000-01-01"
-end_date <- "2015-12-01"
+end_date <- "2010-12-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 

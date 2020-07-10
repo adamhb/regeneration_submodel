@@ -19,7 +19,7 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "vanilla_run"
+run_name <- "vanilla_run_master"
 start_date <- "2001-01-01"
 end_date <- "2015-01-01"
 n_PFTs <- 4
