@@ -48,7 +48,6 @@ def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
 }
 
 
-
 H20_mort <- function(deficit_days, pft.x){
   PFT <- pft.x
   mort_rate <- deficit_days * P1H20[PFT] + P2H20[PFT]
