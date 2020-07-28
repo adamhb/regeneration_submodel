@@ -125,8 +125,10 @@ for (fl in files){
   
   
   tmp_ED2_data <- data.frame(pft = pft, patchID = tmp1, cohort_area = area.tmp, nplant_per_co_m2 = nplant.tmp1,
-             npp_co_per_ind = MMEAN_NPPDAILY_CO, npp_seed_co_per_ind = MMEAN_NPPSEEDS_CO, dbh_co = DBH_CO, bseeds_co_m2 = BSEEDS_CO) %>%
+             npp_co_per_ind = MMEAN_NPPDAILY_CO, npp_seed_co_per_ind = MMEAN_NPPSEEDS_CO, dbh_co = DBH_CO, bseeds_co_m2 = BSEEDS_CO,
+             agb_co_ind = AGB.CO.tmp0) %>%
     mutate(nplant_per_co = nplant_per_co_m2 * cohort_area * 10000) %>%
+    mutate(agb_co = agb_co_ind * nplant_per_co) %>%
     mutate(npp_co_mo = npp_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% #(NPP, gC month per m2 per cohort
     mutate(nppseed_co_mo = npp_seed_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% # same units as above
     mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000) %>% #total Kg of seed per cohort on a 1 ha simulation plot
@@ -135,7 +137,8 @@ for (fl in files){
               nppseed_pft_mo = sum(nppseed_co_mo),
               bseeds_pft_mo = sum(bseeds_co_total), # Kg C per pft
               dbh_pft = mean(dbh_co),
-              n_per_pft = sum(nplant_per_co)) %>%
+              n_per_pft = sum(nplant_per_co),
+              agb_pft = sum(agb_co)) %>%
     mutate(yr = unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")), 
            month =  unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)")))
  
@@ -292,6 +295,7 @@ input_data <- ED2_data_daily2 %>%
   dplyr::select(yr, month, day, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
+  mutate_at(.vars = "day", .funs = as.numeric) %>%
   #rename(day_of_month = day) %>%
   #rowid_to_column(var = "day") %>%
   #dplyr::select(-day_of_month) %>%

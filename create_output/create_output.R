@@ -101,6 +101,8 @@ print(NPP_g)
 dev.off()
 
 
+
+
 #graphing the fraction of NPP going to reproduction
 p1 <- ggplot(data = full_output, aes(x = as.Date(date), y = e_frac, color = pft)) +
   custom_line +
@@ -142,7 +144,28 @@ dev.off()
 
 
 
+
+p2b <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft)) +
+  geom_line() +
+  #smoother_line +
+  year_axis +
+  ylab(expression(paste("carbon for repro.", "(g C day"^"-1","ha"^"-2",")")))+
+  xlab(bquote('year'))+
+  labs(title = "C allocated to reproduction per day") +
+  theme_classic() +
+  adams_theme +
+  theme(legend.position = "none")+
+  scale_color_manual(values = pft.cols)
+
+png(paste0(path_to_this_run_output,"/03_C_for_repro_no_smoothing.png"), height=5, width=8, units="in", res = 100)
+print(p2b)
+dev.off()
+
+
+
 #graphing seedbank size
+
+
 p3 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedbank, color = pft)) +
   #smoother_line +
   custom_line +
@@ -158,6 +181,23 @@ p3 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedbank, color = pf
 png(paste0(path_to_this_run_output,"/04_SeedBank.png"), height=5, width=8, units="in", res = 100)
 print(p3)
 dev.off()
+
+# full_output %>%
+#   filter(date > "2020-04-08" & date < "2020-04-14") %>%
+#   ggplot(aes(x = as.Date(date), y = seedbank, color = pft)) +
+#   #smoother_line +
+#   custom_line +
+#   scale_x_date() +
+#   ylab(expression(paste("seedbank size ", " (g C ","ha"^"-1",")")))+
+#   xlab(bquote('year'))+
+#   labs(title = "Seed bank size (g C)") +
+#   theme_classic() +
+#   adams_theme +
+#   theme(legend.position = "none")+
+#   scale_color_manual(values = pft.cols)
+#   
+
+
 
 
 #add precip to this on a second axis
@@ -182,7 +222,7 @@ dev.off()
 
 
 #graphing the seedling pool
-p5 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = seedpool, color = pft)) +
+p5 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedpool, color = pft)) +
   custom_line +
   #geom_line(size = 1.8)+
   year_axis +
@@ -201,7 +241,7 @@ dev.off()
 
 
 #graphing the light mortality rate
-p6 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = light_mort_rate, color = pft)) +
+p6 <- ggplot(data = full_output, aes(x = as.Date(date), y = light_mort_rate, color = pft)) +
   custom_line +
   year_axis +
   ylab(bquote('daily mort rate (% of seedling pool)'))+
@@ -220,7 +260,7 @@ dev.off()
 
 
 #graphing H20 mortality rate
-p7 <- ggplot(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")), aes(x = as.Date(date), y = H20_mort_rate, color = pft)) +
+p7 <- ggplot(data = full_output, aes(x = as.Date(date), y = H20_mort_rate, color = pft)) +
   custom_line +
   year_axis +
   ylab(expression(paste('H20 Mort. Rate'," (day)"^"-1"))) +
@@ -258,7 +298,7 @@ dev.off()
 
 #graphing the soil matric potential over time
 
-SMP_MPa_g <- ggplot(data = full_output %>% filter(date >= "2005-01-01"), aes(x = as.Date(date), y = SMP/1e5)) +
+SMP_MPa_g <- ggplot(data = full_output, aes(x = as.Date(date), y = SMP/1e5)) +
   labs(title = "Soil Matric Potential (MPa)") +
   theme_classic()+
   geom_line(size = 1.8, color = "black")+
@@ -342,7 +382,7 @@ dev.off()
 #graphing the annual recruitment rate with the total
 #rec_bench_totals.df <- data.frame(bench = rec_bench_totals[-1], date = as.Date(c("2007-06-01", "2012-06-01")))
 
-p10 <- full_output %>% filter(date >= as.POSIXct("2005-01-01")) %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
+p10 <- full_output  %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
   geom_line() +
   #smooth_line +
   year_axis +
@@ -351,7 +391,7 @@ p10 <- full_output %>% filter(date >= as.POSIXct("2005-01-01")) %>% arrange(desc
   labs(title = 'Recruitment Rate') +
   theme_classic() +
   adams_theme +
-  geom_smooth(data = full_output %>% filter(date >= as.POSIXct("2005-01-01")) %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), 
+  geom_smooth(data = full_output %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), 
               mapping = aes(x = as.Date(date), y = total_R*365, color = pft),
               size = 1.8, method = "loess", span = .01, se = F)+
   geom_point(aes(x  = as.Date("2007-06-01"), y = 77), color = "black", size = 5, pch = 2) +
@@ -380,7 +420,7 @@ Submodel_annual_rec <- ggplot() +
   xlab(bquote('year'))+
   labs(title = 'Trends in Annual PFT-specific Recruitment') +
   #geom_smooth(data = full_output %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), mapping = aes(x = as.Date(date), y = total_R*365, color = pft), size = 1.8, method = "loess", span = .1, se = F) +
-  geom_point(data = N_recs_per_year_pfts %>% filter(year >= as.Date("2005-01-01")), mapping = aes(x = year, y = N_rec, color = pft), size = 8) +
+  geom_point(data = N_recs_per_year_pfts, mapping = aes(x = year, y = N_rec, color = pft), size = 8) +
   #geom_point(data = graphable_bench_data %>% filter(date >= as.Date("2005-01-01") & date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), size = 1) +
   #geom_segment(data = graphable_bench_data %>% filter(date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), xend = as.Date("2010-01-01"), yend = 20)+
   #scale_linetype_manual(values = "yellow2")+

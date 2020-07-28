@@ -31,13 +31,19 @@ for (fl in files){
   
   tmp1           = rep(1:length(paco.n), times = paco.n)
   MMEAN_LIGHT_LEVEL = mydata1[["MMEAN_LIGHT_LEVEL"]][]
+
   
+ num_ntiles <- 10
+ 
+ if(no_real_patch_light == T){
+   num_ntiles <- num_bins
+ }
 
  temp <- tibble(patch = tmp1, light = MMEAN_LIGHT_LEVEL) %>%
     group_by(patch) %>%
     summarise(light_at_smallest_cohort = min(light)) %>%
     left_join(ageDF, by = "patch") %>% #print(n= 100)
-    mutate(bin = ntile(x = AGE, n = 10)) %>%
+    mutate(bin = ntile(x = AGE, n =  num_ntiles)) %>%
     group_by(bin) %>%
     summarise(lightZ0 = mean(light_at_smallest_cohort),
               patch_age = mean(AGE)) %>%
@@ -54,19 +60,51 @@ for (fl in files){
 }
 
 
+lseq <- function(from=1, to=100000, length.out=6) {
+  # logarithmic spaced sequence
+  # blatantly stolen from library("emdbook"), because need only this
+  exp(seq(log(from), log(to), length.out = length.out))
+}
+
 #adding synthetic patches (i.e. ones not from ED2) with higher light (bins 11-20)
 synthetic_patch_level_light <- patch_level_light %>%
   mutate_at(.vars = "bin", .funs = function(x){x + 10}) %>%
-  mutate(lightZ0 = rep(seq(from = 0.05,to = 1,length.out = 10),nrow(patch_level_light)/10)) %>%
+  mutate(lightZ0 = rep(lseq(from = 0.05,to = 1,length.out = 10),nrow(patch_level_light)/10)) %>%
+  #mutate(lightZ0 = rep(lseq(from = 0,to = 1,length.out = 20),nrow(patch_level_light)/20)) %>%
   mutate(patch_age = 9999) 
 
 if(synthetic_patches == T){
   patch_level_light <- rbind(patch_level_light, synthetic_patch_level_light)
 }
 
+
+if(no_real_patch_light == T){
   
-
-
+  lights <- lseq(from = 0.03,to = 1, length.out = num_bins)
+  
+  yrmonth <- tibble(
+    yr = input_data1$yr,
+    month = input_data1$month) %>%
+    distinct() 
+  
+  patch_level_light <- tibble()
+  
+  for(i in 1:num_bins){
+    
+    tmp <- yrmonth %>%
+      mutate(bin = i) %>%
+      mutate(lightZ0 = lights[i])
+    
+    patch_level_light <- rbind(patch_level_light,tmp)
+      
+  }
+  patch_level_light <- patch_level_light %>%
+    mutate(dateChar = paste(yr, month, "01" ,sep = "-")) %>%
+    mutate_at(.vars = "dateChar",.funs = as.character) %>%
+    mutate(DateLubr = ymd(dateChar)) %>%
+    mutate(patch_age = 9999) 
+}
+  
 
 
 #str(patch_level_light)
