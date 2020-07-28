@@ -19,9 +19,9 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "ED2_dry_run"
-start_date <- "2005-01-01"
-end_date <- "2030-12-01"
+run_name <- "SMP_DRY_for_segmentation"
+start_date <- "2001-01-01"
+end_date <- "2023-01-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -35,7 +35,7 @@ avg_SMP <- -60326 #
 avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
 
 if(patch_run_type != "many"){
-  percent_light <- 0.03
+  percent_light <- 0.035
 }
 
 
@@ -58,7 +58,7 @@ if(patch_run_type != "many"){
   }
 
 
-soil_moisture_period <- 120
+soil_moisture_period <- 120 #4 months
 
 total_length <- nrow(full_output)
 n_segments <- floor(total_length / (soil_moisture_period * 4))

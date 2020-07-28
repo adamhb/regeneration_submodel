@@ -359,7 +359,8 @@ dev.off()
 
 #graphing the daily recruitment rate without the total
 p9 <- full_output %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
-  custom_line +
+  #custom_line +
+  geom_line() +
   year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
   xlab(bquote('year'))+
