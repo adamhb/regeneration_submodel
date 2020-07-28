@@ -18,7 +18,6 @@ if(patch_run_type == "many"){
 dir.create(path = path_to_this_run_output)
 
 
-
 if(run_type == "ED2"){
   dbh.x <- full_output %>%
     group_by(pft) %>%
