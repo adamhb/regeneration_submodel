@@ -20,10 +20,10 @@ emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
 
-run_name <- "vanilla_run"
+run_name <- "vanilla_run_on_master_branch"
 
 start_date <- "2001-01-01"
-end_date <- "2010-01-01"
+end_date <- "2005-01-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
