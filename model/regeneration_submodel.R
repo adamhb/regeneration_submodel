@@ -91,11 +91,15 @@ light_mort <- function(light = 5000000*60, seedpool.x = 750000){
 #output
 #provides the number of recruits per day
 
-rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, avg_l.x = avg_l, seedpool.x){
+rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, avg_l.x = avg_l, seedpool.x, SMP.x = avg_SMP){
   
   log10_frac_rec <- log10(a_rec.x) + b_rec.x*log10(l/avg_l) 
   
   frac_rec <- (10^log10_frac_rec) #the fraction of the seedling pool recruiting per day
+  
+  if(SMP.x < thresh.xx[PFT]){
+    frac_rec <- 0
+  }
   
   C_rec <- frac_rec * seedpool.x
   
@@ -226,15 +230,19 @@ for(PFT in pft_names){
         - ((light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
         - (input_vars$H20_mort_rate[i] * seedpool[i]) %>%
         - (seedpool[i]*background_seedling_mort[PFT]/365) %>%
-        - (rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$C_rec)
+        - (rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001),
+                    seedpool.x = seedpool[i], 
+                    SMP.x = input_vars$SMP[i])$C_rec)
       
       light_mort_rate[i+1] <- (light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i]))
       
-      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$frac_rec
+      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+                                  SMP.x = input_vars$SMP[i])$frac_rec
       
       
       #recruitment and litter pool dynamics
-      R[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$N_rec
+      R[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+                         SMP.x = input_vars$SMP[i])$N_rec
       
       N[i+1] <- N[i] %>%
         + (R[i+1])

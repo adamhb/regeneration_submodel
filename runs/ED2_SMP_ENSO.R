@@ -19,7 +19,7 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "SMP_ENSO_3.5"
+run_name <- "SMP_ENSO_3.5_moisture_rec"
 start_date <- "2005-01-01"
 end_date <- "2033-12-01"
 n_PFTs <- 4
