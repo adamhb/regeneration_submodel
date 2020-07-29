@@ -21,3 +21,7 @@ makePNG <- function(fig, path_to_output.x = path_to_output, file_name = "unamed_
   print(fig)
   dev.off()
 }
+
+
+
+

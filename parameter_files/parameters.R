@@ -51,8 +51,8 @@ names(b_rec) <- pft_names
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 
 #initial conditions
-seedbank_0 = 22750 #the initial mass of carbon in the seedbank (g C)
-seedpool_0 = 12000 #the initial mass of carbon in the seedling pool (g C)
-litter_0 = 10000
+seedbank_0 = 0# 22750 #the initial mass of carbon in the seedbank (g C)
+seedpool_0 = 0#12000 #the initial mass of carbon in the seedling pool (g C)
+litter_0 = 0 # 10000
 
 plot_input_vars <- "Y"
