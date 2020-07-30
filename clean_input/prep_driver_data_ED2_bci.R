@@ -181,7 +181,7 @@ for(pft.x in PFTs){
   
   daily_temp <- df %>% mutate(Date = ymd(Date)) %>%
     group_by(Date) %>%
-    expand(Date = seq(floor_date(Date, unit = "month"),
+    tidyr::expand(Date = seq(floor_date(Date, unit = "month"),
                       ceiling_date(Date, unit="month")-days(1), 
                       by="day"),
            pft,

@@ -19,9 +19,9 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "vanilla_run_fixed_day"
+run_name <- "vanilla_run_15pct_seedling_mort"
 start_date <- "2001-01-01"
-end_date <- "2010-01-01"
+end_date <- "2020-01-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -44,7 +44,7 @@ if(patch_run_type != "many"){
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters.R")
+source("parameter_files/parameters_ED2_run.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
