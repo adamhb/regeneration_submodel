@@ -1,3 +1,5 @@
+source('utils/supporting_funcs.R')
+
 pft.cols <- c("darkolivegreen2","darkolivegreen4","lightskyblue", "midnightblue")
 
 #set theme for the plots
@@ -11,8 +13,11 @@ adams_theme <- theme(plot.title = element_text(hjust = 0.5, size = 20),
                      axis.text.y = element_text (size = 14, colour = "black"),
                      legend.text = element_text (size = 15))
 
-plot_title <- labs(title = paste0(start_date,"--",end_date,"\n",
-                    "driver: ",basename(driver_data_path)))
+if(exists("start_date")){
+  plot_title <- labs(title = paste0(start_date,"--",end_date,"\n",
+                                    "driver: ",basename(driver_data_path)))
+}
+
 
 
 #png options

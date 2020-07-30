@@ -20,7 +20,7 @@ background_seedling_mort <- c(0.15, 0.15, 0.15, 0.15) # this changed from origin
 names(background_seedling_mort) <- pft_names
 
 #seedling mort-H20
-P1H20 <- c(4.97e-08, 5.07e-08, 4.97e-08, 5.07e-08)
+P1H20 <- c(4.975e-08, 5.067e-08, 4.975e-08, 5.067e-08)
 names(P1H20) <- pft_names
 P2H20 <- c(-3.93e-17, -2.45e-17, -3.93e-17, -2.45e-17)
 names(P2H20) <- pft_names

@@ -5,8 +5,8 @@ print(paste("Running regeneration submodel",Sys.time()))
 
 ############functions###############
 #the probability that an individual is of reproductive status as a function of dbh (mm)
-prob_repro <- function(k = 0.0125, L = 1, size_mm, Dmax){
-  y <- L / (1 + exp(-k*(size_mm - 0.5*Dmax)))
+prob_repro <- function(k = 0.0125, size_mm, Dmax){
+  y <- 1 / (1 + exp(-k*(size_mm - 0.5*Dmax)))
   return(y)
 }
 
@@ -51,7 +51,7 @@ def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
 
 H20_mort <- function(deficit_days, pft.x){
   PFT <- pft.x
-  mort_rate <- deficit_days * P1H20[PFT] + P2H20[PFT]
+  mort_rate <- deficit_days * P1H20[PFT] #+ P2H20[PFT] P2H20 is essentially zero in the observational analysis of Engelbrecht et al. 2003
   return(mort_rate/(window.x))
 }
 
@@ -142,7 +142,7 @@ if(emulate_ED2 == T){
 
 if(patch_run_type != "many"){
   input_data <- input_data %>%
-  mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
+  mutate(light = FSDS * percent_light / 1e6) #this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per per day
 }
 
 if(patch_run_type == "many"){
@@ -238,6 +238,8 @@ for(PFT in pft_names){
       
       frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
                                   SMP.x = input_vars$SMP[i])$frac_rec
+    
+    
       
       
       #recruitment and litter pool dynamics
