@@ -246,7 +246,7 @@ p6 <- ggplot(data = full_output, aes(x = as.Date(date), y = light_mort_rate, col
   ylab(bquote('daily mort rate (% of seedling pool)'))+
   xlab(bquote('year'))+
   #scale_color_manual(values = c("darkolivegreen4", "midnightblue"))+
-  labs(title = 'light-dep. seedling mortality (3% light)') +
+  labs(title = paste('light-dep. seedling mortality',paramsOFrun$param_vals[12],"TOC")) +
   theme_classic() +
   adams_theme +
   scale_color_manual(values = pft.cols)

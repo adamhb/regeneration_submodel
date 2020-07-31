@@ -2,10 +2,15 @@
 pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
 
 
-#transition from seedling to adult recruit
-#a_rec <- a_rec_default #this is the daily beta rec default from liza comitas data
+#tuning param
 a_rec <- rep(0.0004,4)
 names(a_rec) <- pft_names
+
+
+#transition from seedling to adult recruit
+#a_rec <- a_rec_default #this is the daily beta rec default from liza comitas data
+
+
 b_rec <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_rec) <- pft_names
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2

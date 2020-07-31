@@ -31,7 +31,7 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #site and scenario params
 avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
-avg_SMP <- -60326 #
+#avg_SMP <- -60326 #
 avg_l <- 105 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average): default value = 61
 
 if(patch_run_type != "many"){
