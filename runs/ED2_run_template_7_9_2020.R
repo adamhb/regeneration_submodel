@@ -19,8 +19,8 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "vanilla_run_15pct_seedling_mort"
-start_date <- "2008-01-01"
+run_name <- "benchmarking"
+start_date <- "2001-01-01"
 end_date <- "2014-01-01"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
@@ -32,10 +32,10 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 #site and scenario params
 avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
 avg_SMP <- -60326 #
-avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
+avg_l <- 105 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average): default value = 61
 
 if(patch_run_type != "many"){
-  percent_light <- 0.03
+  percent_light <- 0.035
 }
 
 
@@ -44,7 +44,7 @@ if(patch_run_type != "many"){
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters_ED2_run.R")
+source("parameter_files/parameters_ED2_run_benchmarking.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
