@@ -73,15 +73,18 @@ input_data <- input_data1 %>%
 source("model/regeneration_submodel.R")
 source("create_output/create_output.R")
 
+print(paste("patch",i,"of",num_patches,"is done!"))
+
 output_all_patches <- rbind(output_all_patches,full_output)
 }
 
 
-output_all_patches %>%
-  group_by(yr, pft) %>%
-  summarise(R_sum = sum(R))
+full_output <- output_all_patches %>%
+  group_by(date, pft) %>%
+  summarise_if(.predicate = is.numeric, .funs = sum) %>%
+  select(date, pft, NPP, c_repro, seedbank, seedpool, R, ED2_R) 
 
-
+source("create_output/create_output_multipatch.R")
 #sum the patch level output to view on graphs
 
 
