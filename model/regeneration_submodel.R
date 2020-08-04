@@ -59,7 +59,8 @@ H20_mort <- function(deficit_days, pft.x){
 #light-based seedling mortality
 light_mort <- function(light = 5000000*60, seedpool.x = 750000){
   
-  pct_light <- (light / (15750113 * 90)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
+  
+  pct_light <- (light / (15750113 * 90 / 1e6)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
   
   seedlings_N <- seedpool.x / Z0_seedling[PFT]
   
@@ -72,7 +73,7 @@ light_mort <- function(light = 5000000*60, seedpool.x = 750000){
   
   Pm_yr <- 1 - exp(-Ml*3)
   
-  Pm_day <- Pm_yr / 90
+  Pm_day <- Pm_yr / 90 # why did I divide by 90 here instead of 365, check Kobe paper on this
   
   #N_mort <- Pm_day * seedlings_N
   
