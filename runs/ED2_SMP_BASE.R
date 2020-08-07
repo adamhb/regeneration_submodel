@@ -19,7 +19,7 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "SMP_BASE_3.0_pct_light"
+run_name <- "SMP_BASE_fixed_c_repro"
 start_date <- "2003-01-01"
 end_date <- "2015-12-31"
 n_PFTs <- 4

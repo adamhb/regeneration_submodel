@@ -37,7 +37,7 @@
 # ========================================================================================
 
 # Clear the work-space (USER MAY WANT TO COMMENT/UNCOMMENT)
-rm(list=ls())
+#rm(list=ls())
 
 #script_dir <- dirname(sys.frame(1)$ofile)
 
