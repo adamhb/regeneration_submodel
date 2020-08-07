@@ -21,8 +21,8 @@ patch_run_type <- "many" #"many" #one or "many"
 synthetic_patches <- T  # T or F
 no_real_patch_light <- T
 run_name <- "recruitment_vs_light_figure"
-start_date <- "2000-01-01"
-end_date <- "2005-01-01"
+start_date <- "2001-01-01"
+end_date <- '2005-12-31'#"2034-12-31"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -30,10 +30,7 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
-#site and scenario params
-avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
-avg_SMP <- -60326 #
-avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
+
 
 if(patch_run_type != "many"){
   percent_light <- 0.035
@@ -45,7 +42,7 @@ if(patch_run_type != "many"){
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters.R")
+source("parameter_files/parameters_ED2_run_Aug_4.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -62,7 +59,6 @@ num_bins <- 20
 if(patch_run_type == "many"){
 
 source("clean_input/patch_level_simulations.R")
-
 
 summary_data <- tibble()
 for(bin_num in 1:num_bins){
@@ -104,7 +100,7 @@ for(bin_num in 1:num_bins){
  
    
  summary_data <- rbind(summary_data,temp_summary)
-  
+  print(paste("done with patch",bin_num,"of",length(num_bins)))
  if(bin_num < 2){
    source("create_output/create_output.R")
  }

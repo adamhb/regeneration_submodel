@@ -2,14 +2,17 @@
 pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
 
 
+#site params and tuning params
 #tuning param
 a_rec <- rep(0.0004,4)
 names(a_rec) <- pft_names
-
+#site and scenario params
+#avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
+avg_SMP <- -60326 #
+avg_l <- 105 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average); 61 is the value that was used previously
 
 #transition from seedling to adult recruit
 #a_rec <- a_rec_default #this is the daily beta rec default from liza comitas data
-
 
 b_rec <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_rec) <- pft_names

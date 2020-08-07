@@ -36,16 +36,17 @@ light_rec_fig <- light_rec_data %>%
   #  pft == "earlydi" ~ "early",
   #  pft == "latedi" ~ "late"
   #)) %>%
-  ggplot(aes(x = light, y = annual_transition_rate * 365, color = pft, linetype = pft)) +
+  ggplot(aes(x = light, y = annual_transition_rate * 30.4, color = pft, linetype = pft)) +
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values = c("solid","dashed","solid","dashed")) +
-  ylab(label = "annual seedling to \n sapling transition rate") +
-  xlab(label = "cumulative solar radiation at seedling layer \n (MJ accumulated in prior 6 months)") +
-  labs(title = "Seedling to sapling \n transition rate") +
+  ylab(label = "monthly seedling to \n sapling transition prob.") +
+  #xlab(label = "cumulative solar radiation at seedling layer \n (MJ accumulated in prior 6 months)") +
+  xlab(expression(atop("cum. solar radiation at seedling layer", paste("(MJ m"^"-2"," in prior 6 months)")))) +
+  labs(title = "Seedling to sapling transition") +
   geom_vline(xintercept = 92, linetype = "dashed") +
   #annotate("text", x = 170, y = 0.15, label = paste0("avg_l = ", avg_l), size = 25) +
-  annotate("text", x = 92, y = 0.14, label = "mean light \n at BCI seedling layer", size = 5) +
+  annotate("text", x = 92, y = 0.01, label = "mean light \n at BCI seedling layer", size = 5) +
   #geom_vline(xintercept = 61) +
   #annotate("text", x = 61, y = 0.06, label = "original avg_l value") +
   theme_minimal() +

@@ -85,3 +85,13 @@ patch_level_light %>%
     ggplot(aes(mean_patch_age,mean_light)) + geom_point()
   
   
+  
+  
+  input_vars$nppseed_pft_day[1:10] / input_vars$NPP
+  
+  input_data$nppseed_pft_day[1:10] / input_data$NPP
+  
+  
+  
+  
+  

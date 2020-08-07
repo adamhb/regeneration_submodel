@@ -13,6 +13,9 @@ adams_theme <- theme(plot.title = element_text(hjust = 0.5, size = 20),
                      axis.text.y = element_text (size = 14, colour = "black"),
                      legend.text = element_text (size = 15))
 
+adams_theme <- theme_minimal() + adams_theme
+
+
 multipanel_theme <- theme(plot.title = element_text(hjust = 0.5, size = 25),
                      strip.text.x = element_text(size = 20),
                      legend.title = element_blank (),

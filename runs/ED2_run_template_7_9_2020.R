@@ -15,11 +15,12 @@ library(reshape2)
 source("utils/supporting_funcs.R")
 
 #name the run
+use.CgANDr <- T
 run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "benchmarking"
+run_name <- "submodel_take_cgANDr"
 start_date <- "2008-01-01"
 end_date <- "2014-01-01"
 n_PFTs <- 4

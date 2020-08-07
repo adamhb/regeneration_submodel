@@ -1,4 +1,6 @@
 
+create_csv_of_pfts <- F
+
 path_to_benchmarking_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
 
@@ -133,6 +135,10 @@ pfts_sept_2018$dpft[change][5:9] <- "di"
 #the pft list we use in November 2018
 pfts_nov_2018 <- pfts_sept_2018 %>% mutate(pft = paste0(e_vs_l,dpft)) %>% select(Latin, sp, pft)
 
-write.csv(pfts_nov_2018, file = "benchmarking/pft_assignments.csv")
+
+if(create_csv_of_pfts == T){
+  write.csv(pfts_nov_2018, file = "benchmarking/pft_assignments.csv")
+}
+
 
 
