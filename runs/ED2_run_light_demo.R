@@ -20,7 +20,7 @@ emulate_ED2 <- T
 patch_run_type <- "many" #"many" #one or "many"
 synthetic_patches <- T  # T or F
 no_real_patch_light <- T
-run_name <- "recruitment_vs_light_same_Dmax"
+run_name <- "recruitment_vs_light"
 start_date <- "2001-01-01"
 end_date <- '2024-12-31'#"2034-12-31"
 n_PFTs <- 4
@@ -30,13 +30,6 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
-
-
-if(patch_run_type != "many"){
-  percent_light <- 0.035
-}
-
-
 #dbh.x <- 500 #dbh in mm
 #N_co.x <- 800  #the number of individuals in a cohort
 model_area <- 10000 #area in square meters
@@ -44,24 +37,15 @@ model_area <- 10000 #area in square meters
 #source parameter values
 source("parameter_files/parameters_ED2_run_Aug_4.R")
 
-Dmax <- c(545, 557, 545, 557) #maximum diamater (mm)
-names(Dmax) <- pft_names
-
 source("clean_input/prep_driver_data_ED2_bci.R")
 
-if(emulate_ED2 == T){
-  source('model/ED2_emulation.R')
-}
-
-if(patch_run_type != "many"){
-  source("model/regeneration_submodel.R")
-  source("create_output/create_output.R")
-  }
+source('model/ED2_emulation.R')
 
 num_bins <- 20
-if(patch_run_type == "many"){
 
 source("clean_input/patch_level_simulations.R")
+
+
 
 summary_data <- tibble()
 for(bin_num in 1:num_bins){
@@ -103,7 +87,7 @@ for(bin_num in 1:num_bins){
  
    
  summary_data <- rbind(summary_data,temp_summary)
-  print(paste("done with patch",bin_num,"of",length(num_bins)))
+  print(paste("done with patch",bin_num,"of",num_bins))
  if(bin_num < 2){
    source("create_output/create_output.R")
  }
@@ -119,8 +103,13 @@ summary_data <- summary_data %>%
     pft %in% c("earlydi","latedi") ~ "drought_intol",
     pft %in% c("earlydt","latedt") ~ "drought_tol"
   ))
-source("create_output/figure_recruitment_versus_light.R")
-}
+
+
+write_csv(summary_data,"temp/recruitment_vs_light.csv")
+
+#source("create_output/figure_recruitment_versus_light.R")
+
+
 
 
 

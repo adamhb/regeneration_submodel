@@ -469,8 +469,6 @@ N_recs_per_year_pfts <- full_output %>%
 N_recs_per_year_pfts$year <- as.Date(paste0((as.numeric(N_recs_per_year_pfts$year)+1), "-01-01"))
 
 
-
-
 ############################################
 ############################################
 #############################################

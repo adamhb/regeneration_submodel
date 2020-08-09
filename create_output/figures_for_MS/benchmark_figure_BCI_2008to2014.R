@@ -1,26 +1,9 @@
-
-source('runs/ED2_SMP_BASE.R')
-
-#creating table of the annual number of recruits per year per PFT
-N_recs_per_year_pfts <- full_output %>% 
-  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
-  mutate_at(.vars = "date", .funs = as.Date) %>%
-  left_join(bench4graph, by = c("pft","date")) %>%
-  group_by(year, pft) %>% 
-  summarise(submodel = sum(R),
-            ED2 = sum(ED2_R))
-
-N_recs_per_year_pfts$year <- as.Date(paste0((as.numeric(N_recs_per_year_pfts$year)+1), "-01-01"))
-
+source('runs/ED2_BASE.R')
+print("making benchmarking figure...")
 
 ED2_data_for_fig <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
   filter(model == "ED2")
-
-############################################
-############################################
-#############################################
-################NEW GRAPHS#################
 
 
 psize <- 5
@@ -39,16 +22,27 @@ adams_theme_benchFig <- theme_minimal() + theme(plot.title = element_text(hjust 
 
 
 
-
-#in log space
-
 benchmark_fig_log <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  rename(pftold = pft) %>%
+  mutate(pft = case_when(
+    pftold == "earlydi" ~ "LD_DI",
+    pftold == "earlydt" ~ "LD_DT",
+    pftold == "latedi" ~  "ST_DI",
+    pftold == "latedt" ~  "ST_DT"
+  )) %>% 
   #filter(model != "ED2") %>%
   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
   geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 10)) +
   geom_point(data = bench4graph %>%
+               rename(pftold = pft) %>%
+               mutate(pft = case_when(
+                 pftold == "earlydi" ~ "LD_DI",
+                 pftold == "earlydt" ~ "LD_DT",
+                 pftold == "latedi" ~  "ST_DI",
+                 pftold == "latedt" ~  "ST_DT"
+               )) %>%
                filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
              mapping = aes(x = date - 80, y = BCI_obs, color = pft), size = psize+2,
              position = position_jitter(width = 1)) +
@@ -69,10 +63,6 @@ benchmark_fig_log
 png(paste0(path_to_output,"forMS/","benchmark_fig_log.png"), height=5, width=8, units="in", res = 100)
 print(benchmark_fig_log)
 dev.off()
-
-
-
-
 
 
 # benchmark_fig_sec_axis <- N_recs_per_year_pfts %>%
@@ -172,7 +162,7 @@ dev.off()
 # 
 
 
-
+print("FINISHED making benchmarking figure!")
 
 
 

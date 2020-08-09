@@ -332,7 +332,8 @@ input_data <- ED2_data_daily2 %>%
   dplyr::select(yr, month, day, pft, date, dbh, N_co, SMP, NPP, c_repro, FSDS, nppseed_pft_day) %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
-  mutate_at(.vars = "day", .funs = as.numeric) #%>%
+  mutate_at(.vars = "day", .funs = as.numeric) %>%
+  mutate_at(.vars = "c_repro", .funs = function(x){x * model_area})
   #rename(day_of_month = day) %>%
   #rowid_to_column(var = "day") %>%
   #dplyr::select(-day_of_month) %>%

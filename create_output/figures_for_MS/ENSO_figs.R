@@ -1,4 +1,4 @@
-source('runs/ED2_SMP_ENSO.R')
+source('runs/ED2_ENSO.R')
 
 ENSO_long_term <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
@@ -43,7 +43,7 @@ ENSO <- full_output %>%
                date_breaks = "2 months", 
                labels = date_format("%b")) +
   xlab(bquote(''))+
-  labs(title = 'Recruitment across \n an ENSO event') +
+  labs(title = paste('Recruitment across \n an ENSO event at',percent_light * 100,"% light")) +
   theme_classic() +
   #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
   adams_theme +
@@ -54,5 +54,5 @@ png(paste0(path_to_output,"forMS/","ENSO.png"), height=5, width=8, units="in", r
 print(ENSO)
 dev.off()
 
-
+print("FINISHED making ENSO figure")
 

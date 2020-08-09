@@ -1,4 +1,4 @@
-
+print("creating recruitment vs. SMP figure...")
 source("create_output/figure_formatting.R")
 #import benchmarking data
 # bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
@@ -25,17 +25,15 @@ dir.create(path = path_to_this_run_output)
 #   group_by(patch)%>%
 #   summarise(adf = mean(SMP_avg))
 
-
-
 summary_data <- read_csv('temp/SMP_summary_data.csv')
+
 
 se_df <- summary_data %>%
   dplyr::select(pft, R_avg, R_avg_ED2, R_sd, R_sd_ED2, SMP_avg) %>%
   rename(submodel = R_sd, ED2 = R_sd_ED2) %>%  ###############################
   gather(submodel:ED2, key = "model", value = "sd") 
 
-pd <- position_dodge(0.03)
-
+pd <- position_dodge(0.003)
 
 rec_vs_smp <- summary_data %>%
   rename(submodel = R_avg, ED2 = R_avg_ED2) %>%
@@ -43,10 +41,13 @@ rec_vs_smp <- summary_data %>%
   left_join(se_df, by = c("model","SMP_avg","pft")) %>%
   ggplot(mapping = aes(x = SMP_avg/1e5, y = R * 365, color = pft, shape = model)) +
   geom_point(size = 2.5, stroke = 1, alpha = 1) +
-  geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd) +
+  geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0) +
   adams_theme +
   scale_shape_manual(values = rep(c(21,24),2)) +
   scale_color_manual(values = pft.cols) +
+  scale_x_continuous(limits = c(-4,max(summary_data$SMP_avg) / 1e5)) +
+  #scale_y_log10() +
+  scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(1,10,100,200,300), breaks = c(1,10,100,200,300)) + 
   ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab(paste0("mean soil matric potential (MPa)")) #+
   # labs(title = paste0(start_date,"--",end_date,"\n",
@@ -59,7 +60,7 @@ rec_vs_smp
 
 makePNG(fig = rec_vs_smp, 
         path_to_output.x = path_to_this_run_output, 
-        file_name = paste0("SMP_failure_points",
+        file_name = paste0("rec_vs_SMP",
                            basename(driver_data_path)))
 
 
@@ -109,3 +110,4 @@ makePNG(fig = rec_vs_smp,
 #                       "run name:" , run_name))
 # 
 # makePNG(fig = rec_vs_smp_normalized, path_to_output.x = path_to_this_run_output, file_name = paste0("02_rec_vs_SMP_full_axis_",basename(driver_data_path)))
+print("finished making recruitment vs. SMP figure!")

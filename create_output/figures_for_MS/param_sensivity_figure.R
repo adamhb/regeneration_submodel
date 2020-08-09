@@ -1,14 +1,16 @@
-
+from_new_data <- FALSE
+print("creating parameter sensitivity figure...")
 source("create_output/figure_formatting.R")
 
-model_run_time_stamp <- Sys.time() %>% 
-  sub(pattern = ":", replacement = "-") %>%
-  sub(pattern = ":", replacement = "-") %>%
-  sub(pattern = " ", replacement = "-")
+if(file.exists('temp/param_sens_data.csv') == F | from_new_data == T){
+  print("need to run parameter sensitivity analysis.R")
+  source("runs/ED2_run_param_sensitivity.R")
+}else(print("making figure with prior run's data"))
 
-#create folder to store output
-path_to_this_run_output <- paste0(path_to_output,run_name,"_",sub(pattern = " ", replacement = "",x = model_run_time_stamp),"/")
-dir.create(path = path_to_this_run_output)
+
+param_sens_data <- read_csv("temp/param_sens_data.csv")
+
+source("create_output/figure_formatting.R")
 
 base_avg_rec <- param_sens_data %>%
   filter(param_changed == "dummy") %>%
@@ -16,7 +18,7 @@ base_avg_rec <- param_sens_data %>%
 
 param_sens_data1 <- param_sens_data %>%
   group_by(param_changed) %>%
-  summarise(pct_change = (sum(R_avg) - base_avg_rec) / base_avg_rec * 100) %>%
+  summarise(pct_change = (abs(sum(R_avg) - base_avg_rec) / base_avg_rec * 100)) %>%
   filter(param_changed != "dummy") %>%
   mutate(param_changed = case_when(
     (param_changed == "window.x") ~ "H20_mort_window",
@@ -42,8 +44,7 @@ param_sens_fig <- param_sens_data1 %>%
   xlab("parameter") +
   ylab("pct. change in recruitment rate")
 
-
-
-makePNG(fig = param_sens_fig, path_to_output.x = path_to_this_run_output, file_name = paste0("param_sens",basename(driver_data_path)))
+makePNG(fig = param_sens_fig, path_to_output.x = path_to_MS_figures, file_name = "param_sens")
+print("FINISHED making parameter sensitivity figure")
 
 

@@ -1,3 +1,7 @@
+if(file.exists("temp/recruitment_vs_light.csv") == FALSE){
+  source('runs/ED2_run_light_demonstration_08_04_2020.R')
+}
+
 print("making recruitment versus light figure...")
 
 source("create_output/figure_formatting.R")

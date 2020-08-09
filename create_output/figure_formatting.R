@@ -1,5 +1,9 @@
 source('utils/supporting_funcs.R')
 
+path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+path_to_MS_figures <- paste0(path_to_output,"forMS/")
+
+
 pft.cols <- c("darkolivegreen2","darkolivegreen4","lightskyblue", "midnightblue")
 
 #set theme for the plots

@@ -1,6 +1,8 @@
 #PFT parameters 
 pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
 
+percent_light <- 0.02
+model_area <- 10000 #area in square meters
 
 #site params and tuning params
 #tuning param

@@ -29,23 +29,6 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
-#site and scenario params
-avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
-avg_SMP <- -60326 #
-avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
-
-if(patch_run_type != "many"){
-  percent_light <- 0.035
-}
-
-
-#dbh.x <- 500 #dbh in mm
-#N_co.x <- 800  #the number of individuals in a cohort
-model_area <- 10000 #area in square meters
-
-source("clean_input/prep_driver_data_ED2_bci.R")
-
-
 
 #initialize dataframe
 dummy <- 1
@@ -61,10 +44,12 @@ param_sens_data <- tibble()
 
 for(param in params_in_sens){
   
-  source("parameter_files/parameters.R")
+  source("parameter_files/parameters_ED2_run_Aug_4.R")
   
   assign(x = param,value = eval(as.name(param)) * 1.1)
-
+  
+  source("clean_input/prep_driver_data_ED2_bci.R")
+  
   source("model/regeneration_submodel.R")
   
   tmp <- full_output %>%
@@ -82,7 +67,9 @@ for(param in params_in_sens){
   print(paste("finished param",match(param,params_in_sens),"of",length(params_in_sens)))
   
 }
-source("create_output/param_sensivity_figure.R")
+
+write_csv(param_sens_data, "temp/param_sens_data.csv")
+
 
 
 
