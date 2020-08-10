@@ -19,9 +19,9 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "SMP_BASE_3.5"
-start_date <- "2000-01-01"
-end_date <- "2023-12-31"
+run_name <- "SMP_BASE_fixed_c_repro"
+start_date <- "2003-01-01"
+end_date <- "2015-12-31"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -29,22 +29,8 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
-#site and scenario params
-avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
-avg_SMP <- -60326 #
-avg_l <- 61 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average)
-
-if(patch_run_type != "many"){
-  percent_light <- 0.035
-}
-
-
-#dbh.x <- 500 #dbh in mm
-#N_co.x <- 800  #the number of individuals in a cohort
-model_area <- 10000 #area in square meters
-
 #source parameter values
-source("parameter_files/parameters.R")
+source("parameter_files/parameters_ED2_run_Aug_4.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -52,10 +38,22 @@ if(emulate_ED2 == T){
   source('model/ED2_emulation.R')
 }
 
-if(patch_run_type != "many"){
-  source("model/regeneration_submodel.R")
-  source("create_output/create_output.R")
-  }
+
+source("model/regeneration_submodel.R")
+source("create_output/create_output.R")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # soil_moisture_period <- 120

@@ -1,0 +1,110 @@
+
+<all>
+ 
+  <site_name> bci </site_name>
+
+  
+  <ctfs_table_type> full </ctfs_table_type>
+
+ 
+  <unit_dbh> mm </unit_dbh>
+
+  
+  <large_stature_dbh95>  15 </large_stature_dbh95>
+
+ 
+  <large_only> FALSE </large_only>
+
+ 
+  <sapling_dbh> 5 </sapling_dbh>
+
+  
+  <tree_dbh> 10 </tree_dbh>
+
+  
+  <conf_limit> 0.05 </conf_limit>
+
+  
+  <plot_dim_x> 1000 </plot_dim_x> 
+  <plot_dim_y> 500  </plot_dim_y>
+
+ 
+  <do_kat_clim_site> FALSE </do_kat_clim_site>
+
+ 
+  <site_number> 45 </site_number>
+
+ 
+  <do_gen_ncdf4_outfile> FALSE </do_gen_ncdf4_outfile>
+
+ 
+  <do_gen_psscss_file> FALSE </do_gen_psscss_file>
+
+ 
+  <do_palm_filter> TRUE </do_palm_filter>
+
+ 
+  <do_tapercorr> TRUE </do_tapercorr>
+
+ 
+  <do_total_ba> TRUE </do_total_ba>
+
+ 
+  <do_sp_abund> TRUE </do_sp_abund>
+
+  
+  <do_sp_ba> TRUE </do_sp_ba>
+
+ 
+  <do_spp_grate> TRUE </do_spp_grate>
+  <do_plot_spp_grate> FALSE </do_plot_spp_grate>
+
+  
+  <do_spp_mrate> TRUE </do_spp_mrate>
+  <do_plot_spp_mrate> FALSE </do_plot_spp_mrate>
+
+ 
+  <do_spp_rec> TRUE </do_spp_rec>
+
+ 
+  <do_grate> TRUE </do_grate>
+
+
+ 
+  <do_mrate> TRUE </do_mrate>
+
+ 
+  <do_stem_abund> TRUE </do_stem_abund>
+
+ 
+  <do_plot_stem_abund> TRUE </do_plot_stem_abund>
+
+  
+  <do_stem_ba> TRUE </do_stem_ba>
+
+ 
+  <do_plot_stem_ba> TRUE </do_plot_stem_ba>
+
+ 
+  <do_plot_am25_argr95> TRUE </do_plot_am25_argr95>
+
+ 
+  <do_plot_sm25_srgr95> TRUE </do_plot_sm25_srgr95>
+
+ 
+  <do_dbh_dist> FALSE </do_dbh_dist>
+
+ 
+  <plot_dbh_dist> FALSE </plot_dbh_dist>
+
+  
+  <do_demog_tables> TRUE </do_demog_tables>
+
+ 
+  <do_classify_pfts> TRUE </do_classify_pfts>
+
+ 
+
+  <diameter_classes_cm> 1.0,5.0,10.0,20.0,40.0,60.0,80.0,100 </diameter_classes_cm>
+
+</all>

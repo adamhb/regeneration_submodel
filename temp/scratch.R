@@ -85,3 +85,14 @@ patch_level_light %>%
     ggplot(aes(mean_patch_age,mean_light)) + geom_point()
   
   
+  
+  
+  input_vars$nppseed_pft_day[1:10] / input_vars$NPP
+  
+  input_data$nppseed_pft_day[1:10] / input_data$NPP
+  
+  
+  pfts_assgn <- read_csv('benchmarking/pft_assignments.csv') 
+pfts_assgn %>%
+  filter(pft == "earlydi" | pft == "earlydt") %>% print(n = 300)
+  

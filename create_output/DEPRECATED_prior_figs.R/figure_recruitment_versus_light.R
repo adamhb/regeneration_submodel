@@ -1,6 +1,13 @@
+if(file.exists("temp/recruitment_vs_light.csv") == FALSE){
+  source('runs/ED2_run_light_demonstration_08_04_2020.R')
+}
+
 print("making recruitment versus light figure...")
 
 source("create_output/figure_formatting.R")
+
+#import benchmarking data
+bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 
 model_run_time_stamp <- Sys.time() %>% 
   sub(pattern = ":", replacement = "-") %>%
@@ -25,23 +32,35 @@ pd <- position_dodge(0.003)
 
 yrs_in_analysis <- (as.numeric(substr(end_date,start = 1,stop = 4)) - as.numeric(substr(start_date,start = 1,stop = 4))) - 2
 
+
+bench4graph <- bench %>%
+  filter(date > start_date,
+         date < end_date) %>%
+  group_by(pft) %>%
+  summarise(R_bench = mean(rec_rate)) %>%
+  mutate(light = 3) %>%
+  mutate(model = "BCI obs.")
+
+
+
 Rvsl <- summary_data %>%
   dplyr::select(pft, R_avg, R_avg_ED2, R_sd, R_sd_ED2, mean_pct_light) %>%
   rename(submodel = R_avg, ED2 = R_avg_ED2) %>%  ###############################
   gather(submodel:ED2, key = "model", value = "R") %>% 
   left_join(se_df, by = c("model","mean_pct_light","pft")) %>%
   mutate_at(.vars = "sd", .funs = function(x){x / sqrt(yrs_in_analysis)}) %>%
-  ggplot(aes(x = mean_pct_light, y = R * 365, color = pft, shape = model)) +
+  ggplot(aes(x = mean_pct_light * 100, y = R * 365, color = pft, shape = model)) +
   #geom_point() +
   geom_point(size = 2.5, stroke = 1, alpha = 1) +
+  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = 5) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd) +
   scale_color_manual(values = pft.cols) +
-  scale_shape_manual(values = rep(c(21,24),2)) +
+  scale_shape_manual(values = c(10,21,24)) +
   scale_x_log10() +
   #scale_y_log10() +
   ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
-  xlab("percent light at seedling layer (% TOC)") +
-  geom_vline(xintercept = 0.46, linetype = "dotted") +
+  xlab("light at seedling layer (% TOC)") +
+  geom_vline(xintercept = 46, linetype = "dotted") +
   #plot_title +
   adams_theme 
   #annotate("segment", x = 2, xend = 0.1, y = 15, yend = 25, colour = "pink", size=3, alpha=0.6, arrow=arrow())
@@ -58,16 +77,17 @@ Rvsl_just_submodel <- summary_data %>%
   left_join(se_df, by = c("model","mean_pct_light","pft")) %>%
   mutate_at(.vars = "sd", .funs = function(x){x / sqrt(yrs_in_analysis)}) %>%
   filter(model == "submodel") %>%
-  ggplot(aes(x = mean_pct_light, y = R * 365, color = pft, shape = model)) +
+  ggplot(aes(x = mean_pct_light * 100, y = R * 365, color = pft, shape = model)) +
   #geom_point() +
   geom_point(size = 2.5, stroke = 1, alpha = 1) +
+  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = 5) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd) +
   scale_color_manual(values = pft.cols) +
-  scale_shape_manual(values = rep(c(21,24),2)) +
+  scale_shape_manual(values = rep(c(10,24),2)) +
   scale_x_log10() +
   ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("percent light at seedling layer (% TOC)") +
-  geom_vline(xintercept = 0.46, linetype = "dotted") +
+  geom_vline(xintercept = 46, linetype = "dotted") +
   #plot_title +
   adams_theme
 

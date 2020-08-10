@@ -2,6 +2,21 @@ source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
 
+bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
+
+bench4graph <- bench %>%
+  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
+  filter(date > start_date,
+         date < end_date) %>%
+  group_by(pft,int) %>%
+  summarise(BCI_obs = mean(rec_rate),
+            start_dateB = min(date),
+            end_dateB = max(date),
+            date = mean(date)) %>%
+  mutate(model = "BCI obs.")
+
+
+
 #time stamp
 model_run_time_stamp <- Sys.time() %>% 
   sub(pattern = ":", replacement = "-") %>%
@@ -246,7 +261,7 @@ p6 <- ggplot(data = full_output, aes(x = as.Date(date), y = light_mort_rate, col
   ylab(bquote('daily mort rate (% of seedling pool)'))+
   xlab(bquote('year'))+
   #scale_color_manual(values = c("darkolivegreen4", "midnightblue"))+
-  labs(title = 'light-dep. seedling mortality (3% light)') +
+  labs(title = paste('light-dep. seedling mortality',paramsOFrun$param_vals[12],"TOC")) +
   theme_classic() +
   adams_theme +
   scale_color_manual(values = pft.cols)
@@ -357,14 +372,22 @@ dev.off()
 
 
 #graphing the daily recruitment rate without the total
-p9 <- full_output %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = R*365, color = pft)) +
+p9 <- full_output %>%
+  rename(submodel = R, ED2 = ED2_R) %>%
+  gather(c(submodel,ED2), key = "model", value = "R") %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  arrange(desc(pft)) %>% 
+  ggplot(aes(x = as.Date(date), y = R*365, color = pft, linetype = model)) +
   #custom_line +
   geom_line() +
+  scale_y_log10() +
+  scale_linetype_manual(values = c("dashed","solid")) +
   year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
   xlab(bquote('year'))+
   labs(title = 'annual number of recruits') +
   theme_classic() +
+  #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
   adams_theme +
   scale_color_manual(values = pft.cols)
 
@@ -376,6 +399,37 @@ p9 <- full_output %>% arrange(desc(pft)) %>% ggplot( aes(x = as.Date(date), y = 
 png(paste0(path_to_this_run_output,"/13_annual_N_recruits.png"), height=5, width=8, units="in", res = 100)
 print(p9)
 dev.off()
+
+
+p9 <- full_output %>%
+  rename(submodel = R, ED2 = ED2_R) %>%
+  gather(c(submodel,ED2), key = "model", value = "R") %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  filter(model == "submodel") %>%
+  arrange(desc(pft)) %>% 
+  ggplot(aes(x = as.Date(date), y = R*365, color = pft, linetype = model)) +
+  #custom_line +
+  geom_line() +
+  #scale_y_log10() +
+  scale_linetype_manual(values = c("dashed","solid")) +
+  year_axis +
+  ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
+  xlab(bquote('year'))+
+  labs(title = 'recruitment rate') +
+  theme_classic() +
+  #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
+  adams_theme +
+  scale_color_manual(values = pft.cols)
+
+#+
+#geom_smooth(data = full_output %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), 
+#mapping = aes(x = as.Date(date), y = total_R, color = pft),
+#size = 1.8, method = "loess", span = .01, se = F) 
+
+png(paste0(path_to_this_run_output,"/13_annual_N_recruits_just_submodel.png"), height=5, width=8, units="in", res = 100)
+print(p9)
+dev.off()
+
 
 
 
@@ -403,35 +457,75 @@ print(p10)
 dev.off()
 
 
-
 #creating table of the annual number of recruits per year per PFT
 N_recs_per_year_pfts <- full_output %>% 
-  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>% 
+  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
+  mutate_at(.vars = "date", .funs = as.Date) %>%
+  left_join(bench4graph, by = c("pft","date")) %>%
   group_by(year, pft) %>% 
-  summarise(N_rec = sum(R)) 
+  summarise(submodel = sum(R),
+            ED2 = sum(ED2_R))
 
 N_recs_per_year_pfts$year <- as.Date(paste0((as.numeric(N_recs_per_year_pfts$year)+1), "-01-01"))
 
 
+############################################
+############################################
+#############################################
+################NEW GRAPHS#################
 
-Submodel_annual_rec <- ggplot() +
-  custom_line +
+
+
+Submodel_annual_rec <- N_recs_per_year_pfts %>%
+  gather(submodel:ED2, key = "model", value = "R") %>%
+  filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  #filter(model != "ED2") %>%
+  ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
+  geom_point(size = 2.5, stroke = 1, alpha = 1) +
+  geom_point(data = bench4graph %>%
+               filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
+             mapping = aes(x = date, y = BCI_obs, color = pft), size = 4) +
+  #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
+  scale_color_manual(values = pft.cols) +
+  scale_shape_manual(values = c(10,21,24)) +
+  scale_y_log10() +
   ylab(expression(paste('N recruits'," ha"^"-1"," yr"^"-1")))+
   xlab(bquote('year'))+
-  labs(title = 'Trends in Annual PFT-specific Recruitment') +
-  #geom_smooth(data = full_output %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), mapping = aes(x = as.Date(date), y = total_R*365, color = pft), size = 1.8, method = "loess", span = .1, se = F) +
-  geom_point(data = N_recs_per_year_pfts, mapping = aes(x = year, y = N_rec, color = pft), size = 8) +
-  #geom_point(data = graphable_bench_data %>% filter(date >= as.Date("2005-01-01") & date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), size = 1) +
-  #geom_segment(data = graphable_bench_data %>% filter(date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), xend = as.Date("2010-01-01"), yend = 20)+
-  #scale_linetype_manual(values = "yellow2")+
-  theme_classic() +
-  adams_theme +
-  year_axis +
-  scale_color_manual(values = pft.cols)
+  labs(title = run_name) +
+  adams_theme 
 
 png(paste0(path_to_this_run_output,"/16_Recruitment_Annual_Sums.png"), height=5, width=8, units="in", res = 100)
 print(Submodel_annual_rec)
 dev.off()
+
+
+
+
+
+
+
+
+
+
+
+# Submodel_annual_rec <- ggplot() +
+#   custom_line +
+#   ylab(expression(paste('N recruits'," ha"^"-1"," yr"^"-1")))+
+#   xlab(bquote('year'))+
+#   labs(title = 'Trends in Annual PFT-specific Recruitment') +
+#   #geom_smooth(data = full_output %>% group_by(date) %>% summarise(total_R = sum(R), pft = "total"), mapping = aes(x = as.Date(date), y = total_R*365, color = pft), size = 1.8, method = "loess", span = .1, se = F) +
+#   geom_point(data = N_recs_per_year_pfts, mapping = aes(x = year, y = N_rec, color = pft), size = 8) +
+#   #geom_point(data = graphable_bench_data %>% filter(date >= as.Date("2005-01-01") & date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), size = 1) +
+#   #geom_segment(data = graphable_bench_data %>% filter(date <= as.Date("2015-01-01")), mapping = aes(x = date, y = rec_rate, color = pft), xend = as.Date("2010-01-01"), yend = 20)+
+#   #scale_linetype_manual(values = "yellow2")+
+#   theme_classic() +
+#   adams_theme +
+#   year_axis +
+#   scale_color_manual(values = pft.cols)
+
+# png(paste0(path_to_this_run_output,"/16_Recruitment_Annual_Sums.png"), height=5, width=8, units="in", res = 100)
+# print(Submodel_annual_rec)
+# dev.off()
 
 print(paste("Finished generating output",Sys.time(), "Figures are in", path_to_this_run_output))
 

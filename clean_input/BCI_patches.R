@@ -11,74 +11,47 @@ library(lubridate)
 
 
 
+
+
+
+
+
 inputref  = paste0(driver_data_path,"BCI_Xu")
 outpath   = path_to_output
 
 patch_level_light <- tibble()
 
+for (fl in files){
+  myfile         = paste0(driver_data_path,fl) #build the names of each input file
+  mydata1        = h5file(myfile)
+  AGE            = mydata1[["AGE"]][]
+  
+  ageDF = tibble(AGE) %>% rownames_to_column(var = "patch") %>% mutate_at(.vars = "patch",.funs = as.numeric)
+  
+  pft            = mydata1[["PFT"]][]
+  paco.n         = mydata1[["PACO_N"]][]
+  
+  tmp1           = rep(1:length(paco.n), times = paco.n)
+  MMEAN_LIGHT_LEVEL = mydata1[["MMEAN_LIGHT_LEVEL"]][]
 
-
-
-
-
-
-if(no_real_patch_light == F){
-  for (fl in files){
-    
-    
-    myfile         = paste0(driver_data_path,fl) #build the names of each input file
-    mydata1        = h5file(myfile)
-    AGE            = mydata1[["AGE"]][]
-    
-    ageDF = tibble(AGE) %>% rownames_to_column(var = "patch") %>% mutate_at(.vars = "patch",.funs = as.numeric)
-    
-    pft            = mydata1[["PFT"]][]
-    paco.n         = mydata1[["PACO_N"]][]
-    
-    
-    tmp1           = rep(1:length(paco.n), times = paco.n)
-    MMEAN_LIGHT_LEVEL = mydata1[["MMEAN_LIGHT_LEVEL"]][]
-    
-    
-    num_ntiles <- 10
-    
-    if(no_real_patch_light == T){
-      num_ntiles <- num_bins
-    }
-    
-    
-    
-    temp <- tibble(patch = tmp1, light = MMEAN_LIGHT_LEVEL) %>%
-      group_by(patch) %>%
-      summarise(light_at_smallest_cohort = min(light)) %>%
-      left_join(ageDF, by = "patch") %>% #print(n= 100)
-      mutate(bin = ntile(x = AGE, n =  num_ntiles)) %>%
-      group_by(bin) %>%
-      summarise(lightZ0 = mean(light_at_smallest_cohort),
-                patch_age = mean(AGE)) %>%
-      mutate(yr = unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")), 
-             month =  unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)"))) %>%
-      mutate(dateChar = paste(yr, month, "01" ,sep = "-")) %>%
-      mutate_at(.vars = "dateChar",.funs = as.character) %>%
-      mutate(DateLubr = ymd(dateChar)) 
+ temp <- tibble(patch = tmp1, light = MMEAN_LIGHT_LEVEL) %>%
+    group_by(patch) %>%
+    summarise(light_at_smallest_cohort = min(light)) %>%
+    left_join(ageDF, by = "patch") %>% #print(n= 100)
+    mutate(bin = ntile(x = AGE, n =  num_ntiles)) %>%
+    group_by(bin) %>%
+    summarise(lightZ0 = mean(light_at_smallest_cohort),
+              patch_age = mean(AGE)) %>%
+    mutate(yr = unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")), 
+                                           month =  unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)"))) %>%
+    mutate(dateChar = paste(yr, month, "01" ,sep = "-")) %>%
+    mutate_at(.vars = "dateChar",.funs = as.character) %>%
+    mutate(DateLubr = ymd(dateChar)) 
     #ggplot(mapping = aes(x = AGE, y = light_at_smallest_cohort)) +
     #geom_point()
-    
-    patch_level_light <- rbind(temp,patch_level_light)
-  }
   
-  
-  #adding synthetic patches (i.e. ones not from ED2) with higher light (bins 11-20)
-  synthetic_patch_level_light <- patch_level_light %>%
-    mutate_at(.vars = "bin", .funs = function(x){x + 10}) %>%
-    mutate(lightZ0 = rep(lseq(from = 0.05,to = 1,length.out = num_bins),nrow(patch_level_light)/10)) %>%
-    #mutate(lightZ0 = rep(lseq(from = 0,to = 1,length.out = 20),nrow(patch_level_light)/20)) %>%
-    mutate(patch_age = 9999) 
-  
-  if(synthetic_patches == T){
-    patch_level_light <- rbind(patch_level_light, synthetic_patch_level_light)
-  }
-  
+ patch_level_light <- rbind(temp,patch_level_light)
+ 
 }
 
 
@@ -88,10 +61,21 @@ lseq <- function(from=1, to=100000, length.out=6) {
   exp(seq(log(from), log(to), length.out = length.out))
 }
 
+#adding synthetic patches (i.e. ones not from ED2) with higher light (bins 11-20)
+synthetic_patch_level_light <- patch_level_light %>%
+  mutate_at(.vars = "bin", .funs = function(x){x + 10}) %>%
+  mutate(lightZ0 = rep(lseq(from = 0.05,to = 1,length.out = 10),nrow(patch_level_light)/10)) %>%
+  #mutate(lightZ0 = rep(lseq(from = 0,to = 1,length.out = 20),nrow(patch_level_light)/20)) %>%
+  mutate(patch_age = 9999) 
 
 if(synthetic_patches == T){
+  patch_level_light <- rbind(patch_level_light, synthetic_patch_level_light)
+}
+
+
+if(no_real_patch_light == T){
   
-  lights <- lseq(from = 0.01,to = 1, length.out = num_bins)
+  lights <- lseq(from = 0.03,to = 1, length.out = num_bins)
   
   yrmonth <- tibble(
     yr = input_data1$yr,

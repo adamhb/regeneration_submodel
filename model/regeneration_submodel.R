@@ -2,11 +2,12 @@
 #source("parameter_files/parameters.R")
 
 print(paste("Running regeneration submodel",Sys.time()))
+print(paste0("Running at ",percent_light * 100,"% light"))
 
 ############functions###############
 #the probability that an individual is of reproductive status as a function of dbh (mm)
-prob_repro <- function(k = 0.0125, L = 1, size_mm, Dmax){
-  y <- L / (1 + exp(-k*(size_mm - 0.5*Dmax)))
+prob_repro <- function(k = 0.0125, size_mm, Dmax){
+  y <- 1 / (1 + exp(-k*(size_mm - 0.5*Dmax)))
   return(y)
 }
 
@@ -50,7 +51,7 @@ def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
 
 H20_mort <- function(deficit_days, pft.x){
   PFT <- pft.x
-  mort_rate <- deficit_days * P1H20[PFT] + P2H20[PFT]
+  mort_rate <- deficit_days * P1H20[PFT] #+ P2H20[PFT] P2H20 is essentially zero in the observational analysis of Engelbrecht et al. 2003
   return(mort_rate/(window.x))
 }
 
@@ -58,7 +59,8 @@ H20_mort <- function(deficit_days, pft.x){
 #light-based seedling mortality
 light_mort <- function(light = 5000000*60, seedpool.x = 750000){
   
-  pct_light <- (light / (15750113 * 90)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
+  
+  pct_light <- (light / (15750113 * 90 / 1e6)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
   
   seedlings_N <- seedpool.x / Z0_seedling[PFT]
   
@@ -71,7 +73,7 @@ light_mort <- function(light = 5000000*60, seedpool.x = 750000){
   
   Pm_yr <- 1 - exp(-Ml*3)
   
-  Pm_day <- Pm_yr / 90
+  Pm_day <- Pm_yr / 90 # why did I divide by 90 here instead of 365, check Kobe paper on this
   
   #N_mort <- Pm_day * seedlings_N
   
@@ -90,11 +92,15 @@ light_mort <- function(light = 5000000*60, seedpool.x = 750000){
 #output
 #provides the number of recruits per day
 
-rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, avg_l.x = avg_l, seedpool.x){
+rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, avg_l.x = avg_l, seedpool.x, SMP.x = avg_SMP){
   
   log10_frac_rec <- log10(a_rec.x) + b_rec.x*log10(l/avg_l) 
   
   frac_rec <- (10^log10_frac_rec) #the fraction of the seedling pool recruiting per day
+  
+  if(SMP.x < thresh.xx[PFT]){
+    frac_rec <- 0
+  }
   
   C_rec <- frac_rec * seedpool.x
   
@@ -125,7 +131,7 @@ input_data <- input_data %>%
 
 input_data <- input_data %>%
   mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
-  mutate(c_repro = e_frac * NPP * model_area) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare). Because NPP is input in units of per m2
+  #mutate(c_repro = e_frac * CgANDr * model_area) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare). Because NPP is input in units of per m2
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
   arrange(., day,pft) 
 
@@ -137,7 +143,7 @@ if(emulate_ED2 == T){
 
 if(patch_run_type != "many"){
   input_data <- input_data %>%
-  mutate(light = FSDS * percent_light / 1e6) #appears to be units of MJ at the forest canopy
+  mutate(light = FSDS * percent_light / 1e6) #this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per per day
 }
 
 if(patch_run_type == "many"){
@@ -225,15 +231,21 @@ for(PFT in pft_names){
         - ((light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
         - (input_vars$H20_mort_rate[i] * seedpool[i]) %>%
         - (seedpool[i]*background_seedling_mort[PFT]/365) %>%
-        - (rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$C_rec)
+        - (rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001),
+                    seedpool.x = seedpool[i], 
+                    SMP.x = input_vars$SMP[i])$C_rec)
       
       light_mort_rate[i+1] <- (light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i]))
       
-      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$frac_rec
+      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+                                  SMP.x = input_vars$SMP[i])$frac_rec
+    
+    
       
       
       #recruitment and litter pool dynamics
-      R[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i])$N_rec
+      R[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+                         SMP.x = input_vars$SMP[i])$N_rec
       
       N[i+1] <- N[i] %>%
         + (R[i+1])

@@ -50,8 +50,6 @@ source("parameter_files/parameters.R")
 source("clean_input/prep_driver_data_ED2_bci.R")
 
 
-
-
 #MODIFY THE INPUT DATA TO MAKE THE SOIL VERY VERY DRY
 
 dryness_multiplier <- tibble(

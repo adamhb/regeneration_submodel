@@ -1,15 +1,3 @@
-prob_repro <- function(k = 0.0125, size_mm, Dmax){
-  y <- 1 / (1 + exp(-k*(size_mm - 0.5*Dmax)))
-  return(y)
-}
-
-efrac <- function(N, co_dbh_ind, PFT){
-  N_repro <- prob_repro(size_mm = co_dbh_ind, Dmax = Dmax[PFT]) * N
-  fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * frac_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
-  return(e_frac)
-}
-
 
 #rm(list = ls())
 ###----------------------------------------------------------####
@@ -129,54 +117,32 @@ for (fl in files){
   AGB.CO.tmp0    = mydata1[["AGB_CO"]][]
   MMEAN_NPPDAILY_CO = mydata1[["MMEAN_NPPDAILY_CO"]][] #KgC per individual per year
   MMEAN_NPPSEEDS_CO = mydata1[["MMEAN_NPPSEEDS_CO"]][]
-  DBH_CO = mydata1[["DBH"]][] * 10 #convert to mm of dbh
+  DBH_CO = mydata1[["DBH"]][]
   BSEEDS_CO = mydata1[["BSEEDS_CO"]][]
   AGB.CO.tmp1    = AGB.CO.tmp0*nplant.tmp1
   AGB.CO.tmp3    = tapply(AGB.CO.tmp1,tmp1,sum)
   AGB.PFT        = sum(AGB.CO.tmp3*AREA)     #This is a sanity check to make sure the "for" loop calculation is correct.
   
-  tmp_ED2_data <- data.frame(pft_tmp = pft, 
-                             patchID = tmp1, 
-                             cohort_area = area.tmp, 
-                             nplant_per_co_m2 = nplant.tmp1,
-                             npp_co_per_ind = MMEAN_NPPDAILY_CO, 
-                             npp_seed_co_per_ind = MMEAN_NPPSEEDS_CO, 
-                             dbh_co = DBH_CO, 
-                             bseeds_co_m2 = BSEEDS_CO,
-                             agb_co_ind = AGB.CO.tmp0) %>%
-    mutate(pft = case_when(
-      pft_tmp == 2 ~ "earlydt",
-      pft_tmp == 4 ~ "latedt",
-      pft_tmp == 25 ~ "earlydi",
-      pft_tmp == 26 ~ "latedi"
-    )) %>% 
-    mutate(e_frac = base::mapply(FUN = efrac, 
-                                 N = (nplant_per_co_m2 * cohort_area * 10000),
-                                 co_dbh_ind = dbh_co, 
-                                 PFT = pft)) 
   
-  tmp_ED2_data1 <- tmp_ED2_data %>%
+  tmp_ED2_data <- data.frame(pft = pft, patchID = tmp1, cohort_area = area.tmp, nplant_per_co_m2 = nplant.tmp1,
+             npp_co_per_ind = MMEAN_NPPDAILY_CO, npp_seed_co_per_ind = MMEAN_NPPSEEDS_CO, dbh_co = DBH_CO, bseeds_co_m2 = BSEEDS_CO,
+             agb_co_ind = AGB.CO.tmp0) %>%
     mutate(nplant_per_co = nplant_per_co_m2 * cohort_area * 10000) %>%
     mutate(agb_co = agb_co_ind * nplant_per_co) %>%
     mutate(npp_co_mo = npp_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% #(NPP, gC month per m2 per cohort
     mutate(nppseed_co_mo = npp_seed_co_per_ind * 1000 * nplant_per_co / (12 * 10000)) %>% # same units as above
-    mutate(CgANDr_co_per_mo = nppseed_co_mo / 0.3) %>%
-    mutate(c_repro_co_per_mo = e_frac * CgANDr_co_per_mo) %>%
-    mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000)  #total Kg of seed per cohort on a 1 ha simulation plot
-  
-  tmp_ED2_data2 <- tmp_ED2_data1 %>%
+    mutate(bseeds_co_total = bseeds_co_m2 * cohort_area * 10000) %>% #total Kg of seed per cohort on a 1 ha simulation plot
     group_by(pft) %>%
     summarise(npp_pft_mo = sum(npp_co_mo), #g C per pft per month
               nppseed_pft_mo = sum(nppseed_co_mo),
               bseeds_pft_mo = sum(bseeds_co_total), # Kg C per pft
               dbh_pft = mean(dbh_co),
               n_per_pft = sum(nplant_per_co),
-              agb_pft = sum(agb_co),
-              c_repro_per_pft_per_mo = sum(c_repro_co_per_mo)) %>%
+              agb_pft = sum(agb_co)) %>%
     mutate(yr = unlist(str_extract_all(myfile, "(?<=-)[:digit:]{4}(?=-)")), 
            month =  unlist(str_extract(myfile, "(?<=-)[:digit:]{2}(?=-)")))
  
-  ED2_data <- rbind(ED2_data, tmp_ED2_data2)
+  ED2_data <- rbind(ED2_data, tmp_ED2_data)
   
   
   # 
@@ -209,7 +175,6 @@ ED2_data1 <- ED2_data %>%
 
 #converting to daily timestep
 ED2_data_daily <- tibble()
-PFTs <- pft_names
 for(pft.x in PFTs){
   
   df <- ED2_data1 %>% filter(pft == pft.x) 
@@ -225,7 +190,6 @@ for(pft.x in PFTs){
            bseeds_pft_mo,
            dbh_pft,
            n_per_pft,
-           c_repro_per_pft_per_mo,
            yr,
            month) %>%
     as.data.frame() %>%
@@ -237,11 +201,10 @@ for(pft.x in PFTs){
 
 ED2_data_daily1 <- ED2_data_daily %>% 
   mutate(npp_pft_day = npp_pft_mo / lubridate::days_in_month(Date),
-         nppseed_pft_day = nppseed_pft_mo / lubridate::days_in_month(Date), #npp per pft per m2 per day (gC)
-         c_repro_per_pft_per_day = c_repro_per_pft_per_mo / lubridate::days_in_month(Date)) %>% 
+       nppseed_pft_day = nppseed_pft_mo / lubridate::days_in_month(Date)) %>% #npp per pft per m2 per day (gC)
   arrange(pft,Date) %>%
-  #mutate_at(.vars = "dbh_pft", .funs = function(x){x*10}) %>% 
-  rename(date = Date, NPP = npp_pft_day, N_co = n_per_pft, dbh = dbh_pft, c_repro = c_repro_per_pft_per_day)
+  mutate_at(.vars = "dbh_pft", .funs = function(x){x*10}) %>% 
+  rename(date = Date, NPP = npp_pft_day, N_co = n_per_pft, dbh = dbh_pft)
 
 
 #up to here looks good, need to convert to a daily time step now.
@@ -329,27 +292,28 @@ ED2_data_daily2 <- ED2_data_daily1 %>% left_join(envData, by = c("yr","month"))
 #added year month here
 
 input_data <- ED2_data_daily2 %>%
-  dplyr::select(yr, month, day, pft, date, dbh, N_co, SMP, NPP, c_repro, FSDS, nppseed_pft_day) %>%
+  dplyr::select(yr, month, day, pft, date, dbh, N_co, SMP, NPP, FSDS, nppseed_pft_day) %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
   mutate_at(.vars = "day", .funs = as.numeric) %>%
-  mutate_at(.vars = "c_repro", .funs = function(x){x * model_area})
   #rename(day_of_month = day) %>%
   #rowid_to_column(var = "day") %>%
   #dplyr::select(-day_of_month) %>%
-  # mutate(pft2 = case_when(
-  #   pft == 2 ~ "earlydt",
-  #   pft == 4 ~ "latedt",
-  #   pft == 25 ~ "earlydi",
-  #   pft == 26 ~ "latedi"
-  # )) %>% dplyr::select(-pft) %>% rename(pft = pft2) #%>%
+  mutate(pft2 = case_when(
+    pft == 2 ~ "earlydt",
+    pft == 4 ~ "latedt",
+    pft == 25 ~ "earlydi",
+    pft == 26 ~ "latedi"
+  )) %>% dplyr::select(-pft) %>% rename(pft = pft2) #%>%
  #mutate_at(.vars = "dbh", .funs = function(x){x*5}) # delete this line
 
 if(patch_run_type == "many"){
   input_data1 <- input_data
 }
 
-#input_data$CgANDr <- input_data$nppseed_pft_day / 0.3
+
+
+input_data$CgANDr <- input_data$nppseed_pft_day / 0.3
 
 
 

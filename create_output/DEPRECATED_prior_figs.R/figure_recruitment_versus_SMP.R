@@ -1,5 +1,14 @@
 
 source("create_output/figure_formatting.R")
+#import benchmarking data
+bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
+bench4graph <- bench %>%
+  filter(date > start_date,
+         date < end_date) %>%
+  group_by(pft) %>%
+  summarise(R_bench = mean(rec_rate)) %>%
+  mutate(light = 3) %>%
+  mutate(model = "BCI obs.")
 
 #time stamp
 model_run_time_stamp <- Sys.time() %>% 
@@ -35,6 +44,8 @@ rec_vs_smp_full_axis <- soil_moisture_data %>%
   adams_theme +
   scale_shape_manual(values = rep(c(21,24),2)) +
   scale_color_manual(values = pft.cols) +
+  #scale_y_log10() +
+  #scale_y_continuous(limits = c(0,50)) +
   ylab(expression(paste('avg. rec. rate'," (# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab(paste0("soil matric potential (avg. over prior ",soil_moisture_period," days")) +
   #scale_y_continuous(limits = c(0,20))
