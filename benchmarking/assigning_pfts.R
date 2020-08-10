@@ -1,5 +1,5 @@
 
-create_csv_of_pfts <- F
+create_csv_of_pfts <- T
 
 path_to_benchmarking_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
@@ -10,7 +10,8 @@ load(paste0(path_to_benchmarking_data,"wsg.ctfs.Rdata"))
 load(paste0(path_to_benchmarking_data,"bci.spptable.rdata"))
 d_indices <- read.csv(paste0(path_to_benchmarking_data,"drought_indices_Engelbrecht_2007.csv"))
 harms_pft <- read.csv(paste0(path_to_benchmarking_data,"harms_habitat_associations.csv"))
-moistr_resp <- read.table(paste0(path_to_benchmarking_data,"TreeCommunityDrySeasonSpeciesResponse.txt"), sep = '\t', header = T)
+moistr_resp <- read.table(paste0(path_to_benchmarking_data,"TreeCommunityDrySeasonSpeciesResponse.txt"),
+                          sep = '\t', header = T)
 
 
 #function to convert Latin names to "sp code names"
@@ -36,15 +37,15 @@ temp <- merge(wsg.ctfs3,bci.spptable, by = "Latin")[,c(1,2,5)]
 names(temp)[3] <- "sp"
 temp[temp$Latin == "Trema integerrima",]$sp <- "tremin"
 canopy_species <- merge(as.data.frame(canopy_species_bci),temp, by = "sp") %>% na.omit(.)
-write.csv(canopy_species, "canopy_sp_pfts_9_20_2018.csv")
+#write.csv(canopy_species, "canopy_sp_pfts_9_20_2018.csv")
 
 
 
 
 #adding early versus late accoring to Powell 2018
 pft <- rep(NA, length(canopy_species$sp))
-pft[canopy_species$wsg >= 0.49] <- "late"
-pft[canopy_species$wsg < 0.49] <- "early"
+pft[canopy_species$wsg >= 0.49] <- "ST"
+pft[canopy_species$wsg < 0.49] <- "LD"
 canopy_species$pft <- pft
 
 
@@ -80,12 +81,12 @@ quantile(d_indices$d_index, probs = c(.33, .66), na.rm = T)
 
 pfts_sept_2018 <- pfts_sept_2018 %>% mutate_at(c(2:4), funs(replace(., is.na(.), 0)))
 
-pfts_sept_2018[pfts_sept_2018$d_index < 14.2 & pfts_sept_2018$d_index > 0,]$engel_dpft <- "dt"
-pfts_sept_2018[pfts_sept_2018$d_index > 33.35,]$engel_dpft <- "di"
+pfts_sept_2018[pfts_sept_2018$d_index < 14.2 & pfts_sept_2018$d_index > 0,]$engel_dpft <- "DT"
+pfts_sept_2018[pfts_sept_2018$d_index > 33.35,]$engel_dpft <- "DI"
 
-names(pfts_sept_2018)[c(5,6,8)] <- c("e_vs_l","harms_dt_vs_di", "engel_dt_vs_di")
+names(pfts_sept_2018)[c(5,6,8)] <- c("LD_vs_ST","harms_dt_vs_di", "engel_dt_vs_di")
 
-pfts_sept_2018 <- pfts_sept_2018 %>% select(Latin, sp, wsg, e_vs_l, d_index, engel_dt_vs_di, harms_dt_vs_di, Moist)
+pfts_sept_2018 <- pfts_sept_2018 %>% select(Latin, sp, wsg, LD_vs_ST, d_index, engel_dt_vs_di, harms_dt_vs_di, Moist)
 
 
 #adding the PNAS categorization
@@ -95,8 +96,8 @@ pfts_sept_2018 <- pfts_sept_2018 %>% mutate_at(c(7:8), funs(replace(., is.na(.),
 
 PNAS_dt_vs_di <- rep(0, length(pfts_sept_2018$Latin))
 
-PNAS_dt_vs_di[pfts_sept_2018$Moist < -0.0001] <- "di"
-PNAS_dt_vs_di[pfts_sept_2018$Moist > 0] <- "dt"
+PNAS_dt_vs_di[pfts_sept_2018$Moist < -0.0001] <- "DI"
+PNAS_dt_vs_di[pfts_sept_2018$Moist > 0] <- "DT"
 
 
 pfts_sept_2018$PNAS_dt_vs_di <- PNAS_dt_vs_di
@@ -127,13 +128,13 @@ pfts_sept_2018[pfts_sept_2018$dpft == 0,]$dpft <- runif(n = 9,min = 0,max = 1)
 
 change <- as.logical((is.na(as.numeric(pfts_sept_2018$dpft))*-1)+1)
 
-pfts_sept_2018$dpft[change][1:4] <- "dt"
-pfts_sept_2018$dpft[change][5:9] <- "di" 
+pfts_sept_2018$dpft[change][1:4] <- "DT"
+pfts_sept_2018$dpft[change][5:9] <- "DI" 
 
 #write.csv(pfts_sept_2018, file = paste0(path_to_benchmarking_output,"pfts_9_20_2018b.csv"))
 
 #the pft list we use in November 2018
-pfts_nov_2018 <- pfts_sept_2018 %>% mutate(pft = paste0(e_vs_l,dpft)) %>% select(Latin, sp, pft)
+pfts_nov_2018 <- pfts_sept_2018 %>% mutate(pft = paste0(LD_vs_ST,"_",dpft)) %>% select(Latin, sp, pft)
 
 
 if(create_csv_of_pfts == T){

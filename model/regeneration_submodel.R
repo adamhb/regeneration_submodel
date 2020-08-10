@@ -68,7 +68,7 @@ light_mort <- function(light = 5000000*60, seedpool.x = 750000){
   A <- P1light_mort[PFT]
   B <- P2light_mort[PFT]
   
-  ifelse((test = PFT == "latedi" | PFT == "latedt" | (PFT == "earlydi" & pct_light <= 18.98) | (PFT == "earlydt" & pct_light <= 18.98)), 
+  ifelse((test = PFT == "ST_DI" | PFT == "ST_DT" | (PFT == "LD_DI" & pct_light <= 18.98) | (PFT == "LD_DT" & pct_light <= 18.98)), 
          yes = Ml <- A * exp(-B*pct_light),
          no = Ml <- A * exp(-B*18.98))
   

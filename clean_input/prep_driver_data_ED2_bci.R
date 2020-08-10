@@ -145,11 +145,11 @@ for (fl in files){
                              bseeds_co_m2 = BSEEDS_CO,
                              agb_co_ind = AGB.CO.tmp0) %>%
     mutate(pft = case_when(
-      pft_tmp == 2 ~ "earlydt",
-      pft_tmp == 4 ~ "latedt",
-      pft_tmp == 25 ~ "earlydi",
-      pft_tmp == 26 ~ "latedi"
-    )) %>% 
+      pft_tmp == 2 ~ "LD_DT",
+      pft_tmp == 4 ~ "ST_DT",
+      pft_tmp == 25 ~ "LD_DI",
+      pft_tmp == 26 ~ "ST_DI"
+    )) %>%
     mutate(e_frac = base::mapply(FUN = efrac, 
                                  N = (nplant_per_co_m2 * cohort_area * 10000),
                                  co_dbh_ind = dbh_co, 

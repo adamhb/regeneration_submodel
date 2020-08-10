@@ -18,31 +18,34 @@ adams_theme_benchFig <- theme_minimal() + theme(plot.title = element_text(hjust 
                      axis.title.y.right = element_text (size = axis_size, color = pft.cols[2]),
                      axis.text.x = element_text (size = axis_size, colour = "black"),
                      axis.text.y = element_text (size = axis_size, colour = "black"),
-                     legend.text = element_text (size = axis_size)) 
+                     legend.text = element_text (size = axis_size),
+                     legend.spacing.x = unit(0.3, 'cm'),
+                     legend.spacing.y = unit(0.3, 'cm'), #this changes the spacing between groups of legend symbols
+                     legend.key.size = unit(0.9, "cm")) #this changes the spacing between legend symbols
 
 
 
 benchmark_fig_log <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-  rename(pftold = pft) %>%
-  mutate(pft = case_when(
-    pftold == "earlydi" ~ "LD_DI",
-    pftold == "earlydt" ~ "LD_DT",
-    pftold == "latedi" ~  "ST_DI",
-    pftold == "latedt" ~  "ST_DT"
-  )) %>% 
+  #rename(pftold = pft) %>%
+  # mutate(pft = case_when(
+  #   pftold == "earlydi" ~ "LD_DI",
+  #   pftold == "earlydt" ~ "LD_DT",
+  #   pftold == "latedi" ~  "ST_DI",
+  #   pftold == "latedt" ~  "ST_DT"
+  # )) %>% 
   #filter(model != "ED2") %>%
   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
   geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 10)) +
   geom_point(data = bench4graph %>%
-               rename(pftold = pft) %>%
-               mutate(pft = case_when(
-                 pftold == "earlydi" ~ "LD_DI",
-                 pftold == "earlydt" ~ "LD_DT",
-                 pftold == "latedi" ~  "ST_DI",
-                 pftold == "latedt" ~  "ST_DT"
-               )) %>%
+               #rename(pftold = pft) %>%
+               # mutate(pft = case_when(
+               #   pftold == "earlydi" ~ "LD_DI",
+               #   pftold == "earlydt" ~ "LD_DT",
+               #   pftold == "latedi" ~  "ST_DI",
+               #   pftold == "latedt" ~  "ST_DT"
+               # )) %>%
                filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
              mapping = aes(x = date - 80, y = BCI_obs, color = pft), size = psize+2,
              position = position_jitter(width = 1)) +

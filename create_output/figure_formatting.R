@@ -15,7 +15,9 @@ adams_theme <- theme(plot.title = element_text(hjust = 0.5, size = 20),
                      axis.title.y.right = element_text (size = 15, color = pft.cols[2]),
                      axis.text.x = element_text (size = 14, colour = "black"),
                      axis.text.y = element_text (size = 14, colour = "black"),
-                     legend.text = element_text (size = 15))
+                     legend.text = element_text (size = 15),
+                     legend.spacing.x = unit(0.5, 'cm'),
+                     legend.spacing.y = unit(0.5, 'cm'))
 
 adams_theme <- theme_minimal() + adams_theme
 

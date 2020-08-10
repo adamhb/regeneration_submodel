@@ -1,5 +1,5 @@
 #PFT parameters 
-pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 
 percent_light <- 0.02
 model_area <- 10000 #area in square meters
