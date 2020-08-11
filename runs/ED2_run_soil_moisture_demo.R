@@ -21,7 +21,7 @@ patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
 run_name <- "SMP_DEMO_2.0pct_light"
 start_date <- "2001-01-01"
-end_date <- "2023-12-31"
+end_date <- "2024-12-31"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -119,7 +119,7 @@ write.csv(summary_data, file = "temp/SMP_summary_data.csv")
 #     ED2 = mean(ED2_R)) %>%
 #   gather(submodel:ED2,key = "model",value = "R")
 # 
-source("create_output/figure_recruitment_versus_SMP_v2.R")
+
   
 
 

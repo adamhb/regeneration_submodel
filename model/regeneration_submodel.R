@@ -2,7 +2,7 @@
 #source("parameter_files/parameters.R")
 
 print(paste("Running regeneration submodel",Sys.time()))
-print(paste0("Running at ",percent_light * 100,"% light"))
+
 
 ############functions###############
 #the probability that an individual is of reproductive status as a function of dbh (mm)
@@ -144,12 +144,14 @@ if(emulate_ED2 == T){
 
 if(patch_run_type != "many"){
   input_data <- input_data %>%
-  mutate(light = FSDS * percent_light / 1e6) #this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per per day
+  mutate(light = FSDS * percent_light / 1e6)
+  print(paste0("Running at ",percent_light * 100,"% light"))#this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per per day
 }
 
 if(patch_run_type == "many"){
   input_data <- input_data %>%
     mutate(light = FSDS * lightZ0 / 1e6)
+  print(paste0("Running at ",mean(lightZ0) * 100,"% light"))
 }
 
 #str(input_data)

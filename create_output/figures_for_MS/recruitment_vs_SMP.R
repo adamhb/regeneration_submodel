@@ -36,13 +36,13 @@ rec_vs_smp <- summary_data %>%
   ggplot(mapping = aes(x = SMP_avg/1e5, y = R * 365, color = pft, shape = model)) +
   geom_point(size = 2.5, stroke = 1, alpha = 1) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0) +
-  adams_theme +
   scale_shape_manual(values = rep(c(21,24),2)) +
   scale_color_manual(values = pft.cols) +
-  scale_x_continuous(limits = c(-4,max(summary_data$SMP_avg) / 1e5)) +
+  scale_x_continuous(limits = c(-4,0)) +
   scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(1,10,100,200,300), breaks = c(1,10,100,200,300)) + 
   ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
-  xlab(paste0("mean soil matric potential (MPa)")) #+
+  xlab(paste0("mean soil matric potential (MPa)")) +
+  adams_theme #+
   
 rec_vs_smp
 

@@ -1,6 +1,7 @@
 source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
+rec.y.axis <- ylab(expression(paste('N recruits ha'^'-1','yr'^'-1')))
 
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 
