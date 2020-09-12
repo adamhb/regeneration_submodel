@@ -1,6 +1,6 @@
-from_new_data <- FALSE
+from_new_data <- TRUE
 print("creating recruitment vs. SMP figure...")
-source("create_output/figure_formatting.R")
+
 
 if(file.exists('temp/SMP_summary_data.csv') == F | from_new_data == T){
   print("need to run ED2_run_soil_moisture_demo.R")
@@ -8,17 +8,18 @@ if(file.exists('temp/SMP_summary_data.csv') == F | from_new_data == T){
 }else(print("making figure with prior run's data"))
 
 #import benchmarking data
-# bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
-# bench4graph <- bench %>%
-#   filter(date > start_date,
-#          date < end_date) %>%
-#   group_by(pft) %>%
-#   summarise(R_bench = mean(rec_rate)) %>%
-#   mutate(light = 3) %>%
-#   mutate(model = "BCI obs.")
+bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 
-#time stamp
+source('benchmarking/bci_soil_moisture_obs.R')
+source("create_output/figure_formatting.R")
 
+bench4graph <- bench %>%
+  filter(date > start_date,
+         date < end_date) %>%
+  group_by(pft) %>%
+  summarise(R_bench = mean(rec_rate)) %>%
+  mutate(SMP = Lutz.smp) %>%
+  mutate(model = "BCI obs.")
 
 summary_data <- read_csv('temp/SMP_summary_data.csv')
 
@@ -28,28 +29,33 @@ se_df <- summary_data %>%
   gather(submodel:ED2, key = "model", value = "sd") 
 
 pd <- position_dodge(0.003)
+psize <- 5
+axis_size <- 20
+title_size <- 25
 
 rec_vs_smp <- summary_data %>%
   rename(submodel = R_avg, ED2 = R_avg_ED2) %>%
   gather(c(submodel,ED2), key = "model", value = "R") %>%
   left_join(se_df, by = c("model","SMP_avg","pft")) %>%
   ggplot(mapping = aes(x = SMP_avg/1e5, y = R * 365, color = pft, shape = model)) +
-  geom_point(size = 2.5, stroke = 1, alpha = 1) +
-  geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0) +
-  scale_shape_manual(values = rep(c(21,24),2)) +
+  geom_point(size = psize, stroke = 1) +
+  geom_point(data = bench4graph, mapping = aes(x = SMP/1e5, y = R_bench, color = pft, shape = model), size = psize, stroke = 2) +
+  geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, show.legend = F) +
+  scale_shape_manual(values = c(10,21,24)) +
   scale_color_manual(values = pft.cols) +
   scale_x_continuous(limits = c(-4,0)) +
   scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(1,10,100,200,300), breaks = c(1,10,100,200,300)) + 
   ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
-  xlab(paste0("mean soil matric potential (MPa)")) +
+  xlab(paste0("20-yr mean patch-level \n soil matric potential (MPa)")) +
+  #labs(title = "Moisture-sensitive recruitment \n among patches (2% TOC light)") +
+  annotate(geom = "text", x = -3, y = 30, label = "recruitment failure \n under chronically dry conditions", size = 4) +
+  geom_segment(aes(x = -3.5, y = 20, xend = -3.5, yend = 3),
+               arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   adams_theme #+
   
-rec_vs_smp
-
 makePNG(fig = rec_vs_smp, 
         path_to_output.x = path_to_MS_figures, 
-        file_name = paste0("rec_vs_SMP_",
-                           basename(driver_data_path)))
+        file_name = "rec_vs_SMP")
 
 
 # rec_vs_smp_full_axis <- soil_moisture_data %>%

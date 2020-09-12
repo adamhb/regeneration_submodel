@@ -1,4 +1,5 @@
 source('runs/ED2_BASE.R')
+source('utils/supporting_funcs.R')
 print("making benchmarking figure...")
 
 ED2_data_for_fig <- N_recs_per_year_pfts %>%
@@ -24,10 +25,28 @@ adams_theme_benchFig <- theme_minimal() + theme(plot.title = element_text(hjust 
                      legend.key.size = unit(0.9, "cm")) #this changes the spacing between legend symbols
 
 
+bench_data <- bench4graph %>%
+  #rename(pftold = pft) %>%
+  # mutate(pft = case_when(
+  #   pftold == "earlydi" ~ "LD_DI",
+  #   pftold == "earlydt" ~ "LD_DT",
+  #   pftold == "latedi" ~  "ST_DI",
+  #   pftold == "latedt" ~  "ST_DT"
+  # )) %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  group_by(pft) %>% summarise(R = mean(BCI_obs)) %>%
+  mutate(simYr = 10, model = "BCI obs.")
+
+
 
 benchmark_fig_log <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
+  mutate(facetVar = model) %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
+  mutate(simYr = as.numeric(stringr::str_sub(year, start = 1, end = 4)) - 2000) %>%
+  #filter(model != "ED2") %>%
+  
   #rename(pftold = pft) %>%
   # mutate(pft = case_when(
   #   pftold == "earlydi" ~ "LD_DI",
@@ -36,36 +55,104 @@ benchmark_fig_log <- N_recs_per_year_pfts %>%
   #   pftold == "latedt" ~  "ST_DT"
   # )) %>% 
   #filter(model != "ED2") %>%
-  ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
-  geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 10)) +
-  geom_point(data = bench4graph %>%
-               #rename(pftold = pft) %>%
-               # mutate(pft = case_when(
-               #   pftold == "earlydi" ~ "LD_DI",
-               #   pftold == "earlydt" ~ "LD_DT",
-               #   pftold == "latedi" ~  "ST_DI",
-               #   pftold == "latedt" ~  "ST_DT"
-               # )) %>%
-               filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
-             mapping = aes(x = date - 80, y = BCI_obs, color = pft), size = psize+2,
-             position = position_jitter(width = 1)) +
+  ggplot(mapping = aes(x = simYr, y = R, color = pft, shape = model)) +
+  geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 0)) +
+  geom_point(data = bench_data,
+             mapping = aes(x = simYr, y = R, color = pft), size = psize, stroke = 2,
+             position = position_jitter(width = 0, height = 0)) +
   #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
   scale_color_manual(values = pft.cols) +
-  scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
-  scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-  scale_shape_manual(values = c(10,21,24)) +
+  #scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
+  scale_x_continuous(breaks = seq(5,20,5)) +
+  scale_y_log10(limits = c(2,305), breaks = round(lseq(from = 2, to = 300,length.out = 7)),labels = round(lseq(from = 2, to = 300,length.out = 7))) +
+  #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
+  scale_shape_manual(values = c(10,21,24)) + #21 and 24
   #scale_y_log10(labels = c(0,10,100)) +
   #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-  ylab(expression(paste("N recruits"," ha"^"-1"," yr"^"-1")))+
-  xlab(bquote('year'))+
-  labs(title = "Predicting rank order \n of PFT-specific recruitment") +
-  adams_theme_benchFig 
+  ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
+  xlab(bquote('simulation year'))+
+  #labs(title = "Predicting rank order \n of PFT-specific recruitment") +
+  adams_theme_benchFig +
+  #guides(colour = guide_legend(override.aes = list(size = 10)))+
+  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2))))
 
 benchmark_fig_log
 
-png(paste0(path_to_output,"forMS/","benchmark_fig_log.png"), height=5, width=8, units="in", res = 100)
-print(benchmark_fig_log)
-dev.off()
+#5 by 8 inches
+makePNG(fig = benchmark_fig_log, path_to_output.x = paste0(path_to_output,"forMS/"),file_name = paste0("benchmark_fig_",mult))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+benchmark_fig_linear_axis <- N_recs_per_year_pfts %>%
+  gather(submodel:ED2, key = "model", value = "R") %>%
+  mutate(facetVar = model) %>%
+  filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
+  mutate(simYr = as.numeric(stringr::str_sub(year, start = 1, end = 4)) - 2000) %>%
+  #filter(model != "ED2") %>%
+  
+  #rename(pftold = pft) %>%
+  # mutate(pft = case_when(
+  #   pftold == "earlydi" ~ "LD_DI",
+  #   pftold == "earlydt" ~ "LD_DT",
+  #   pftold == "latedi" ~  "ST_DI",
+  #   pftold == "latedt" ~  "ST_DT"
+  # )) %>% 
+  #filter(model != "ED2") %>%
+  ggplot(mapping = aes(x = simYr, y = R, color = pft, shape = model)) +
+  geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 0)) +
+  geom_point(data = bench_data,
+             mapping = aes(x = simYr, y = R, color = pft), size = psize, stroke = 2,
+             position = position_jitter(width = 0, height = 0)) +
+  #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
+  scale_color_manual(values = pft.cols) +
+  #scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
+  scale_x_continuous(breaks = seq(5,20,5)) +
+  #scale_y_log10(limits = c(2,305), breaks = round(lseq(from = 2, to = 300,length.out = 7)),labels = round(lseq(from = 2, to = 300,length.out = 7))) +
+  #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
+  scale_shape_manual(values = c(10,21,24)) + #21 and 24
+  #scale_y_log10(labels = c(0,10,100)) +
+  #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
+  ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
+  xlab(bquote('simulation year'))+
+  #labs(title = "Predicting rank order \n of PFT-specific recruitment") +
+  adams_theme_benchFig +
+  #guides(colour = guide_legend(override.aes = list(size = 10)))+
+  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2)))) +
+  facet_wrap(~facetVar)
+
+benchmark_fig_linear_axis
+
+#5 by 8 inches
+makePNG(fig = benchmark_fig_linear_axis, path_to_output.x = paste0(path_to_output,"forMS/"),file_name = paste0("benchmark_fig_linear_axis"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # benchmark_fig_sec_axis <- N_recs_per_year_pfts %>%

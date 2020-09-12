@@ -1,23 +1,8 @@
 #PFT parameters 
 pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
-
 percent_light <- 0.02
 model_area <- 10000 #area in square meters
-
-#site params and tuning params
-#tuning param
-a_rec <- rep(0.0004,4)
-names(a_rec) <- pft_names
-#site and scenario params
-#avg_precip <- 71 #precipitation in mm over two weeks (the annual average)
-avg_SMP <- -60326 #
-avg_l <- 105 #the average total solar radiation load (MJ per m2) at the forest floor over 6 months (annual average); 61 is the value that was used previously
-
-#transition from seedling to adult recruit
-#a_rec <- a_rec_default #this is the daily beta rec default from liza comitas data
-
-b_rec <- c(1.0653, 1.0653, 0.8615, 0.8615)
-names(b_rec) <- pft_names
+#avg_SMP <- -27423.26#-60326 
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 
 #these are the default parameters based off of BCI FDP data
@@ -26,12 +11,14 @@ names(Dmax) <- pft_names
 frac_repro <- c(0.1,0.1,0.1,0.1)#the fraction of NPP that gets allocated to reproduction
 names(frac_repro) <- pft_names
 seed_frac <- 0.5 #the fraction of reproductive carbon that gets allocated to seeds
+k <- 0.0125
 
-a_rec <- c(rep(coef(LDm2)[2],2),rep(coef(STm2)[2],2))
+
+a_rec <- c(4.117201e-06, 4.117201e-06, 3.154737e-06, 3.154737e-06)
 names(a_rec) <- pft_names
-b_rec <- c(rep(coef(LDm2)[3],2),rep(coef(STm2)[3],2))
+b_rec <- c(3.421052e-10,  3.421052e-10, -4.552948e-10, -4.552948e-10) 
 names(b_rec) <- pft_names
-c_rec <- c(rep(coef(LDm2)[1],2),rep(coef(STm2)[1],2))
+c_rec <- c(-3.619412e-05, -3.619412e-05,  7.320845e-05,  7.320845e-05) 
 names(c_rec) <- pft_names
 
   
@@ -40,7 +27,7 @@ decay_rate <- 0.51 #the annual decay rate of the seedbank
 #beta_emerg <- c(0.074, 0.056, 0.03617053, 0.07876964)
 a_emerg <- rep(0.5/365, 4) #the average daily fraction of the seedbank that moves to the seedling pool (annual average)
 names(a_emerg) <- pft_names
-b_emerg <- c(1.05,1.05, 1, 1) #the precipitation response parameter for emergence
+b_emerg <- c(1.05,1.05, 1, 1) #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
 
 #background_seedling_mort <- default_background_seedling_mort #see script called background_seedling_mort.R for derivation
@@ -66,8 +53,9 @@ P1light_mort <- c(0.752, 0.752, 0.0241, 0.0241)
 names(P1light_mort) <- pft_names
 P2light_mort <- c(0.1368, 0.1368, 0.0404, 0.0404)
 names(P2light_mort) <- pft_names
-Z0_seedling <- c(35,35,40,40)
-names(Z0_seedling) <- pft_names
+LD_light_thresh <- 18.98 # from Kobe
+#Z0_seedling <- c(35,35,40,40)
+#names(Z0_seedling) <- pft_names
 
 
 

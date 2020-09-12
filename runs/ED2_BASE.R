@@ -1,6 +1,7 @@
 rm(list = ls())
 gc()
 
+
 #load libraries
 library(ncdf4)
 library(ncdf.tools)
@@ -19,9 +20,9 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "SMP_BASE_fixed_c_repro"
-start_date <- "2003-01-01"
-end_date <- "2015-12-31"
+run_name <- "SMP_BASE_new_a_rec_param"
+start_date <- "2001-01-01"
+end_date <- "2020-12-31"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
@@ -30,7 +31,9 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_4.R")
+source("parameter_files/parameters_ED2_run_Aug_17.R")
+#changes from default parameter values
+percent_light <- 0.02
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -41,18 +44,6 @@ if(emulate_ED2 == T){
 
 source("model/regeneration_submodel.R")
 source("create_output/create_output.R")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

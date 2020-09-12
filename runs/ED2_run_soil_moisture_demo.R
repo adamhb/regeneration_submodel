@@ -43,7 +43,7 @@ if(patch_run_type != "many"){
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_4.R")
+source("parameter_files/parameters_ED2_run_Aug_17.R")
 source("clean_input/prep_driver_data_ED2_bci.R")
 
 SMP_orig <- input_data$SMP
@@ -61,7 +61,7 @@ for(q in 1:20){
   
   
   temp_summary <- full_output %>%
-    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 2) %>% #doesn't include 3 yr spin up in calculations
+    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 4) %>% #doesn't include 3 yr spin up in calculations
     group_by(pft,yr) %>%
     summarise(
       start_date = as.Date(min(date)),
@@ -83,6 +83,11 @@ for(q in 1:20){
     )
   
   summary_data <- rbind(summary_data,temp_summary)
+  
+  if(q == 10){
+    source("create_output/create_output.R")
+  }
+  
   print(paste("done with patch",q))
 }
 

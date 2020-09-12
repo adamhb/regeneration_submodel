@@ -21,8 +21,14 @@ path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/
   
   
   rec_data <- data.frame()
+  
   for(i in 1:7){
-    rec_data <- rbind(rec_data, data.frame(int = rep(i, length(sp.Rlist_mindbh[[i]]$R)), sp = names(sp.Rlist_mindbh[[i]]$R), R = sp.Rlist_mindbh[[i]]$R, int_length = sp.Rlist_mindbh[[i]]$time, M_rate = sp.Mlist[[i]]$rate[1:300,1]))
+    rec_data <- rbind(rec_data, data.frame(int = rep(i, length(sp.Rlist_mindbh[[i]]$R)), 
+                                           sp = names(sp.Rlist_mindbh[[i]]$R), 
+                                           R = sp.Rlist_mindbh[[i]]$R, 
+                                           int_length = sp.Rlist_mindbh[[i]]$time, 
+                                           M_rate = sp.Mlist[[i]]$rate[1:300,1],#))
+                                           a = as.numeric(sp.Alist[[i]]$abund$all[1:300])))
     print(paste("done",i))
   }
   
@@ -31,7 +37,31 @@ path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/
   rec_data <- rec_data %>% mutate(R_adjust = R / (1 - M_rate))
   
   #merging with the species for which we have pft designations
-  rec_data <- merge(pfts_nov_2018, rec_data, by = "sp") #this creates 182 species
+  rec_data <- merge(pfts_nov_2018, rec_data, by = "sp") 
+  
+  
+  
+  #pft-specific mortality rates
+  pft.level.M <- rec_data %>%
+    filter(M_rate != Inf) %>%
+    group_by(pft) %>%
+    summarise(mrate.pft = mean(M_rate, na.rm = T))
+  
+  
+ N_dead_per_year_per_pft <- rec_data %>% group_by(int,pft) %>%
+    drop_na(a,M_rate,R,R_adjust) %>%
+    filter(M_rate != Inf) %>%
+    summarise(a = sum(a)/50,
+              m = mean(M_rate),
+              r = sum(R)/50,
+              ra = sum(R_adjust)/50) %>%
+    mutate(n_dead = m*a) %>%
+    group_by(pft) %>%
+    summarise_if(.predicate = is.numeric, .funs = mean) #%>% pull(n_dead) %>% median()
+              
+  
+ 
+ 
   
   #aggregating recruits to the pft level
   rec_data <- rec_data %>% group_by(int, pft) %>%

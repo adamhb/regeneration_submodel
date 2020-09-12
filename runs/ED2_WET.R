@@ -1,5 +1,4 @@
-rm(list = ls())
-gc()
+
 
 #load libraries
 library(ncdf4)
@@ -19,7 +18,7 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "WET"
+run_name <- "WET_no_emerg_max"
 start_date <- "2001-01-01"
 end_date <- "2034-12-31"
 n_PFTs <- 4
@@ -30,7 +29,16 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_wet/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_4.R")
+source("parameter_files/parameters_ED2_run_Aug_17.R")
+
+#changes from default parameter values
+
+if(high_light == T){
+  percent_light <- 0.2
+}else{
+  percent_light <- 0.02
+}
+
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 

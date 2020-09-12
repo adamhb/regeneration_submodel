@@ -16,3 +16,4 @@ draw_key_polygon3 <- function(data, params, size) {
       linejoin = "mitre"
     ))
 }
+

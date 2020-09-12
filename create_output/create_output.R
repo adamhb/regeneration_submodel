@@ -1,7 +1,7 @@
 source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
-rec.y.axis <- ylab(expression(paste('N recruits ha'^'-1','yr'^'-1')))
+
 
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 
@@ -88,7 +88,7 @@ if(yrs > 40){
 }
 
 
-year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%Y"))
+year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%y"))
 
 
 
@@ -234,6 +234,54 @@ p4 <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_emerging, color
 png(paste0(path_to_this_run_output,"/05_frac_emerging.png"), height=5, width=8, units="in", res = 100)
 print(p4)
 dev.off()
+
+
+p4b <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_emerging, color = pft)) +
+  custom_line +
+  #smoother_line +
+  #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
+  scale_x_date(breaks = date_breaks("1 month"), 
+               labels = date_format("%b"),
+               limits = as.Date(c("2004-01-01","2005-01-01")))+
+  #year_axis +
+  ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
+  xlab(bquote('year'))+
+  labs(title = paste0("b = ",b_emerg[1])) +
+  #theme(legend.position = "none")+
+  scale_color_manual(values = pft.cols)+
+  scale_linetype_manual(values = c(1,2,1,2))+
+  theme_classic() +
+  adams_theme +
+  theme(axis.text.x = element_text(size = 12))
+
+
+
+png(paste0(path_to_this_run_output,"/05_frac_emerging_seasonal_cycle.png"), height=5, width=8, units="in", res = 100)
+print(p4b)
+dev.off()
+
+
+
+
+p4b_smp <- ggplot(data = full_output, aes(x = as.Date(date), y = SMP, color = pft)) +
+  custom_line +
+  #smoother_line +
+  #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
+  scale_x_date(breaks = date_breaks("1 month"), 
+               labels = date_format("%b"),
+               limits = as.Date(c("2004-01-01","2005-01-01")))+
+  #year_axis +
+  ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
+  xlab(bquote('year'))+
+  labs(title = paste0("b_LD = ",b_emerg[1], "a = ", a_emerg[1])) +
+  #theme(legend.position = "none")+
+  scale_color_manual(values = pft.cols)+
+  scale_linetype_manual(values = c(1,2,1,2))+
+  theme_classic() +
+  adams_theme +
+  theme(axis.text.x = element_text(size = 12))
+
+
 
 
 #graphing the seedling pool

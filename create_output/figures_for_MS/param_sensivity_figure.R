@@ -1,12 +1,13 @@
 from_new_data <- FALSE
 print("creating parameter sensitivity figure...")
-source("create_output/figure_formatting.R")
+
 
 if(file.exists('temp/param_sens_data.csv') == F | from_new_data == T){
   print("need to run parameter sensitivity analysis.R")
   source("runs/ED2_run_param_sensitivity.R")
 }else(print("making figure with prior run's data"))
 
+source("create_output/figure_formatting.R")
 
 param_sens_data <- read_csv("temp/param_sens_data.csv")
 
@@ -19,7 +20,9 @@ base_avg_rec <- param_sens_data %>%
 param_sens_data1 <- param_sens_data %>%
   group_by(param_changed) %>%
   summarise(pct_change = (abs(sum(R_avg) - base_avg_rec) / base_avg_rec * 100)) %>%
-  filter(param_changed != "dummy") %>%
+  filter(param_changed != "dummy",
+         param_changed != "Z0_seedling",
+         param_changed != "Z0") %>%
   mutate(param_changed = case_when(
     (param_changed == "window.x") ~ "H20_mort_window",
     (param_changed == "seed_frac") ~ "F_seed",

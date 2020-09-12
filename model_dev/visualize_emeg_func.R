@@ -8,6 +8,9 @@ pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 avg_SMP <- -60326 
 
 
+source2("model/")
+
+
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.x = avg_SMP, avg_SMP.x = avg_SMP, seedbank.x){
   
   

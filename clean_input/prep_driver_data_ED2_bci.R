@@ -207,7 +207,7 @@ ED2_data1 <- ED2_data %>%
   mutate(Date = ymd(date)) 
 
 
-#converting to daily timestep
+#converting ED2 data to daily timestep
 ED2_data_daily <- tibble()
 PFTs <- pft_names
 for(pft.x in PFTs){
@@ -348,6 +348,9 @@ input_data <- ED2_data_daily2 %>%
 if(patch_run_type == "many"){
   input_data1 <- input_data
 }
+
+
+avg_SMP <- mean(input_data$SMP)
 
 #input_data$CgANDr <- input_data$nppseed_pft_day / 0.3
 

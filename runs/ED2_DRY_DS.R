@@ -1,5 +1,3 @@
-rm(list = ls())
-gc()
 
 #load libraries
 library(ncdf4)
@@ -19,21 +17,25 @@ run_type <- "ED2" # keep this as ED2
 emulate_ED2 <- T
 patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
-run_name <- "SMP_ENSO"
+run_name <- "DRY_DS_60_94"
 start_date <- "2001-01-01"
-end_date <- "2034-12-01"
+end_date <- "2034-12-31"
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
+driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_dryDS/analy_dry75/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
 source("parameter_files/parameters_ED2_run_Aug_17.R")
 
 #changes from default parameter values
-percent_light <- 0.2
+if(high_light == T){
+  percent_light <- 0.2
+}else{
+  percent_light <- 0.02
+}
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -42,11 +44,20 @@ if(emulate_ED2 == T){
 }
 
 source("model/regeneration_submodel.R")
-
-
-
 source("create_output/create_output.R")
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # soil_moisture_period <- 120
@@ -75,7 +86,7 @@ source("create_output/create_output.R")
 #   gather(submodel:ED2,key = "model",value = "R")
 # 
 # source("create_output/figure_recruitment_versus_SMP.R")
-#   
+  
 
 
 

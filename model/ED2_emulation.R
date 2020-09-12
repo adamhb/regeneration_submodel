@@ -1,7 +1,7 @@
 
 C2B <- 2 #carbon to biomass ratio used in ED2
 seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
-seedling_mortality <- 0.95 # mortality rate in every (monthly?) time step taken from ./init/ed_params.f90:2089
+seedling_mortality <- 0.99 # mortality rate in every (monthly?) time step taken from ./init/ed_params.f90:2089
 
 #sapling height to dbh function
 h2dbh <- function(h, #height (m) 
