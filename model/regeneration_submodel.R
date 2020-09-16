@@ -15,7 +15,7 @@ prob_repro <- function(k.x = k, size_mm, Dmax){
 efrac <- function(N, co_dbh_ind, PFT){
   N_repro <- prob_repro(size_mm = co_dbh_ind, Dmax = Dmax[PFT]) * N
   fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * frac_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
+  e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
   return(e_frac)
 }
 
@@ -56,9 +56,8 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, S
 
 
 
-def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
-  thresh <- thresh.x
-  def <- (abs(thresh) - abs(soil_moist))*-1
+def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
+  def <- (abs(psi_crit.x) - abs(soil_moist))*-1
   no_def <- def < 0 
   def[no_def] <- 0
   deficit_days <- c()
@@ -81,9 +80,9 @@ def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
 H20_mort <- function(deficit_days, pft.x){
   PFT <- pft.x
   
-  daily_mort_rate <- a.H20[PFT] * deficit_days^2 + b.H20[PFT] * deficit_days + c.H20[PFT]
+  daily_mort_rate <- a.MH20[PFT] * deficit_days^2 + b.MH20[PFT] * deficit_days + c.MH20[PFT]
   
-  if(deficit_days < DD_thresh[PFT]){
+  if(deficit_days < MDDs_crit[PFT]){
     daily_mort_rate <- 0
   }
   
@@ -147,10 +146,10 @@ H20_mort <- function(deficit_days, pft.x){
 light_mort <- function(light = 90, seedpool.x = 1){
   
   #browser()
-  P1light_mort.x <- P1light_mort[PFT]
-  P2light_mort.x <- P2light_mort[PFT]
+  a.ML.x <- a.ML[PFT]
+  b.ML.x <- b.ML[PFT]
   
-  Pm_day <- exp(P1light_mort.x * light + P2light_mort.x)
+  Pm_day <- exp(a.ML.x * light + b.ML.x)
   
   #N_mort <- Pm_day * seedlings_N
   
@@ -198,13 +197,13 @@ light_mort <- function(light = 90, seedpool.x = 1){
 
 
 
-rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, SMP.x, seedpool.x){
+rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.x){
   # log10tr <- a_rec.x + b_rec.x*log10(l)
   # frac_rec <- 10^log10tr
   
-  frac_rec <- a_rec.x * l^b_rec.x
+  frac_rec <- a_TR.x * l^b_TR.x
    
-  if(SMP.x < thresh.xx[PFT]){
+  if(SMP.x < psi_crit[PFT]){
     frac_rec <- 0
   }
   
@@ -225,7 +224,7 @@ rec_func <- function(a_rec.x = a_rec[PFT], b_rec.x = b_rec[PFT], l, SMP.x, seedp
 #generating water deficit values for the time series
 water_def <- c()
 for(PFT in pft_names){
-  water_def <- append(water_def, def_func(soil_moist = input_data[input_data$pft == PFT,]$SMP, thresh.x = thresh.xx[PFT], window = window.x))
+  water_def <- append(water_def, def_func(soil_moist = input_data[input_data$pft == PFT,]$SMP, psi_crit.x = psi_crit[PFT], window = W_psi))
 }
 
 
@@ -325,14 +324,14 @@ for(PFT in pft_names){
      
       #seedbank dynamics
       seedbank[i+1] <- seedbank[i] %>%
-        - (decay_rate/365 * seedbank[i]) %>%
+        - (S_decay/365 * seedbank[i]) %>%
         #- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg %>%
         - emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > 28, yes = mean(input_vars$SMP[(i-13):i]), 
                                                   no = input_vars$SMP[i])), 
                      SMP.4.to.2.wks.ago = (ifelse(test= i > 28, yes = mean(input_vars$SMP[(i-27):(i-14)]), 
                                                   no = input_vars$SMP[i])),
                      seedbank.x = seedbank[i])$C_emerg %>%
-        + (seed_frac * input_vars$c_repro[i])
+        + (F_seed * input_vars$c_repro[i])
       
       #frac_emerging[i+1] <- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$frac_emerg
       
@@ -355,23 +354,23 @@ for(PFT in pft_names){
                      SMP.4.to.2.wks.ago = (ifelse(test= i > 28, yes = mean(input_vars$SMP[(i-27):(i-14)]), 
                                                   no = input_vars$SMP[i])),
                      seedbank.x = seedbank[i])$C_emerg %>%
-        - ((light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
+        - ((light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
         - (input_vars$H20_mort_rate[i] * seedpool[i]) %>%
-        - (seedpool[i]*background_seedling_mort[PFT]/365) %>%
-        - (rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001),
+        - (seedpool[i]*M_background[PFT]/365) %>%
+        - (rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001),
                     seedpool.x = seedpool[i], 
                     SMP.x = input_vars$SMP[i])$C_rec)
       
-      light_mort_rate[i+1] <- (light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i]))
+      light_mort_rate[i+1] <- (light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i]))
       
-      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
                                   SMP.x = input_vars$SMP[i])$frac_rec
     
     
       
       
       #recruitment and litter pool dynamics
-      R[i+1] <- rec_func(l = ifelse(test = i > 183, yes = sum(input_vars$light[(i-183):i] +0.0001), no = sum(input_vars$light[(i+183):i]) + 0.0001), seedpool.x = seedpool[i],
+      R[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
                          SMP.x = input_vars$SMP[i])$N_rec
       
       N[i+1] <- N[i] %>%
@@ -379,10 +378,10 @@ for(PFT in pft_names){
       
       
       litter[i+1] <- litter[i] %>%
-        + ((1-seed_frac) * input_vars$c_repro[i]) %>%
-        + (decay_rate/365 * seedbank[i]) %>%
-        + ((light_mort(light = ifelse(test = i > 90, yes = sum(input_vars$light[(i-90):i] +0.0001), no = input_vars$light[i]*90 + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
-        + (seedpool[i] * background_seedling_mort[PFT]/365) %>%
+        + ((1-F_seed) * input_vars$c_repro[i]) %>%
+        + (S_decay/365 * seedbank[i]) %>%
+        + ((light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
+        + (seedpool[i] * M_background[PFT]/365) %>%
         + (H20_mort(deficit_days = input_vars$water_def[i], pft.x = PFT)*seedpool[i]) 
       
       

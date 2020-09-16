@@ -1,4 +1,4 @@
-from_new_data <- FALSE
+from_new_data <- TRUE
 print("creating parameter sensitivity figure...")
 
 
@@ -10,6 +10,7 @@ if(file.exists('temp/param_sens_data.csv') == F | from_new_data == T){
 source("create_output/figure_formatting.R")
 
 param_sens_data <- read_csv("temp/param_sens_data.csv")
+#param_sens_data <- read_csv("temp/param_sens_data_ENSO.csv")
 
 source("create_output/figure_formatting.R")
 
@@ -20,18 +21,7 @@ base_avg_rec <- param_sens_data %>%
 param_sens_data1 <- param_sens_data %>%
   group_by(param_changed) %>%
   summarise(pct_change = (abs(sum(R_avg) - base_avg_rec) / base_avg_rec * 100)) %>%
-  filter(param_changed != "dummy",
-         param_changed != "Z0_seedling",
-         param_changed != "Z0") %>%
-  mutate(param_changed = case_when(
-    (param_changed == "window.x") ~ "H20_mort_window",
-    (param_changed == "seed_frac") ~ "F_seed",
-    (param_changed == "frac_repro") ~ "F_repro",
-    (param_changed == "decay_rate") ~ "S_decay",
-    (param_changed == "thresh.xx") ~ "moisture_threshold",
-    (param_changed == "background_seedling_mort") ~ "M_background",
-    TRUE ~ as.character(param_changed)
-  ))
+  filter(param_changed != "dummy")
 
 param_order <- param_sens_data1 %>%
   arrange(abs(pct_change)) %>% pull(param_changed)
@@ -51,3 +41,9 @@ makePNG(fig = param_sens_fig, path_to_output.x = path_to_MS_figures, file_name =
 print("FINISHED making parameter sensitivity figure")
 
 
+
+# scale_x_discrete(labels = parse(text= c("b_TR" = "b[TR]",
+#                                         "b.ML" = "b[ML]",
+#                                         "F_seed" = "F[seed]",
+#                                         "F_repro" = "F[repro]",
+#                                         "Dmax" = "Dmax"))) +

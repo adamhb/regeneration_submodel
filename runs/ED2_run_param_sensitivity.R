@@ -30,15 +30,14 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 
-#initialize dataframe
+
 dummy <- 1
-params_in_sens <- c("dummy", "Dmax", "frac_repro","k", 
-                    "seed_frac","decay_rate", "a_emerg", "b_emerg", 
-                    "background_seedling_mort", 
-                    "P1H20", "P2H20","thresh.xx", "window.x",
-                    "P1light_mort","P2light_mort","LD_light_thresh",
-                    "Z0_seedling",
-                    "a_rec", "b_rec","c_rec","Z0")
+params_in_sens <- c("dummy","Dmax", "F_repro", 
+                    "F_seed","S_decay","a_emerg", "b_emerg", 
+                    "a.ML","b.ML","W_ML", 
+                    "a.MH20","b.MH20","c.MH20","psi_crit","W_psi",
+                    "M_background",
+                    "a_TR","b_TR","W_TR")
 
 param_sens_data <- tibble()
 
@@ -53,7 +52,7 @@ for(param in params_in_sens){
   source("model/regeneration_submodel.R")
   
   tmp <- full_output %>%
-    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 3) %>% #doesn't include 3 yr spin up in calculations
+    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 4) %>% #doesn't include 4 yr spin up in calculations
     group_by(pft) %>%
     summarise(
       start_date = as.Date(min(date)),

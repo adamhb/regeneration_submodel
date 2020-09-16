@@ -2,10 +2,10 @@
 #ED2 parameters
 C2B <- 2 #carbon to biomass ratio used in ED2
 seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
-F_repro_ED2 <- 0.1
+F_repro_ED2 <- 0.3
 
 #the default value for this is 0.95
-seedling_mortality <- 0.97 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
+seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
 
 
 #the below allometric functions were taken from the ED2 code to determine the amount of carbon required to make 1 new recuirt with dbh of 1 cm

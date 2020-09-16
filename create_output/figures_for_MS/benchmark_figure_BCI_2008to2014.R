@@ -146,6 +146,7 @@ final_plot2 <- ggdraw(add_sub(final_plot, "simulation year", vpadding=grid::unit
  makePNG(fig = final_plot2, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "benchmark_fig", width = 8.5)
 
 
+PNGheight
 
 
 

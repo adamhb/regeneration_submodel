@@ -140,3 +140,10 @@ pfts_assgn %>%
 # gtable
 # 
 
+
+
+nummies <- c(1,2,3,4)
+
+modify_if(.x = nummies,.p = nummies==2,.f = function(x){x+10})
+
+

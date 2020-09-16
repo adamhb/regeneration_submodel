@@ -55,16 +55,7 @@ if(patch_run_type == "many"){
   percent_light <- mean(tmp_patch_data$lightZ0)
 }
 
-#record the params
-paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 
-                                          "a_emerg", "b_emerg", "a_rec", "b_rec", "percent_light", "thresh", "window.x", 
-                                          "seedbank_0", "seedpool_0", "litter_0", "gitCommit", "start_date", "end_date", "driver_data"), 
-                          param_vals = c(model_area, dbh.x, N_co.x, paste0(Dmax, collapse = ","),paste0(frac_repro, collapse = ","), 
-                                         seed_frac, decay_rate, paste0(a_emerg, collapse = ","), paste0(b_emerg, collapse = ","), 
-                                         paste0(a_rec, collapse = ","), paste0(b_rec, collapse = ","), 
-                                         percent_light, paste0(thresh.xx, collapse = ","), 
-                                         window.x, seedbank_0, seedpool_0, litter_0, system("git rev-parse HEAD", intern=TRUE),
-                                         start_date, end_date, basename(driver_data_path)))
+
 #put the param used for run in the output folder
 write.csv(paramsOFrun, file = paste0(path_to_this_run_output,"/params.csv"))
 
@@ -371,8 +362,8 @@ SMP_MPa_g <- ggplot(data = full_output, aes(x = as.Date(date), y = SMP/1e5)) +
   xlab(bquote('year'))+
   adams_theme +
   theme(legend.position = "none") +
-  geom_hline(yintercept = thresh.xx[1]/1e5, size = 1.8, color = "darkolivegreen2")+
-  geom_hline(yintercept = thresh.xx[2]/1e5, size = 1.8, color = "darkolivegreen4")#+
+  geom_hline(yintercept = psi_crit[1]/1e5, size = 1.8, color = "darkolivegreen2")+
+  geom_hline(yintercept = psi_crit[2]/1e5, size = 1.8, color = "darkolivegreen4")#+
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[1]/1e5), data = full_output, label = "DI threshold", color = "black") +
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[2]/1e5), data = full_output, label = "DT threshold", color = "black")
 
@@ -392,8 +383,8 @@ water_def_g <- ggplot(data = full_output, aes(x = as.Date(date), y = water_def, 
   xlab(bquote('year'))+
   adams_theme +
   #theme(legend.position = "none") +
-  geom_hline(yintercept = thresh.xx[1]/1e5)+
-  geom_hline(yintercept = thresh.xx[2]/1e5)#+
+  geom_hline(yintercept = psi_crit[1]/1e5)+
+  geom_hline(yintercept = psi_crit[2]/1e5)#+
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[1]/1e5), data = full_output, label = "DI threshold", color = "black") +
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[2]/1e5), data = full_output, label = "DT threshold", color = "black")
 

@@ -1,4 +1,4 @@
-from_new_data <- FALSE
+from_new_data <- TRUE
 if(file.exists("temp/recruitment_vs_light.csv") == FALSE | from_new_data == T){
   source('runs/ED2_run_light_demo.R')
 }else{
