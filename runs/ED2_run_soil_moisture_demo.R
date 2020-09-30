@@ -43,7 +43,7 @@ if(patch_run_type != "many"){
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_17.R")
+source("parameter_files/bci_params_default_ED2.R")
 source("clean_input/prep_driver_data_ED2_bci.R")
 
 SMP_orig <- input_data$SMP

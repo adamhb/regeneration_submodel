@@ -75,11 +75,23 @@ N_recs_per_year_pfts_high_light <- N_recs_per_year_pfts %>%
 #          fill=guide_legend(title="PFT"))
 #   
 
+smp.yr <- input_data %>%
+  filter(SMP < -2.5e5,pft == "LD_DT") %>%
+  select(yr,day,SMP,date) %>%
+  group_by(yr) %>%
+  summarise(n = 250,date = mean(date))
+
+smp.model <- c(rep("submodel",nrow(smp.yr)/2),rep("ED2",nrow(smp.yr)/2))
+
+smp.yr$model <- smp.model
+
+
 
 DRY_DS_high_light <- N_recs_per_year_pfts_high_light  %>%
-  ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
+  ggplot(mapping = aes(x = year, y = R, color = pft, shape = model), color = "blue") +
   geom_line() +
   point +
+  #geom_point(data = smp.yr, mapping = aes(x = as.Date(date),y = n),color = "red",size = 5) +
   # geom_point(data = bench4graph %>%
   #              filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
   #            mapping = aes(x = date, y = BCI_obs, color = pft), size = 4) +
@@ -95,13 +107,44 @@ DRY_DS_high_light <- N_recs_per_year_pfts_high_light  %>%
   #scale_y_log10(labels = c(0,10,100)) +
   rec.y.axis +
   facet_wrap(~model) +
-  scale_y_continuous(limits = c(50,300), breaks = c(50,100,150,200,250,300)) +
+  geom_text(x = as.Date("2002-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2007-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2009-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2014-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2016-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2021-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2023-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2028-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  geom_text(x = as.Date("2030-01-01"),  y = 200, 
+            label = "X", 
+            colour = "red") +
+  scale_y_continuous(limits = c(50,300), breaks = c(50,100,150,200,250,300))+
+                     #sec.axis = sec_axis(~ . * 270, name = "SMP")) +
   #scale_y_log10(limits = c(1,300), breaks = lseq(from = 1,to = 300,length.out = 7)) +
   xlab(bquote('simulation year'))+
   #labs(title = paste("DRY-DS",percent_light * 100,"% light")) +
   adams_theme +
   long_term_sim_theme +
   adams_guides 
+  # theme(
+  #   axis.title.y = element_text(color = "black"),
+  #   axis.title.y.right = element_text(color = "blue"))
   #theme(legend.position = "none")
 
 makePNG(fig = DRY_DS_high_light,path_to_output.x = paste0(path_to_output,"forMS/"),file_name = "DRY_DS_long_term", height = 5, width = 7, units = 'in', res = 100)

@@ -29,7 +29,7 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_wet/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_17.R")
+source("parameter_files/bci_params_default_ED2.R")
 
 #changes from default parameter values
 

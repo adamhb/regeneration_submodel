@@ -47,6 +47,7 @@ path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/
     group_by(pft) %>%
     summarise(mrate.pft = mean(M_rate, na.rm = T))
   
+  write.csv(x = pft.level.M, "temp/mort_rates.csv")
   
  N_dead_per_year_per_pft <- rec_data %>% group_by(int,pft) %>%
     drop_na(a,M_rate,R,R_adjust) %>%
@@ -59,7 +60,7 @@ path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/
     group_by(pft) %>%
     summarise_if(.predicate = is.numeric, .funs = mean) #%>% pull(n_dead) %>% median()
               
-  
+ write.csv( x = N_dead_per_year_per_pft , "temp/mort_rates.csv")
  
  
   

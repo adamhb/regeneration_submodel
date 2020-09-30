@@ -1,4 +1,4 @@
-from_new_data <- TRUE
+from_new_data <- FALSE
 print("creating recruitment vs. SMP figure...")
 
 
@@ -44,7 +44,7 @@ rec_vs_smp <- summary_data %>%
   scale_shape_manual(values = c(10,21,24)) +
   scale_color_manual(values = pft.cols) +
   scale_x_continuous(limits = c(-4,0)) +
-  scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(1,10,100,200,300), breaks = c(1,10,100,200,300)) + 
+  scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = lseq(from = 1,to = 300,length.out = 7), breaks = lseq(from = 1,to = 300,length.out = 7)) + 
   ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab(paste0("20-yr mean patch-level \n soil matric potential (MPa)")) +
   #labs(title = "Moisture-sensitive recruitment \n among patches (2% TOC light)") +

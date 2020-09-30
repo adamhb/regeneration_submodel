@@ -36,6 +36,8 @@ a_emerg <- rep(0.004, 4) #the average daily fraction of the seedbank that moves 
 names(a_emerg) <- pft_names
 b_emerg <- c(1.2,1.2, 0.8, 0.8) #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
+W_emerg <- 28
+
 
 #light-based seedling mortality
 a.ML <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
@@ -62,12 +64,20 @@ M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
 names(M_background) <- pft_names
 
 #light-based seed to sapling transition rate
-a_TR <- rep(rep(18e-6,4)) / 2 #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data
+a_TR <- rep(rep(18e-6,4)) / 2.5 #this parameter can be divided by 2.5 to have recruitment better match the BCI forest dynamics plot data
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names
 W_TR <- 183
 
+
+############################
+###default ED2 parameters###
+############################
+C2B <- 2 #carbon to biomass ratio used in ED2
+seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
+F_repro_ED2 <- 0.3
+seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
 
 
 #########################################

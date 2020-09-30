@@ -1,16 +1,33 @@
-from_new_data <- TRUE
+library(tidyverse)
+from_new_data <- FALSE
 if(file.exists("temp/recruitment_vs_light.csv") == FALSE | from_new_data == T){
   source('runs/ED2_run_light_demo.R')
 }else{
+  
+  run_type <- "ED2" # keep this as ED2
+  emulate_ED2 <- T
+  patch_run_type <- "many" #"many" #one or "many"
+  synthetic_patches <- T  # T or F
+  no_real_patch_light <- T
+  run_name <- "recruitment_vs_light"
+  start_date <- "2001-01-01"
+  end_date <- '2024-12-31'#"2034-12-31"
+  n_PFTs <- 4
+  soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
+  
+  #set path to driver data
+  driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
+  path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+  
+  #dbh.x <- 500 #dbh in mm
+  #N_co.x <- 800  #the number of individuals in a cohort
+  model_area <- 10000 #area in square meters
+  
   summary_data <- read_csv("temp/recruitment_vs_light.csv")
 }
 print("making recruitment versus light figure...")
 
-
-
-
 source("create_output/figure_formatting.R")
-
 
 #import benchmarking data
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
@@ -23,12 +40,10 @@ bench4graph <- bench %>%
   mutate(model = "BCI obs.")
 
 
-
 psize <- 5
 axis_size <- 20
 title_size <- 25
 pd <- position_dodge(0.003)
-
 
 
 se_df <-summary_data %>%
@@ -116,15 +131,16 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   geom_vline(xintercept = 46, linetype = "dotted") +
   annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
   labs(title = "submodel") +
-  geom_segment(aes(x = 1.5, y = 80, xend = 1.3, yend = 5),
-               arrow = arrow(length = unit(0.5, "cm")), color = "black") +
-  annotate(geom = "text", x = 2, y = 115, label = "LD recruitment\nfails", size = 4) +
+  #geom_segment(aes(x = 1.5, y = 80, xend = 1.3, yend = 5),
+  #             arrow = arrow(length = unit(0.5, "cm")), color = "black") +
+  #annotate(geom = "text", x = 2, y = 115, label = "LD recruitment\nfails", size = 4) +
   annotate(geom = "text", x = 3, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
   geom_segment(aes(x = 7, y = 350, xend = 25, yend = 350),
                arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #plot_title +
   #facet_wrap(~model) +
   adams_theme +
+  #geom_hline(yintercept=46,color = "red") +
   theme(legend.position = "none",
         axis.title.x = element_blank())
   # theme(#axis.text.x=element_blank()),

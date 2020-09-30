@@ -39,9 +39,12 @@ bench_data <- bench4graph %>%
 
 #write_csv(N_recs_per_year_pfts, path = "temp/outofbox_bench.csv")
 
-N_recs_per_year_pfts_OOB <- read_csv("temp/outofbox_bench.csv")
 
-benchmark_fig_log <- N_recs_per_year_pfts_OOB %>%
+##################################
+#making figure with default params
+##################################
+N_recs_per_year_default_params <- read_csv("temp/N_recs_per_yr_default_params.csv")
+benchmark_fig_log <- N_recs_per_year_default_params %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
   mutate(facetVar = model) %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
@@ -85,7 +88,11 @@ benchmark_fig_log
 #5 by 8 inches
 #makePNG(fig = benchmark_fig_log, path_to_output.x = paste0(path_to_output,"forMS/"),file_name = paste0("benchmark_fig_",mult))
 
+##################################
+#making figure with BCI params
+##################################
 
+N_recs_per_year_BCI_params <- read_csv("temp/N_recs_per_yr_bci_params.csv")
 benchmark_fig_linear_axis <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
   mutate(facetVar = model) %>%
@@ -135,7 +142,7 @@ benchmark_fig_linear_axis
 
 
 final_plot <- plot_grid(benchmark_fig_log, benchmark_fig_linear_axis,
-                         rel_widths = c(2,3),labels = "auto",label_size = 14)
+                        rel_widths = c(2,3),labels = "auto",label_size = 14)
 final_plot2 <- ggdraw(add_sub(final_plot, "simulation year", vpadding=grid::unit(1,"lines"), size = axis_size ))
 
 
@@ -143,10 +150,10 @@ final_plot2 <- ggdraw(add_sub(final_plot, "simulation year", vpadding=grid::unit
 # test_plot
 # 
 # PNGwidth <- 9
- makePNG(fig = final_plot2, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "benchmark_fig", width = 8.5)
+makePNG(fig = final_plot2, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "benchmark_fig", width = 8.5)
 
 
-PNGheight
+
 
 
 

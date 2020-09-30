@@ -53,7 +53,7 @@ WET_20_pct <- N_recs_per_year_pfts_high_light %>%
   #scale_y_log10(labels = c(0,10,100)) +
   rec.y.axis +
   facet_wrap(~facet_var) +
-  scale_y_continuous(limits = c(1,350), breaks = c(1,50,100,150,200,250,300,350)) +
+  scale_y_continuous(limits = c(100,400), breaks = c(100,50,100,150,200,250,300,350,400)) +
   #scale_y_log10() +
   xlab(bquote('simulation year'))+
   #labs(title = paste("WET",percent_light * 100,"% light")) +

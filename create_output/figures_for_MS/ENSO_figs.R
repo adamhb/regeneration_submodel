@@ -35,6 +35,7 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   scale_y_continuous(limits = c(50,350), breaks = c(50,100,150,200,250,300,350)) +
   #scale_y_log10(limits = c(0,360), breaks = lseq(from = )) +
   geom_vline(xintercept = as.Date("2010-01-01"), linetype = "dotted", alpha = 0.4, color = "red") +
+  annotate(geom = "text", x = as.Date("2005-01-01"), y = 350, label = "a", size = 8) +
   geom_vline(xintercept = as.Date("2030-01-01"), linetype = "dotted", alpha = 0.4, color = "red") +
   #scale_linetype_manual(values = c("dotted","dashed")) +
   #scale_y_log10(labels = c(0,10,100)) +
@@ -46,7 +47,7 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   long_term_sim_theme +
   adams_guides +
   #guides(shape=FALSE) +
-  theme(legend.position = c(.3,.9), 
+  theme(legend.position = c(.7,.9), 
   legend.text = element_text (size = 12),
   legend.spacing.x = unit(0.2, 'cm'),
   legend.spacing.y = unit(0.2, 'cm'), #this changes the spacing between groups of legend symbols
@@ -79,7 +80,7 @@ ENSO <- full_output %>%
   scale_linetype_manual(values = c("dashed","solid")) +
   #year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
-  scale_y_continuous(limits = c(0,360), breaks = c(0,50,100,150,200,250,300,350)) +
+  scale_y_continuous(limits = c(0,560), breaks = c(0,50,100,150,200,250,300,350,400,450,500,550)) +
   scale_x_date(limits = c(as.Date("2028-10-01"),as.Date("2029-10-01")), 
                date_breaks = "2 months", 
                labels = date_format("%b")) +
@@ -90,7 +91,7 @@ ENSO <- full_output %>%
   long_term_sim_theme +
   adams_guides +
   theme(axis.title.y=element_blank(),
-        legend.position = c(0.2,0.2),
+        legend.position = c(0.2,0.8),
         #legend.direction = "horizontal",
         legend.box.background = element_rect(colour = "black"),
         legend.text = element_text(size = 12),
