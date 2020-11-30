@@ -23,7 +23,7 @@ litter_0 = 0 # the initial mass of carbon in the litter pool (g C)
 #########################
 
 #reproductive allocation
-Dmax <- c(895, 861, 545, 557) #maximum diamater (mm)
+Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) was 895,861,545,557 before I fixed the weighted average issue
 names(Dmax) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names

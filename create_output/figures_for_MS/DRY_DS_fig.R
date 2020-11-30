@@ -83,9 +83,7 @@ smp.yr <- input_data %>%
 
 smp.model <- c(rep("submodel",nrow(smp.yr)/2),rep("ED2",nrow(smp.yr)/2))
 
-smp.yr$model <- smp.model
-
-
+#smp.yr$model <- smp.model
 
 DRY_DS_high_light <- N_recs_per_year_pfts_high_light  %>%
   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model), color = "blue") +

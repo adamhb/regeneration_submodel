@@ -6,7 +6,7 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/model_functions/"
 pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
 
 
-Dmax <- c(934.2857, 846.3182, 556.7179, 561.3786) #maximum diamater (mm), changed from 561 to 591 to jigger the line
+Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm), changed from 561 to 591 to jigger the line
 names(Dmax) <- pft_names
 
 frac_repro <- c(0.1,0.1,0.1,0.1)#the fraction of NPP that gets allocated to reproduction

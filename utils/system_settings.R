@@ -1,3 +1,6 @@
+library(tidyverse)
+path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
+
 options(dplyr.print_max = 1e3)
 
 

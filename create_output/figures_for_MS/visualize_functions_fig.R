@@ -28,7 +28,7 @@ subplot_heading_size <- 12
 #############        repro alloc        #######
 ###############################################
 
-sizes <- 1:1000 
+sizes <- 1:1300 
 pft <- c()
 
 for(i in pft_names){
@@ -45,14 +45,14 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
   ggplot(aes(x = dbh, y = F_alloc, color = PFT, linetype = PFT)) +
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
-  scale_linetype_manual(values=c("solid", "solid","solid","dashed")) +
+  scale_linetype_manual(values=c("solid", "solid","solid","solid")) +
   ylab(expression(atop(paste("fraction of ",C[g+r]),"allocated to reproduction"))) +
   #annotate(geom = "text", x = 0, y = 0.1, label = "a", size = subplot_heading_size) +
   labs(title = "Allocation to reproduction") +
   theme_minimal() +
   multipanel_theme +
         #legend.key.size = unit(2,"line")) +
-  theme(legend.position = c(0.8,0.4), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
+  theme(legend.position = c(0.2,0.8), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
   guides(color = guide_legend(override.aes = list(size=8)))
          
 #png options
