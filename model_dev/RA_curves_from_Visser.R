@@ -53,7 +53,7 @@ adams_augment <- function(d){
 RA2 <- RA %>%
   group_by(pft) %>%
   nest() %>%
-  mutate(model = map(data, ~glm(rep ~ dbh, data = .,family = "binomial"))) %>%
+  mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial"))) %>%
   ungroup() %>%
   mutate(augs = map(.x = model,.f = adams_augment)) %>%
   mutate(coefs = map(.x = model,.f = coef)) %>%
