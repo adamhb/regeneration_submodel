@@ -310,7 +310,7 @@ moisture_def_fig <- ggplot(SMP_data, aes(x = day, y = SMP/1e5)) +
 #makePNG(fig = moisture_def_fig, path_to_output.x = path_to_output, file_name = "viz_def_days")
 
 source2("runs/ED2_ENSO.R",start = 18,end = 42)
-source2("model/regeneration_submodel.R",start = 225,end = 228)
+source2("model/regeneration_submodel.R",start = 222,end = 225)
 
 H20_mort_rates <- c()
 water_defs <- seq(from = 0, to = summary(water_def)[6], length.out = 100)
