@@ -39,10 +39,20 @@ mean_annual_mort_rate <- seed_dyn %>%
 print("mean seedling mortality rate is:")
 print(mean_annual_mort_rate)
 
-print("PFT-level seedling mortality rate is:")
-print(pft_specific_annual_mort_rate)
 
 
+
+H20andlightMort <- full_output %>%
+  group_by(pft) %>%
+  summarise(light_mort_rate = mean(light_mort_rate),
+            H20_mort_rate = mean(H20_mort_rate))
+
+
+background_mort_rate <- pft_specific_annual_mort_rate$annual_mort_rate - H20andlightMort$light_mort_rate
+names(background_mort_rate) <- pft_names
+
+print("background PFT-level seedling mortality rate is:")
+print(background_mort_rate) #this agrees with rates in Metz
 
 
 

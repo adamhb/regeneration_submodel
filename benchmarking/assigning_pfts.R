@@ -1,144 +1,150 @@
-
-create_csv_of_pfts <- F
+print("assigning species to pfts")
+library(tidyverse)
+create_csv_of_pfts <- T
 
 path_to_benchmarking_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
+path_to_observations <- path_to_benchmarking_data
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
 
-#loading the census and other observational data
+#import Powell's pft assignments according to Wright's (2010) growth mortality tradeoff
+powell.pfts <- read_csv(paste0(path_to_observations,"wright_2010_powell_manipulated_pfts.csv")) %>%
+  select(GENUS, SPECIES, powell_pft) %>%
+  mutate(Latin = paste(GENUS,SPECIES)) %>%
+  mutate(powell_pft = case_when(
+    powell_pft %in% c("e","me")  ~ "LD",
+    powell_pft %in% c("l","ml")  ~ "ST"
+  )) %>%
+  select(Latin,powell_pft)
+
+#import Ruger's (2020) pft assignments
+ruger.pfts <- read_csv(paste0(path_to_observations,"ruger_pft_assignments.csv")) %>%
+  select(Genus, Species, PFT_1axis) %>%
+  mutate(Latin = paste(Genus, Species)) %>%
+  filter(PFT_1axis != 2) %>%
+  mutate(ruger_pft = case_when(
+    PFT_1axis == 1  ~ "LD",
+    PFT_1axis == 3  ~ "ST"
+  )) %>%
+  select(Latin, ruger_pft)
+
+#loading the bci census and drought tolerance data
 load(paste0(path_to_benchmarking_data,"bcifull.RData"))
-load(paste0(path_to_benchmarking_data,"wsg.ctfs.Rdata"))
+load(paste0(path_to_benchmarking_data,"wsg.ctfs.Rdata")) 
 load(paste0(path_to_benchmarking_data,"bci.spptable.rdata"))
 d_indices <- read.csv(paste0(path_to_benchmarking_data,"drought_indices_Engelbrecht_2007.csv"))
 harms_pft <- read.csv(paste0(path_to_benchmarking_data,"harms_habitat_associations.csv"))
-moistr_resp <- read.table(paste0(path_to_benchmarking_data,"TreeCommunityDrySeasonSpeciesResponse.txt"), sep = '\t', header = T)
+moistr_resp <- read.table(paste0(path_to_benchmarking_data,"TreeCommunityDrySeasonSpeciesResponse.txt"),
+                          sep = '\t', header = T)
 
 
 #function to convert Latin names to "sp code names"
 Latin2sp <- function(Latin.name){
   if(is.character(Latin.name) != T){Latin.name <- as.character(Latin.name)} 
-  
   sp <- sp_code[sp_code$Latin == Latin.name,]$sp
-  
   if(Latin.name %in% sp_code$Latin == F){return(Latin.name)}else{
     return(sp)}
 }
 
+#geting a list of wood specific gravity for all species in the bci.spptable
+wsg <- wsg.ctfs3 %>%
+  mutate(Latin = paste(genus,species)) %>%
+  rename(sp_wsg = sp) %>%
+  left_join(bci.spptable, by = "Latin") %>%
+  select(Latin,wsg,sp) %>%
+  drop_na(sp,wsg) %>%
+  distinct(Latin,sp,wsg)
 
-
-#defining canopy species by saying that any species greater than 20 cm can be a pft
-canopy_species_bci <- bci.full %>% select(sp, dbh) %>% filter(dbh > 200) %>% .$sp %>% unique(.)
-canopy_species_bci <- as.data.frame(canopy_species_bci)
+#defining canopy species according to Powell et al. 2018
+canopy_species_bci <- bci.full %>% 
+  select(sp, dbh) %>% 
+  filter(dbh > 200) %>% 
+  pull(sp) %>% unique() %>% as.data.frame()
 names(canopy_species_bci) <- "sp"
 
 
-wsg.ctfs3$Latin <- paste(wsg.ctfs3$genus, wsg.ctfs3$species)
-temp <- merge(wsg.ctfs3,bci.spptable, by = "Latin")[,c(1,2,5)]
-names(temp)[3] <- "sp"
-temp[temp$Latin == "Trema integerrima",]$sp <- "tremin"
-canopy_species <- merge(as.data.frame(canopy_species_bci),temp, by = "sp") %>% na.omit(.)
-write.csv(canopy_species, "canopy_sp_pfts_9_20_2018.csv")
+###############################################
+##assigning light demanding vs. shade tolerant#
+###############################################
+cs2 <- canopy_species_bci %>%
+  left_join(wsg, by = "sp") %>% #adding wsg to the list of canopy species
+  mutate(Latin = case_when(
+    sp == "picrla" ~ "Picramnia latifolia", #this species did not have wsg gravity data but it does have a pft assignment from Powell's assignments
+    TRUE ~ Latin)) %>%
+  drop_na(Latin) %>%
+  left_join(powell.pfts) %>%
+  left_join(ruger.pfts) %>%
+  mutate(wsg_pft = case_when(
+    wsg >= 0.49 ~ "ST",
+    wsg < 0.49 ~ "LD"
+  )) %>%
+  mutate(pft = case_when(
+    !is.na(powell_pft) ~ powell_pft,
+    is.na(powell_pft) & !is.na(ruger_pft) ~ ruger_pft,
+    is.na(powell_pft) & is.na(ruger_pft)  ~ wsg_pft
+  )) %>%
+  rename(l.pft = pft) %>%
+  select(sp,Latin,l.pft)
 
 
 
-
-#adding early versus late accoring to Powell 2018
-pft <- rep(NA, length(canopy_species$sp))
-pft[canopy_species$wsg >= 0.49] <- "late"
-pft[canopy_species$wsg < 0.49] <- "early"
-canopy_species$pft <- pft
+###############################################
+##assigning drought tolerant vs. intolerant####
+###############################################
 
 
-#adding drought tolerant versus intolerant from Engelbrecht drought indices
-
-pfts_sept_2018 <- merge(d_indices, canopy_species, all.y = T)
-
-#adding data from Harms 2001 on whats positively or negatively associated with the plateau
-
-#importing the habitat associations from the harms 2001 paper
-
+#cleaning the habitat associations data from Harms et al. 2001
 harms_pft$sp <- gsub(pattern = "\n", replacement = " ", x = harms_pft$sp)
 harms_pft$stat <- as.character(harms_pft$stat)
-names(harms_pft) <- c("Latin", "dpft")
+names(harms_pft) <- c("Latin", "harms_pft")
 
-#merging the values with the dpft data from Harmin
-pfts_sept_2018 <- merge(pfts_sept_2018, harms_pft, by = "Latin", all.x = T)
-
-
-#adding the values from the PNAS paper
-
-# importing the moisture response data from the PNAS paper
-
+#cleaning moisture response data from Condit 2013
 moistr_resp <- moistr_resp %>% select(Latin, occur, Inter, Moist, Moist.2)
 moistr_resp$Latin <- lapply(X = strsplit(x = as.character(moistr_resp$Latin), split = " (", fixed = T), `[[`, 1) %>% unlist(.)
+condit2013 <- moistr_resp %>% select(Latin,Moist) #just selecting the first order coefficient
 
 
-#merging this new list back with the pft data
-pfts_sept_2018 <- merge(pfts_sept_2018, y = moistr_resp[,c("Latin", "Moist")], by = "Latin", all.x = T)
-pfts_sept_2018$engel_dpft <- rep(0, length(pfts_sept_2018$Latin))
+#determining the 33% percentile and 66% percent of drought indices
+Dquantiles <- quantile(d_indices$d_index, probs = c(.33, .66), na.rm = T)
 
-quantile(d_indices$d_index, probs = c(.33, .66), na.rm = T)
-
-pfts_sept_2018 <- pfts_sept_2018 %>% mutate_at(c(2:4), funs(replace(., is.na(.), 0)))
-
-pfts_sept_2018[pfts_sept_2018$d_index < 14.2 & pfts_sept_2018$d_index > 0,]$engel_dpft <- "dt"
-pfts_sept_2018[pfts_sept_2018$d_index > 33.35,]$engel_dpft <- "di"
-
-names(pfts_sept_2018)[c(5,6,8)] <- c("e_vs_l","harms_dt_vs_di", "engel_dt_vs_di")
-
-pfts_sept_2018 <- pfts_sept_2018 %>% select(Latin, sp, wsg, e_vs_l, d_index, engel_dt_vs_di, harms_dt_vs_di, Moist)
-
-
-#adding the PNAS categorization
-
-quantile(pfts_sept_2018$Moist, na.rm = T)
-pfts_sept_2018 <- pfts_sept_2018 %>% mutate_at(c(7:8), funs(replace(., is.na(.), 0)))
-
-PNAS_dt_vs_di <- rep(0, length(pfts_sept_2018$Latin))
-
-PNAS_dt_vs_di[pfts_sept_2018$Moist < -0.0001] <- "di"
-PNAS_dt_vs_di[pfts_sept_2018$Moist > 0] <- "dt"
+cs3 <- cs2 %>%
+  left_join(d_indices) %>% #adding drought indices from Engelbrecht
+  mutate(engelbrecht_pft = case_when(
+          d_index  >  Dquantiles[2] ~ "DI",
+          d_index  <  Dquantiles[2] ~ "DT"
+           )) %>%
+  left_join(harms_pft) %>%
+  mutate_at(.vars = "harms_pft", .funs = toupper) %>%
+  left_join(condit2013) %>%
+  mutate(condit_pft = case_when(
+    Moist < 0 ~ "DI",
+    Moist >= 0 ~ "DT"
+  )) %>%
+  mutate(d.pft = case_when(
+    !is.na(engelbrecht_pft) ~ engelbrecht_pft,
+    is.na(engelbrecht_pft) & !is.na(harms_pft) ~ harms_pft,
+    is.na(engelbrecht_pft) & is.na(harms_pft) & !is.na(condit_pft) ~ condit_pft
+    #is.na(engelbrecht_pft) & is.na(harms_pft) & is.na(Moist) ~  c("DT","DI")[round(runif(1,1,2))]
+    #TRUE ~ c("DT","DI")[round(runif(1,1,2))]
+  )) 
 
 
-pfts_sept_2018$PNAS_dt_vs_di <- PNAS_dt_vs_di
 
+#there are 9 species for which there is no drought information
+set.seed(7)
+cs3$d.pft[is.na(cs3$d.pft)] <- c("DT","DI")[round(runif(9,1,2))] #assigning them randomly
+cs4 <- cs3 %>% mutate(pft = paste0(l.pft,"_",d.pft))
 
-#creating final dt_vs_di pfts
-dpft <- c()
-for(i in 1:length(pfts_sept_2018$Latin)){
-  if(pfts_sept_2018$engel_dt_vs_di[i] != 0){dpft[i] <- pfts_sept_2018$engel_dt_vs_di[i]}else{
-    if(pfts_sept_2018$harms_dt_vs_di != 0){dpft[i] <- pfts_sept_2018$harms_dt_vs_di[i]}else{
-      dpft[i] <- pfts_sept_2018$PNAS_dt_vs_di[i]
-    }
-  }
-}
-
-
-pfts_sept_2018$dpft <- dpft
-
-#write.csv(pfts_sept_2018, paste0(path_to_benchmarking_output,"pfts_9_20_2018a.csv"))
-
-#acknowledging the ones that we don't have drought tolerance data for
-no_drought_tolerance_data <- pfts_sept_2018[pfts_sept_2018$dpft == "0",]
-
-#randomly assigning those few trees to either drought tolerance or intolerant
-
-pfts_sept_2018[pfts_sept_2018$dpft == 0,]$dpft <- runif(n = 9,min = 0,max = 1)
-
-
-change <- as.logical((is.na(as.numeric(pfts_sept_2018$dpft))*-1)+1)
-
-pfts_sept_2018$dpft[change][1:4] <- "dt"
-pfts_sept_2018$dpft[change][5:9] <- "di" 
-
-#write.csv(pfts_sept_2018, file = paste0(path_to_benchmarking_output,"pfts_9_20_2018b.csv"))
-
-#the pft list we use in November 2018
-pfts_nov_2018 <- pfts_sept_2018 %>% mutate(pft = paste0(e_vs_l,dpft)) %>% select(Latin, sp, pft)
-
+pft_list <- cs4 %>% select(Latin, sp, pft)
 
 if(create_csv_of_pfts == T){
-  write.csv(pfts_nov_2018, file = "benchmarking/pft_assignments.csv")
+  write.csv(pft_list, file = "benchmarking/pft_assignments.csv")
 }
 
+print("finished assigning species to pfts")
+pfts_nov_2018 <- pft_list #some subsequent scripts still call the pft list by this name
+
+pft_list %>%
+  group_by(pft) %>%
+  summarise(n = length(pft))
 
 

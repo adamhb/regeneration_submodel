@@ -1,12 +1,15 @@
-prob_repro <- function(k = 0.0125, size_mm, Dmax){
-  y <- 1 / (1 + exp(-k*(size_mm - 0.5*Dmax)))
+############functions###############
+#the probability that an individual is of reproductive status as a function of dbh (mm)
+prob_repro <- function(k.x = k, size_mm, Dmax){
+  y <- 1 / (1 + exp(-k.x*(size_mm - 0.5*Dmax)))
   return(y)
 }
+
 
 efrac <- function(N, co_dbh_ind, PFT){
   N_repro <- prob_repro(size_mm = co_dbh_ind, Dmax = Dmax[PFT]) * N
   fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * frac_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
+  e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
   return(e_frac)
 }
 
@@ -145,11 +148,11 @@ for (fl in files){
                              bseeds_co_m2 = BSEEDS_CO,
                              agb_co_ind = AGB.CO.tmp0) %>%
     mutate(pft = case_when(
-      pft_tmp == 2 ~ "earlydt",
-      pft_tmp == 4 ~ "latedt",
-      pft_tmp == 25 ~ "earlydi",
-      pft_tmp == 26 ~ "latedi"
-    )) %>% 
+      pft_tmp == 2 ~ "LD_DT",
+      pft_tmp == 4 ~ "ST_DT",
+      pft_tmp == 25 ~ "LD_DI",
+      pft_tmp == 26 ~ "ST_DI"
+    )) %>%
     mutate(e_frac = base::mapply(FUN = efrac, 
                                  N = (nplant_per_co_m2 * cohort_area * 10000),
                                  co_dbh_ind = dbh_co, 
@@ -207,7 +210,7 @@ ED2_data1 <- ED2_data %>%
   mutate(Date = ymd(date)) 
 
 
-#converting to daily timestep
+#converting ED2 data to daily timestep
 ED2_data_daily <- tibble()
 PFTs <- pft_names
 for(pft.x in PFTs){
@@ -348,6 +351,9 @@ input_data <- ED2_data_daily2 %>%
 if(patch_run_type == "many"){
   input_data1 <- input_data
 }
+
+
+avg_SMP <- mean(input_data$SMP)
 
 #input_data$CgANDr <- input_data$nppseed_pft_day / 0.3
 

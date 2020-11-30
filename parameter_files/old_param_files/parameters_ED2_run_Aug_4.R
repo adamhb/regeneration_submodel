@@ -1,5 +1,5 @@
 #PFT parameters 
-pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 
 percent_light <- 0.02
 model_area <- 10000 #area in square meters
@@ -27,6 +27,14 @@ frac_repro <- c(0.1,0.1,0.1,0.1)#the fraction of NPP that gets allocated to repr
 names(frac_repro) <- pft_names
 seed_frac <- 0.5 #the fraction of reproductive carbon that gets allocated to seeds
 
+a_rec <- c(rep(coef(LDm2)[2],2),rep(coef(STm2)[2],2))
+names(a_rec) <- pft_names
+b_rec <- c(rep(coef(LDm2)[3],2),rep(coef(STm2)[3],2))
+names(b_rec) <- pft_names
+c_rec <- c(rep(coef(LDm2)[1],2),rep(coef(STm2)[1],2))
+names(c_rec) <- pft_names
+
+  
 #seed bank and emergence
 decay_rate <- 0.51 #the annual decay rate of the seedbank
 #beta_emerg <- c(0.074, 0.056, 0.03617053, 0.07876964)

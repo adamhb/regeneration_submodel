@@ -2,6 +2,7 @@ source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
 
+
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 
 bench4graph <- bench %>%
@@ -54,16 +55,7 @@ if(patch_run_type == "many"){
   percent_light <- mean(tmp_patch_data$lightZ0)
 }
 
-#record the params
-paramsOFrun <- data.frame(param_names = c("model_area", "dbh.x", "N_co.x", "Dmax", "frac_repro", "seed_frac","decay_rate", 
-                                          "a_emerg", "b_emerg", "a_rec", "b_rec", "percent_light", "thresh", "window.x", 
-                                          "seedbank_0", "seedpool_0", "litter_0", "gitCommit", "start_date", "end_date", "driver_data"), 
-                          param_vals = c(model_area, dbh.x, N_co.x, paste0(Dmax, collapse = ","),paste0(frac_repro, collapse = ","), 
-                                         seed_frac, decay_rate, paste0(a_emerg, collapse = ","), paste0(b_emerg, collapse = ","), 
-                                         paste0(a_rec, collapse = ","), paste0(b_rec, collapse = ","), 
-                                         percent_light, paste0(thresh.xx, collapse = ","), 
-                                         window.x, seedbank_0, seedpool_0, litter_0, system("git rev-parse HEAD", intern=TRUE),
-                                         start_date, end_date, basename(driver_data_path)))
+
 #put the param used for run in the output folder
 write.csv(paramsOFrun, file = paste0(path_to_this_run_output,"/params.csv"))
 
@@ -87,7 +79,7 @@ if(yrs > 40){
 }
 
 
-year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%Y"))
+year_axis <- scale_x_date(breaks = date_breaks(date_breaks_custom), labels = date_format("%y"))
 
 
 
@@ -235,6 +227,54 @@ print(p4)
 dev.off()
 
 
+p4b <- ggplot(data = full_output, aes(x = as.Date(date), y = frac_emerging, color = pft)) +
+  custom_line +
+  #smoother_line +
+  #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
+  scale_x_date(breaks = date_breaks("1 month"), 
+               labels = date_format("%b"),
+               limits = as.Date(c("2004-01-01","2005-01-01")))+
+  #year_axis +
+  ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
+  xlab(bquote('year'))+
+  labs(title = paste0("b = ",b_emerg[1])) +
+  #theme(legend.position = "none")+
+  scale_color_manual(values = pft.cols)+
+  scale_linetype_manual(values = c(1,2,1,2))+
+  theme_classic() +
+  adams_theme +
+  theme(axis.text.x = element_text(size = 12))
+
+
+
+png(paste0(path_to_this_run_output,"/05_frac_emerging_seasonal_cycle.png"), height=5, width=8, units="in", res = 100)
+print(p4b)
+dev.off()
+
+
+
+
+p4b_smp <- ggplot(data = full_output, aes(x = as.Date(date), y = SMP, color = pft)) +
+  custom_line +
+  #smoother_line +
+  #geom_smooth(size = 1.8, method = "loess", span = .01, se = F, lty = 1)+
+  scale_x_date(breaks = date_breaks("1 month"), 
+               labels = date_format("%b"),
+               limits = as.Date(c("2004-01-01","2005-01-01")))+
+  #year_axis +
+  ylab(expression(paste("frac. of seedbank emerging"," (day)"^"-1")))+
+  xlab(bquote('year'))+
+  labs(title = paste0("b_LD = ",b_emerg[1], "a = ", a_emerg[1])) +
+  #theme(legend.position = "none")+
+  scale_color_manual(values = pft.cols)+
+  scale_linetype_manual(values = c(1,2,1,2))+
+  theme_classic() +
+  adams_theme +
+  theme(axis.text.x = element_text(size = 12))
+
+
+
+
 #graphing the seedling pool
 p5 <- ggplot(data = full_output, aes(x = as.Date(date), y = seedpool, color = pft)) +
   custom_line +
@@ -322,8 +362,8 @@ SMP_MPa_g <- ggplot(data = full_output, aes(x = as.Date(date), y = SMP/1e5)) +
   xlab(bquote('year'))+
   adams_theme +
   theme(legend.position = "none") +
-  geom_hline(yintercept = thresh.xx[1]/1e5, size = 1.8, color = "darkolivegreen2")+
-  geom_hline(yintercept = thresh.xx[2]/1e5, size = 1.8, color = "darkolivegreen4")#+
+  geom_hline(yintercept = psi_crit[1]/1e5, size = 1.8, color = "darkolivegreen2")+
+  geom_hline(yintercept = psi_crit[2]/1e5, size = 1.8, color = "darkolivegreen4")#+
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[1]/1e5), data = full_output, label = "DI threshold", color = "black") +
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[2]/1e5), data = full_output, label = "DT threshold", color = "black")
 
@@ -343,8 +383,8 @@ water_def_g <- ggplot(data = full_output, aes(x = as.Date(date), y = water_def, 
   xlab(bquote('year'))+
   adams_theme +
   #theme(legend.position = "none") +
-  geom_hline(yintercept = thresh.xx[1]/1e5)+
-  geom_hline(yintercept = thresh.xx[2]/1e5)#+
+  geom_hline(yintercept = psi_crit[1]/1e5)+
+  geom_hline(yintercept = psi_crit[2]/1e5)#+
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[1]/1e5), data = full_output, label = "DI threshold", color = "black") +
 #geom_text(mapping = aes(x = median(as.Date(date)), y = thresh.xx[2]/1e5), data = full_output, label = "DT threshold", color = "black")
 

@@ -35,7 +35,7 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_4.R")
+source("parameter_files/bci_params_default_ED2.R")
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -44,8 +44,6 @@ source('model/ED2_emulation.R')
 num_bins <- 20
 
 source("clean_input/patch_level_simulations.R")
-
-
 
 summary_data <- tibble()
 for(bin_num in 1:num_bins){
@@ -60,7 +58,7 @@ for(bin_num in 1:num_bins){
 
 
  temp_summary <- full_output %>%
-    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 2) %>% #doesn't include 3 yr spin up in calculations
+    filter(as.numeric(yr) > as.numeric(substr(start_date,1,4)) + 4) %>% #doesn't include 4 yr spin up in calculations
     group_by(pft,yr) %>%
     summarise(
       start_date = as.Date(min(date)),
@@ -94,6 +92,9 @@ for(bin_num in 1:num_bins){
 #source("create_output/create_output.R") # just run this if you want to see full details of output within age bins
   
 }
+
+
+
 summary_data <- summary_data %>%
   mutate(eVl = case_when(
     pft %in% c("earlydi","earlydt") ~ "early",

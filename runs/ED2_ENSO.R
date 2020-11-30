@@ -30,10 +30,10 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
-source("parameter_files/parameters_ED2_run_Aug_4.R")
+source("parameter_files/bci_params_default_ED2.R")
 
 #changes from default parameter values
-percent_light <- 0.45
+percent_light <- 0.2
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 
@@ -42,6 +42,9 @@ if(emulate_ED2 == T){
 }
 
 source("model/regeneration_submodel.R")
+
+
+
 source("create_output/create_output.R")
   
 

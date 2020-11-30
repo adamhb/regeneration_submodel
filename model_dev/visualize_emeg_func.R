@@ -4,8 +4,11 @@ source("parameter_files/parameters_ED2_run_benchmarking.R")
 #visualize efrac
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/model_functions/"
 
-pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 avg_SMP <- -60326 
+
+
+source2("model/")
 
 
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.x = avg_SMP, avg_SMP.x = avg_SMP, seedbank.x){

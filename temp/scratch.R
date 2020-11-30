@@ -96,3 +96,54 @@ patch_level_light %>%
 pfts_assgn %>%
   filter(pft == "earlydi" | pft == "earlydt") %>% print(n = 300)
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# h <- 500
+# gridExtra::grid.arrange(F_repro_fig,viz_emerg,viz_light_mort,
+#              light_rec_fig,viz_H20_mort,moisture_def_fig, 
+#              layout_matrix = rbind(c(1,2,3),c(4,5,6)),
+#              heights = c(4,4))
+# 
+# library(gtable)
+# grob()
+# 
+# grob_Frepro <- ggplotGrob(F_repro_fig)
+# grob_Fviz <- ggplotGrob(viz_emerg)
+# grob_lightmort <- ggplotGrob(viz_light_mort)
+# 
+# q <- cbind(grob_Frepro,grob_Fviz,grob_lightmort, size = "first")
+# plot(q)
+# 
+# png(filename = "temp/test.png", width = 8,height = 8, res = 100)
+# q
+# dev.off()
+# 
+# makePNG(fig = q, path_to_output.x = path_to_output, file_name = "viz_H20_mort")
+# 
+# q$widths <- unit.pmax(grob_Frepro$widths, grob_Frepro$widths)
+# 
+# 
+# gtable
+# 
+
+
+
+nummies <- c(1,2,3,4)
+
+modify_if(.x = nummies,.p = nummies==2,.f = function(x){x+10})
+
+

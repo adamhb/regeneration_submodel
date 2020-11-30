@@ -8,11 +8,39 @@
 rm(list = rm())
 gc()
 library(tidyverse)
+library(lubridate)
 
 path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 engelbrecht_mort_data <- read_csv(paste0(path_to_observational_data,"engelbrecht_mort_data.csv"))
-pft_names <- c("earlydi", "earlydt", "latedi", "latedt")
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 
+source("benchmarking/assigning_pfts.R")
+source("create_output/figure_formatting.R")
+
+
+
+seedling_mort_over_time <- read_csv(paste0(path_to_observational_data,"engelbrecht_seedling_mort_over_time.csv"),
+                                    col_names = c("week","pct_indvls_alive","engelbrecht_id","treatment","Latin","N_start"))
+
+eng_start_date <- dmy("18-12-2000")
+
+moisture_stress_points <- read_csv(paste0(path_to_observational_data,"engelbrecht_wilt_50.csv"))
+
+moisture_stress_points_pft <- moisture_stress_points %>%
+  select(-pft) %>%
+  left_join(d_indices, by = "Latin") %>%
+  mutate(pft = case_when(
+    d_index < 14.2 ~ "DT",
+    d_index > 33.35 ~ "DI"
+  )) %>%
+  drop_na() %>%
+  group_by(pft) %>%
+  summarise(mean_wilt_50_week = mean(week_50_slight_wilt)) %>%
+  mutate(day = round(as.numeric((eng_start_date + mean_wilt_50_week * 7) - eng_start_date)))
+  
+
+
+  
 #pedotransfer function based on data provided in Engelbrecht et al. 2003
 PTF_func <- function(sgwc){
   
@@ -50,7 +78,7 @@ sgwc <- c(0.48, 0.41,0.39,0.35,0.37,0.34,0.33,0.33,0.38)
 
 #Step 3. Converting the soil moisture time series data to a matric potential (mm water suction)
 
-matric <- PTF_func(sgwc = sgwc) * 1e5
+matric <- PTF_func(sgwc = sgwc) * 1e5 #converting matric potential (Mpa) to mm of H20 suction
 #plot(weeks, matric)
 
 #creating a dataframe to store the moisture and (later) mortality data
@@ -60,16 +88,24 @@ ts_wk <- data.frame(week = weeks, matric = matric)
 ts_wk$day <- ts_wk$week*7
 
 #Wilting points. Wilting points were determined from Figure 2 in Engelbrecht and Kursar, 2003
-thresh.xx <- c(ts_wk$matric[2], ts_wk$matric[6])
-names(thresh.xx) <- c("latedi","latedt") 
+# thresh.xx <- c(ts_wk$matric[2], ts_wk$matric[6])
+# names(thresh.xx) <- c("latedi","latedt") 
 
 #Determing matric potential on each day
 matric_days <- predict(loess(matric~weeks), newdata = seq(from = 4, to = 22, length = 127))
 days <- 1:127 + 27
 ts_days <- data.frame(day = days, matric = matric_days)
+
+thresh_new <- ts_days %>% filter(day %in% c(moisture_stress_points_pft$day)) %>% pull(matric)
+names(thresh_new) <- c("DI","DT")
+
 plot(days, matric_days / 1e5, ylab = "soil matric potential (Mpa)", 
      main = "Soil moisture observations \n Engelbrecht drought experiment")
 
+
+
+
+#defining the SMP threshold at which 50% of individuals start to wilt
 
 
 #defining a function to create deficit days for the 22 week period of the experiment
@@ -86,13 +122,269 @@ def_func <- function(soil_moist, thresh.x = thresh.xx[PFT], window){
 }
 
 
-
 #plot(def_func(thresh.x = thresh.xx[PFT], soil_moist = matric_days, window = 126))
 
 #creating deficit days for the drought intolerant PFTs over the 18 week period when soil moisture was measured.
-deficit_days_DT <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedt"], window = 18*7)[126]
-deficit_days_DI <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedi"], window = 18*7)[126]
+#deficit_days_DT <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedt"], window = 18*7)[126]
+#deficit_days_DI <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedi"], window = 18*7)[126]
 
+
+# DDs <- tibble(DDs = append(def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedt"], window = 18*7),
+#                            def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedi"], window = 18*7)),
+#               pft = c(rep("DT",127),rep("DI",127)),
+#               day = rep(1:127,2))
+
+DDs <- tibble(DDs = append(def_func(soil_moist = matric_days, thresh.x = thresh_new["DT"], window = 18*7),
+                           def_func(soil_moist = matric_days, thresh.x = thresh_new["DI"], window = 18*7)),
+              pft = c(rep("DT",127),rep("DI",127)),
+              day = rep(1:127,2))
+
+
+pfts_nov_2018 <- pfts_nov_2018 %>% mutate_at(.vars = "Latin", .funs = as.character)
+
+missing_sp <- seedling_mort_over_time %>%
+  left_join(pfts_nov_2018, by = "Latin") %>% 
+  filter(is.na(pft) == T) %>%
+  pull(Latin) %>% unique()
+
+seedling_mort_over_time1 <- seedling_mort_over_time %>%
+  left_join(pfts_nov_2018, by = "Latin") %>%
+  mutate(pft=ifelse(Latin=="Pouteria unilocularis","ST_DT",pft)) %>%
+  filter(Latin != "Hymenaea courbaril") %>%
+  mutate(pft = case_when(
+    pft %in% c("ST_DI", "LD_DI") ~ "DI",
+    pft %in% c("ST_DT", "LD_DT") ~ "DT"
+  )) %>%
+  select(-sp) %>%
+  mutate_at(.vars = "week", .funs = round) %>%
+  spread(key = treatment, value = pct_indvls_alive) %>%
+  mutate(Ndry = round(N_start * (dry/100)), Nwet = round(N_start * (wet/100))) %>%
+  arrange(Latin,week) %>%
+  mutate(int_name = paste0(lag(week),"_",week)) %>%
+  mutate(int.length = (week - lag(week)) * 7) %>%
+  mutate(N.dead.dry = lag(Ndry) - Ndry,
+         N.dead.wet = lag(Nwet) - Nwet) %>%
+  mutate(mort.rate.dry = N.dead.dry / lag(Ndry),
+         mort.rate.wet = N.dead.dry / lag(Nwet)) %>%
+  mutate(mort.rate.drought = mort.rate.dry - mort.rate.wet) %>%
+  drop_na() %>%
+  mutate(M_daily_sp = mort.rate.drought / int.length) %>%
+  group_by(pft,int_name) %>%
+  summarise(M_daily = median(M_daily_sp),
+            mean_N = mean(Ndry)) %>%
+  filter(M_daily >= 0, int_name != "22_0")
+
+
+#pfts for each of Engel's species
+seedling_mort_over_time %>%
+  left_join(pfts_nov_2018, by = "Latin") %>%
+  mutate(pft=ifelse(Latin=="Pouteria unilocularis","ST_DT",pft)) %>%
+  filter(Latin != "Hymenaea courbaril") %>%
+  mutate(pft = case_when(
+    pft %in% c("ST_DI", "LD_DI") ~ "DI",
+    pft %in% c("ST_DT", "LD_DT") ~ "DT"
+  )) %>% select(engelbrecht_id, pft) %>% distinct()
+
+
+
+#getting start and end week for each interval
+x <- str_split(seedling_mort_over_time1$int_name,pattern = "_")
+starts <- unlist(lapply(x, `[[`, 1))
+ends <- unlist(lapply(x, `[[`, 2))
+eng_start_date <- dmy("18-12-2000")
+
+
+
+
+
+seedling_mort_over_time2 <- seedling_mort_over_time1 %>%
+  ungroup() %>%
+  mutate(start.week = as.numeric(starts), end.week = as.numeric(ends)) %>%
+  mutate(start_date = eng_start_date + start.week * 7,
+         end_date = eng_start_date + end.week * 7) %>%
+  mutate(st_day = as.numeric(start_date - eng_start_date),
+         end_day = as.numeric(end_date - eng_start_date)) %>%
+  arrange(start_date) %>%
+  rename(day = end_day) %>%
+  left_join(DDs, by = c("pft","day")) %>%
+  drop_na()
+
+
+
+#graph showing deficit and mortality over time
+mortANDDD_overTime <- seedling_mort_over_time2 %>%
+  ggplot(aes(day,DDs,color = pft)) +
+  geom_point(size = 5) +
+  geom_line(mapping = aes(day, M_daily * 2631856462)) +
+  geom_point(mapping = aes(day, M_daily * 2631856462)) +
+  scale_y_continuous(
+        "deficit days",
+        sec.axis = sec_axis(~ . / 2631856462, name = "daily drought-induced mortality rate")
+      ) +
+  adams_theme
+
+
+DI_mort_data <- seedling_mort_over_time2 %>%
+  filter(pft == "DI",
+         day < 120) 
+
+
+DT_mort_data <- seedling_mort_over_time2 %>%
+  filter(pft == "DT",
+         day < 120) %>%
+  mutate_at(.vars = c("M_daily","DDs"), .funs = function(x){x+0.00000000001})
+
+
+#log linear
+DT_mod_lnLin <- lm(data = DT_mort_data, formula = log(M_daily) ~ DDs)
+summary(DT_mod_lnLin)
+
+#quadratic
+DT_mod_Quad <- lm(data = DT_mort_data, formula = M_daily ~ DDs + I(DDs^2))
+summary(DT_mod_Quad)
+
+pred_data <- tibble(DDs = seq(min(DT_mort_data$DDs),max(DT_mort_data$DDs),length.out = 100))
+pred_data$logLin <- exp(predict(DT_mod_lnLin, newdata = pred_data))
+pred_data$quad <- predict(DT_mod_Quad, newdata = pred_data)
+
+
+#the quadratic relationship is best for DT
+DT_mort_data %>%
+  ggplot(aes(DDs,M_daily)) +
+  geom_point() +
+  geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
+  geom_line(data = pred_data, mapping = aes(DDs,quad), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,8e-4)) +
+  adams_theme
+
+
+DI_mort_data <- seedling_mort_over_time2 %>%
+  filter(pft == "DI",
+         day < 120) 
+
+#quadratic
+DI_mod_Quad <- lm(data = DI_mort_data, formula = M_daily ~ DDs + I(DDs^2))
+summary(DT_mod_Quad)
+
+pred_data_DI <- tibble(DDs = seq(min(DI_mort_data$DDs),max(DI_mort_data$DDs),length.out = 100))
+pred_data_DI$quad <- predict(DI_mod_Quad, newdata = pred_data_DI)
+
+DI_mort_data %>%
+  ggplot(aes(DDs,M_daily)) +
+  geom_point() +
+  #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
+  geom_line(data = pred_data_DI, mapping = aes(DDs,quad), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,0.008)) +
+  adams_theme
+
+
+
+
+a.H20 <- rep(c( coef(DI_mod_Quad)[3], coef(DT_mod_Quad)[3] ), 2)
+b.H20 <- rep(c( coef(DI_mod_Quad)[2], coef(DT_mod_Quad)[2] ), 2)
+c.H20 <- rep(c( coef(DI_mod_Quad)[1], coef(DT_mod_Quad)[1] ), 2)
+names(a.H20) <- pft_names
+names(b.H20) <- pft_names
+names(c.H20) <- pft_names
+DD_thresh <- rep(c(4.6e6,1.4e6),2)
+names(DD_thresh ) <- pft_names
+
+#defining the new H20 mortality function 
+H20_mort2 <- function(deficit_days, pft.x){
+  PFT <- pft.x
+  
+  daily_mort_rate <- a.H20[PFT] * deficit_days^2 + b.H20[PFT] * deficit_days + c.H20[PFT]
+  
+  if(deficit_days < DD_thresh[PFT]){
+    daily_mort_rate <- 0
+  }
+  
+  return(daily_mort_rate)
+}
+
+
+
+H20_mort2(deficit_days = pred_data_DI$DDs, pft.x = "LD_DI")
+
+
+#transition rate
+light_regimes <- 20:1000
+light_rec_data3 <- tibble()
+
+HMort_data <- tibble()
+for(i in pft_names){
+  for(DD in seq(from = 0, to = max(DI_mort_data$DDs), length.out = 100)){
+    
+    PFT <- i
+    temp <- tibble(
+      H20M_daily = H20_mort2(deficit_days = DD,
+                  pft.x = i),
+      pft = i,
+      DDs = DD)
+    
+    HMort_data <- rbind(HMort_data, temp)
+  }
+}
+
+
+
+HMort_data %>%
+  ggplot(aes(DDs,H20M_daily, color = pft)) +
+  geom_line()
+
+
+
+DI_mort_data %>%
+  ggplot(aes(DDs,M_daily)) +
+  geom_point() +
+  #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
+  #geom_line(data = pred_data_DI, mapping = aes(DDs,quad), linetype = "solid") +
+  geom_line(data = pred_data_DI, mapping = aes(DDs,new_mod), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,0.008)) +
+  adams_theme
+
+
+
+# #exponetial
+# DT_mod_E <- lm(data = DT_mort_data, formula = M_daily ~ I(DDs^2)) 
+# #power
+# DT_mod_P <- lm(data = DT_mort_data, formula = log(M_daily) ~ DDs)
+# summary(DT_mod)
+
+
+#create predictions 
+
+
+# DT_mort_data1 <- DT_mort_data %>%
+#   mutate(predictions = predict(object = DT_mod, newdata = DT_mort_data))
+
+DT_mort_data1 %>%
+  mutate(predictions = predict(object = DI_mod, newdata = DI_mort_data)) %>%
+  gather(c(M_daily,predictions), key = "type", value = "M") %>%
+  ggplot(aes(DDs,M,color = type)) +
+  geom_point()
+
+  
+  
+DT_mort_data %>%
+  rbind(DI_mort_data) %>%
+  rename(obs = M_daily) %>%
+  gather(c(obs,predictions),key = "type",value = "M_daily") %>%
+  filter(pft == "DI") %>%
+  ggplot(aes(DDs,M_daily,linetype = "type")) + 
+  scale_linetype_manual(values = c("dashed","solid")) +
+  #geom_point() + 
+  geom_line() +
+  adams_theme
+
+
+
+
+
+
+
+ggplot(data = DDs, mapping = aes(x = day, y = DDs, color = pft)) +
+  geom_line()
 
 dr_mort_DI <- engelbrecht_mort_data %>%
   filter(PFT == "DI") %>%
