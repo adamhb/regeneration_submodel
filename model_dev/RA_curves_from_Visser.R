@@ -64,7 +64,8 @@ total_ba_per_pft_at_bci <- pfts %>%
   drop_na(pft) %>%
   group_by(pft) %>%
   summarise(ba.gr.pft = sum(ba,na.rm = T)) %>%
-  add_column(grform = "T")
+  add_column(grform = "T") #this is just here to make the next figure work
+
 
 #fig of total ba per growth form / pft for the 196 species we cover in our PFTs at BCI 
 total_ba_per_pft_grform_at_bci <- pfts %>% 
