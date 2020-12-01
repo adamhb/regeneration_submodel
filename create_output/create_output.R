@@ -141,7 +141,7 @@ p2 <- ggplot(data = full_output, aes(x = as.Date(date), y = c_repro, color = pft
   labs(title = "C allocated to reproduction per day") +
   theme_classic() +
   adams_theme +
-  theme(legend.position = "none")+
+  theme(legend.position = "none") +
   scale_color_manual(values = pft.cols)
 
 png(paste0(path_to_this_run_output,"/03_C_for_repro.png"), height=5, width=8, units="in", res = 100)
