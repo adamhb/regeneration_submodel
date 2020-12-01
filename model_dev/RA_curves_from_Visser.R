@@ -111,12 +111,13 @@ adams_augment <- function(d){
 #logistic regression
 #pooling by PFT
 RA2 <- RA %>%
+  left_join(ba_per_sp,by = "sp") %>%
   group_by(pft) %>%
   nest() %>%
-  mutate(model = map(data, ~glm(rep ~ dbh, data = .,family = "binomial"))) %>%
+  mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial",weights = ba))) %>%
   ungroup() %>%
-  mutate(augs = map(.x = model,.f = adams_augment)) %>%
-  mutate(coefs = map(.x = model,.f = coef)) %>%
+  mutate(augs = purrr::map(.x = model,.f = adams_augment)) %>%
+  mutate(coefs = purrr::map(.x = model,.f = coef)) %>%
   unnest(cols = data,augs) %>%
   unnest(cols = coefs) %>%
   select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
@@ -125,32 +126,54 @@ RA2 <- RA %>%
 #plotting the reproductive allocation curves
 curves_allsp <- RA2 %>%
   ggplot(aes(dbh,rep_fitted,color = pft)) +
-  geom_line(size = 2) +
+  geom_line(size = 1) +
   scale_color_manual(values = pft.cols) +
+  ylab("probability reproductive") +
   adams_theme
 makePNG(fig = curves_allsp,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "curves_allsp.png")
 
-#NEED TO ADD COEFS TO TABLE BELOW
+#getting parameter values per pft
+pft_names_df <- tibble(pft = c("LD_DI", "LD_DT", "ST_DI", "ST_DT"))
+
+intercept <- pft_names_df %>%
+  left_join(RA2,by = "pft") %>%
+  distinct(pft,coefs) %>% filter(coefs < 0) %>% pull(coefs)
+
+b1 <- pft_names_df %>%
+  left_join(RA2,by = "pft") %>%
+  distinct(pft,coefs) %>% filter(coefs > 0) %>% pull(coefs)
+
+print(paste('param vals are',b1))
+
+
+
+#AS DEMONSTRATION I DID THE SAME AS ABOVE BUT BROKE OUT BY GROWTH FORM
 #logistic regression
 #pooling by PFT and growth form
 RA3 <- RA %>%
+  left_join(ba_per_sp,by = "sp") %>%
   group_by(pft,grform) %>%
   nest() %>%
-  mutate(model = map(data, ~glm(rep ~ dbh, data = .,family = "binomial"))) %>%
+  mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial", weights = ba))) %>%
   ungroup() %>%
-  mutate(augs = map(.x = model,.f = adams_augment)) %>%
+  mutate(augs = purrr::map(.x = model,.f = adams_augment)) %>%
+  mutate(coefs = purrr::map(.x = model,.f = coef)) %>%
   unnest(cols = data,augs) %>%
-  select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm) %>%
+  unnest(cols = coefs) %>%
+  select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
   rename(rep_fitted = .fitted, se = .se.fit)
 
 
 #plotting the reproductive allocation curves
 curves_by_grform <- RA3 %>%
-  ggplot(aes(dbh,rep_fitted,color = pft)) +
-  geom_line(size = 2) +
-  facet_grid(~grform,scales = "fixed") +
+  ggplot(aes(dbh,rep_fitted,color = pft,linetype = pft)) +
+  geom_line(size = 1) +
+  facet_wrap(~grform,scales = "fixed",nrow = 3) +
   scale_color_manual(values = pft.cols) +
+  scale_linetype_manual(values = c(rep("solid",3),"dashed")) +
+  ylab("probability reproductive") +
   adams_theme
+  
 makePNG(fig = curves_by_grform,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "curves_by_grform_fixed_axes.png")
 
 
