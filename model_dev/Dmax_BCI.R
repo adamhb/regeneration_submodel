@@ -1,7 +1,7 @@
 ##DMAX##
 #The Dmax is the mean of the six largest trees in each species across all censuses in BCI.
-rm(list = ls())
-gc()
+# rm(list = ls())
+# gc()
 
 library(tidyverse)
 
@@ -23,6 +23,7 @@ source("benchmarking/forestgeo_benchmark_driver_AHB.r")
 
 ba_per_sp <- tibble()
 
+#THIS ONLY LOOKS AT BA FOR 2015
 for(i in 8){
   
   ba <- sp.BAlist[[i]]$ba
@@ -33,6 +34,8 @@ for(i in 8){
   
   ba_per_sp <- rbind(ba_per_sp,tmp)
 }
+
+write_csv(ba_per_sp,path = "temp/ba_per_sp_2015.R")
 
 total_ba_per_pft <- ba_per_sp %>% 
   group_by(sp) %>% 
