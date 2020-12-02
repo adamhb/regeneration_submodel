@@ -81,6 +81,7 @@ fig_total_ba_bci <- total_ba_per_pft_grform_at_bci %>%
   geom_bar(stat="identity") +
   ylab("basal area") +
   adams_theme
+
 makePNG(fig = fig_total_ba_bci,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "fig_total_ba_bci.png")
 
 #graph showing the amount of basal area covered by the species sampled in the Visser data

@@ -41,6 +41,11 @@ harms_pft <- read.csv(paste0(path_to_benchmarking_data,"harms_habitat_associatio
 moistr_resp <- read.table(paste0(path_to_benchmarking_data,"TreeCommunityDrySeasonSpeciesResponse.txt"),
                           sep = '\t', header = T)
 
+#load the growth form data from expert opinion
+g.forms <- read_csv(paste0(path_to_observational_data,"bci50splistwrepthresh.csv")) %>%
+  rename(sp = sp6)
+
+names(g.forms)
 
 #function to convert Latin names to "sp code names"
 Latin2sp <- function(Latin.name){
@@ -63,6 +68,8 @@ wsg <- wsg.ctfs3 %>%
 canopy_species_bci <- bci.full %>% 
   select(sp, dbh) %>% 
   filter(dbh > 200) %>% 
+  left_join(g.forms, by = "sp") %>%
+  filter(grform != "U") %>%
   pull(sp) %>% unique() %>% as.data.frame()
 names(canopy_species_bci) <- "sp"
 
