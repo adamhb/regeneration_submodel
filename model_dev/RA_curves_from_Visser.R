@@ -131,7 +131,7 @@ curves_allsp <- RA2 %>%
   geom_line(size = 1) +
   scale_color_manual(values = pft.cols) +
   ylab("probability reproductive") +
-  xlab("dbh (mm)") +
+  xlab("dbh [mm]") +
   adams_theme
 makePNG(fig = curves_allsp,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "curves_allsp.png")
 
