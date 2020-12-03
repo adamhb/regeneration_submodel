@@ -209,7 +209,7 @@ makePNG(fig = curves_by_grform,path_to_output.x = paste0(path_to_output,"model_d
 
 
 
-#testing
+#testing, testing, testing
 #extra
 #figures showing mean size of reproductive and non-reproductive trees
 fig.allsp <- RA %>%
