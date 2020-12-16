@@ -1,7 +1,12 @@
 source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
+#use new benchmarking data
+new_bench <- T
 
+if(new_bench == T){
+  source("benchmarking/create_recruitment_benchmarks.R")
+}
 
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
 

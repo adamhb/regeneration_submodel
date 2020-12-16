@@ -70,6 +70,7 @@ canopy_species_bci <- bci.full %>%
   filter(dbh > 200) %>% 
   left_join(g.forms, by = "sp") %>%
   filter(grform != "U") %>%
+  #filter(grform != "U" & grform != "M") %>%
   pull(sp) %>% unique() %>% as.data.frame()
 names(canopy_species_bci) <- "sp"
 
