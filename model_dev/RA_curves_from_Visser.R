@@ -120,8 +120,8 @@ RA2 <- RA %>%
   ungroup() %>%
   mutate(augs = purrr::map(.x = model,.f = adams_augment)) %>%
   mutate(coefs = purrr::map(.x = model,.f = coef)) %>%
-  unnest(cols = data,augs) %>%
-  unnest(cols = coefs) %>%
+  tidyr::unnest(cols = data,augs) %>%
+  tidyr::unnest(cols = coefs) %>%
   select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
   rename(rep_fitted = .fitted, se = .se.fit)
 
