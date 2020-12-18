@@ -107,7 +107,7 @@ RA <- pfts %>%
 
 #defining a function to add the predictions to data frame
 adams_augment <- function(d){
-  augment(d,type.predict = "response")
+  augment(d,type.predict = "response", se.fit = T)
 }
 
 #logistic regression
