@@ -89,6 +89,9 @@ benchmark_fig_log
 #5 by 8 inches
 #makePNG(fig = benchmark_fig_log, path_to_output.x = paste0(path_to_output,"forMS/"),file_name = paste0("benchmark_fig_",mult))
 
+
+
+
 ##################################
 #making figure with BCI params
 ##################################

@@ -42,10 +42,12 @@ if(emulate_ED2 == T){
 }
 
 source("model/regeneration_submodel.R") #run the submodel
+
+
 source("create_output/create_output.R") #create submodel output
 
 
-#pick up here
+
 write_csv(N_recs_per_year_pfts,"temp/N_recs_per_yr_default_params.csv")
 
 
@@ -63,6 +65,12 @@ source("model/regeneration_submodel.R")
 source("create_output/create_output.R")
 
 write_csv(N_recs_per_year_pfts,"temp/N_recs_per_yr_bci_params.csv")
+
+
+
+
+
+
 
 
 

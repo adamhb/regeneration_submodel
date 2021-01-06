@@ -2,7 +2,7 @@ source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
 #use new benchmarking data
-new_bench <- T
+new_bench <- F
 
 if(new_bench == T){
   source("benchmarking/create_recruitment_benchmarks.R")
@@ -65,9 +65,7 @@ if(patch_run_type == "many"){
 write.csv(paramsOFrun, file = paste0(path_to_this_run_output,"/params.csv"))
 
 
-smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
-smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .05, se = F)
-smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
+
 
 
 start_yr <- substr(lubridate::ymd(as.Date(min(full_output$date))), start = 1, stop = 4)

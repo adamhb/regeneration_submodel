@@ -37,6 +37,7 @@ names(a_emerg) <- pft_names
 b_emerg <- c(1.2,1.2, 0.8, 0.8) #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
 W_emerg <- 28
+emerg_thresh <- -15744.65
 
 
 #light-based seedling mortality

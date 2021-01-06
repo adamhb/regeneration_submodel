@@ -37,12 +37,18 @@ efrac <- function(N, co_dbh_ind, PFT){
 # }
 
 
+
+
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x){
   
+  if(input_vars$SMP[i] < emerg_thresh){
+    frac_emerg <- 0
+  } else {
   log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
   
   frac_emerg <- 10^log10_frac_emerg 
   #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+  }
   
   C_emerg <- frac_emerg * seedbank.x
   

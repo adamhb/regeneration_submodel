@@ -73,6 +73,10 @@ x_axis <- scale_x_date(limits = c(as.Date("2005-01-01"),as.Date("2034-12-31")),
 
 point <- geom_point(size = 2.5, stroke = 1, alpha = 1)
 
+smooth_line <- geom_smooth(size = 1.2, method = "loess", span = .01, se = F)
+smoother_line <- geom_smooth(size = 1.8, method = "loess", span = .05, se = F)
+smooth_line_black <- geom_smooth(size = 1.8, method = "loess", span = .01, se = F, color = "black")
+
 
 
 if(exists("start_date")){
