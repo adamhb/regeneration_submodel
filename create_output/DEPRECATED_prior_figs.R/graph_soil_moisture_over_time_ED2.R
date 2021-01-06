@@ -42,7 +42,7 @@ SMP_fig <- out %>%
   adams_theme +
   ylab("Matric Pot. (MPa)")
 
-makePNG(fig = SMP_fig, file_name = "SMP_fig")
+#makePNG(fig = SMP_fig, file_name = "SMP_fig")
 
 
 
