@@ -68,7 +68,11 @@ M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
 names(M_background) <- pft_names
 
 #light-based seed to sapling transition rate
-a_TR <- rep(rep(18e-6,4)) / 2.5 #this parameter can be divided by 2.5 to have recruitment better match the BCI forest dynamics plot data
+# a_TR <- rep(rep(18e-6,4)) #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data
+# names(a_TR) <- pft_names
+# b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
+# names(b_TR) <- pft_names
+a_TR <- c(rep(1.771e-5,2),rep(4.085e-5,2)) #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names

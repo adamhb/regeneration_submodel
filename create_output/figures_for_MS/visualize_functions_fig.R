@@ -5,7 +5,7 @@ source("create_output/figure_formatting.R")
 #visualize efrac
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/forMS/"
 source2('parameter_files/bci_params_default_ED2.R',start = 1,end = 80)
-source2('model/regeneration_submodel.R',start = 9,end = 221) #source the model functions
+source2('model/regeneration_submodel.R',start = 9,end = 235) #source the model functions
 
 #png options
 PNGheight = 11/3
@@ -106,7 +106,8 @@ for(p in pft_names){
     PFT <- p
     tmp <- emerg_func(SMP.2.to.0.wks.ago = smpDF$smp2.0[i],
                       SMP.4.to.2.wks.ago = smpDF$smp4.2[i],
-                      seedbank.x = 1)$frac_emerg
+                      seedbank.x = 1,
+                      light.xx = 1e5)$frac_emerg
     emerg <- append(emerg, tmp) 
     pft <- append(pft, p) 
     #print(paste(i/nrow(smpDF) * 100,"% done"))
