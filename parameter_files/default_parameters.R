@@ -24,7 +24,10 @@ litter_0 = 0 # the initial mass of carbon in the litter pool (g C)
 
 #reproductive allocation
 Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) was 895,861,545,557 before I fixed the weighted average issue
-names(Dmax) <- pft_names
+RA_0 <- c(-3.1380, -2.4607, -2.6518, -2.6171)
+names(RA_0) <- pft_names
+RA_1 <- c(0.0058, 0.0059, 0.0042, 0.0049)
+names(RA_1) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
 F_seed <- 0.5 #the fraction of reproductive carbon that is seed
@@ -38,6 +41,10 @@ b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for 
 names(b_emerg) <- pft_names
 W_emerg <- 28
 emerg_thresh <- -15744.65
+b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
+names(b0_light_germ) <- pft_names
+b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
+names(b1_light_germ) <- pft_names
 
 #light-based seedling mortality
 a.ML <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)

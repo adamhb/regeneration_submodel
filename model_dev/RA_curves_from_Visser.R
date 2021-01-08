@@ -2,7 +2,8 @@
 #run scripts to set up environment and create pft assignments
 source('utils/system_settings.R')
 source('create_output/figure_formatting.R')
-source("benchmarking/assigning_pfts.R")
+#source("benchmarking/assigning_pfts.R")
+
 
 #load data
 RAobs <- read_csv(paste0(path_to_observational_data,"Dataset3_BCIreproduction.csv")) %>%
@@ -114,6 +115,7 @@ adams_augment <- function(d){
 #pooling by PFT
 RA2 <- RA %>%
   left_join(ba_per_sp,by = "sp") %>%
+  filter(grform == "T") %>%
   group_by(pft) %>%
   nest() %>%
   mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial",weights = ba))) %>%
@@ -146,7 +148,40 @@ b1 <- pft_names_df %>%
   left_join(RA2,by = "pft") %>%
   distinct(pft,coefs) %>% filter(coefs > 0) %>% pull(coefs)
 
-print(paste('param vals are',b1))
+b0 <- pft_names_df %>%
+  left_join(RA2,by = "pft") %>%
+  distinct(pft,coefs) %>% filter(coefs < 0) %>% pull(coefs)
+
+print('RA0:')
+print(round(b0,4))
+
+
+print('RA1:')
+print(round(b1,4))
+
+
+
+
+
+
+
+#supporting analyses below
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -180,36 +215,6 @@ curves_by_grform <- RA3 %>%
 makePNG(fig = curves_by_grform,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "curves_by_grform_fixed_axes.png")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#testing, testing, testing
 #extra
 #figures showing mean size of reproductive and non-reproductive trees
 fig.allsp <- RA %>%

@@ -6,18 +6,18 @@ print(paste("Running regeneration submodel",Sys.time()))
 
 ############functions###############
 #the probability that an individual is of reproductive status as a function of dbh (mm)
-prob_repro <- function(k.x = k, size_mm, Dmax){
-  y <- 1 / (1 + exp(-k.x*(size_mm - 0.5*Dmax)))
-  return(y)
-}
-
-
-efrac <- function(N, co_dbh_ind, PFT){
-  N_repro <- prob_repro(size_mm = co_dbh_ind, Dmax = Dmax[PFT]) * N
-  fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
-  return(e_frac)
-}
+# prob_repro <- function(k.x = k, size_mm, Dmax){
+#   y <- 1 / (1 + exp(-k.x*(size_mm - 0.5*Dmax)))
+#   return(y)
+# }
+# 
+# 
+# efrac <- function(N, co_dbh_ind, PFT){
+#   N_repro <- prob_repro(size_mm = co_dbh_ind, Dmax = Dmax[PFT]) * N
+#   fraction_reproductive <- N_repro / N
+#   e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
+#   return(e_frac)
+# }
 
 
 
@@ -37,17 +37,28 @@ efrac <- function(N, co_dbh_ind, PFT){
 # }
 
 
+light_germ <- function(light.x){
+  if(PFT %in% c("LD_DT","LD_DI")){
+    germ_rate <- b1_light_germ[PFT]*log(light.x) + b0_light_germ[PFT]
+    return(ifelse(test = germ_rate < 0, yes = 0, no = germ_rate))
+  } else {
+    return(1)
+  }
+}
 
 
-emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x){
+
+emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x, light.xx){
   
   if(input_vars$SMP[i] < emerg_thresh){
     frac_emerg <- 0
   } else {
+  
   log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
   
-  frac_emerg <- 10^log10_frac_emerg 
+  frac_emerg <- (10^log10_frac_emerg) *  light_germ(light.x = light.xx)
   #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+  
   }
   
   C_emerg <- frac_emerg * seedbank.x
@@ -237,6 +248,7 @@ input_data <- input_data %>%
   mutate(H20_mort_rate = base::mapply(FUN = H20_mort, deficit_days = input_data$water_def, pft.x = input_data$pft))
 
 
+
 input_data <- input_data %>%
   mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #adding the "effective fraction" of NPP that gets allocated to reproduction in each time step
   #mutate(c_repro = e_frac * CgANDr * model_area) %>%  #calculating the carbon allocated to reproduction in each daily timestep for the whole model area (1 hectare). Because NPP is input in units of per m2
@@ -252,7 +264,7 @@ if(emulate_ED2 == T){
 if(patch_run_type != "many"){
   input_data <- input_data %>%
   mutate(light = FSDS * percent_light / 1e6)
-  print(paste0("Running at ",percent_light * 100,"% light"))#this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per per day
+  print(paste0("Running at ",percent_light * 100,"% light"))#this converts solar radiation in Joules per day at TOC to solar radiation at the forest floor in MJ per day
 }
 
 if(patch_run_type == "many"){
@@ -330,7 +342,8 @@ for(PFT in pft_names){
                                                   no = input_vars$SMP[i])), 
                      SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
                                                   no = input_vars$SMP[i])),
-                     seedbank.x = seedbank[i])$C_emerg %>%
+                     seedbank.x = seedbank[i],
+                     light.xx = input_vars$light[i])$C_emerg %>%
         + (F_seed * input_vars$c_repro[i])
       
       #frac_emerging[i+1] <- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$frac_emerg
@@ -339,7 +352,8 @@ for(PFT in pft_names){
                                                                     no = input_vars$SMP[i])), 
                                        SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
                                                                     no = input_vars$SMP[i])),
-                                       seedbank.x = seedbank[i])$frac_emerg
+                                       seedbank.x = seedbank[i],
+                                       light.xx = input_vars$light[i])$frac_emerg
       
       #carbon_emerging[i+1] <- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg
       
@@ -353,7 +367,8 @@ for(PFT in pft_names){
                                                   no = input_vars$SMP[i])), 
                      SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
                                                   no = input_vars$SMP[i])),
-                     seedbank.x = seedbank[i])$C_emerg %>%
+                     seedbank.x = seedbank[i],
+                     light.xx = input_vars$light[i])$C_emerg %>%
         - ((light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
         - (input_vars$H20_mort_rate[i] * seedpool[i]) %>%
         - (seedpool[i]*M_background[PFT]/365) %>%
