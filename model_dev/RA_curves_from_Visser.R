@@ -115,7 +115,7 @@ adams_augment <- function(d){
 #pooling by PFT
 RA2 <- RA %>%
   left_join(ba_per_sp,by = "sp") %>%
-  filter(grform == "T") %>%
+  filter(grform == "T") %>% #CANOPY TREES ONLY
   group_by(pft) %>%
   nest() %>%
   mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial",weights = ba))) %>%

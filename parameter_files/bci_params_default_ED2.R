@@ -8,7 +8,7 @@ percent_light <- 0.02
 model_area <- 10000 #area in square meters
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 plot_input_vars <- "Y" #do you want to plot submodel output?
-
+photoblastic_germ_rate_modifier_switch <- T
 ####################
 #initial conditions#
 ####################
@@ -42,6 +42,7 @@ b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
 names(b0_light_germ) <- pft_names
 b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
 names(b1_light_germ) <- pft_names
+l_crit <- 22.3
 
 #light-based seedling mortality
 a.ML <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)

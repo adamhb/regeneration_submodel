@@ -8,6 +8,7 @@ percent_light <- 0.02
 model_area <- 10000 #area in square meters
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 plot_input_vars <- "Y" #do you want to plot submodel output?
+photoblastic_germ_rate_modifier_switch <- F
 
 ####################
 #initial conditions#
@@ -30,7 +31,7 @@ RA_1 <- c(0.0058, 0.0059, 0.0042, 0.0049)
 names(RA_1) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
-F_seed <- 0.5 #the fraction of reproductive carbon that is seed
+F_seed <- 0.5 * 0.5 #the fraction of reproductive carbon that is seed
 k <- 0.0125 #shape parameter relating dbh to reproductive probability
 
 #seed bank dynamics
@@ -45,6 +46,7 @@ b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
 names(b0_light_germ) <- pft_names
 b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
 names(b1_light_germ) <- pft_names
+l_crit <- 22.3
 
 #light-based seedling mortality
 a.ML <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)

@@ -146,7 +146,7 @@ benchmark_fig_linear_axis
 
 
 final_plot <- plot_grid(benchmark_fig_log, benchmark_fig_linear_axis,
-                        rel_widths = c(2,3),labels = "auto",label_size = 14)
+                        rel_widths = c(2,3), labels = c("(a)","(b)"), label_size = 14)
 final_plot2 <- ggdraw(add_sub(final_plot, "simulation year", vpadding=grid::unit(1,"lines"), size = axis_size ))
 
 

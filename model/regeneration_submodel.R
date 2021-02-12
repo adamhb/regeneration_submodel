@@ -37,11 +37,21 @@ print(paste("Running regeneration submodel",Sys.time()))
 # }
 
 
-light_germ <- function(light.x){
-  if(PFT %in% c("LD_DT","LD_DI")){
-    germ_rate <- b1_light_germ[PFT]*log(light.x) + b0_light_germ[PFT]
-    return(ifelse(test = germ_rate < 0, yes = 0, no = germ_rate))
-  } else {
+photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional form matches observations from (find this obs)
+                                            median_TOC_light = median(input_vars$FSDS), #median TOC light (J m-2 -day)
+                                            light.x){ #understory light in current time step (J m-2 -day)
+  
+  median_TOC_light_umol_s <- (median_TOC_light * 4.6) / (3600 * 12) # assuming 12 hour day 
+  understory_light_umol_s <- (light.x * 4.6) / (3600 * 12)
+  
+  x <- understory_light_umol_s/median_TOC_light_umol_s
+  x_prime <- l_crit/median_TOC_light_umol_s
+  
+  #relative resource amount (% of median TOC light)
+  germ_rate_modifier <- x/(x + x_prime) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
+  if(photoblastic_germ_rate_modifier_switch == T & PFT %in% c("LD_DI","LD_DT")){
+    return(germ_rate_modifier)
+  } else{
     return(1)
   }
 }
@@ -56,7 +66,8 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, S
   
   log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
   
-  frac_emerg <- (10^log10_frac_emerg) *  light_germ(light.x = light.xx)
+  frac_emerg <- (10^log10_frac_emerg) *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+                                                                          
   #if(frac_emerg > 0.07){frac_emerg <- 0.07}
   
   }

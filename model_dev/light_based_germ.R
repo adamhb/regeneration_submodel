@@ -1,4 +1,5 @@
 source('utils/system_settings.R')
+source('create_output/figure_formatting.R')
 lg <- read_csv(paste0(path_to_observations,"light_based_germination_requirement.csv"))
 
 #light in ED is given in terms of Wm2, so I need to convert ppfd to Wm2
@@ -22,8 +23,6 @@ mod <- lm(data = lg, formula = mean_MJ_day ~ R_FR + I(R_FR^2))
 lg$pred_mean_MJ_day <- predict(object = mod, newdata = lg)
 
 
-
-
 #this study observed germination as a function of different red:far-red ratios, but they also showed that there was a strong relationship between ppdf and those ratios in the forest
 #therefore, I have modeled germination as a function of ppfd
 mod1 <- lm(data = lg, formula = germ ~ log(mean_MJ_day))
@@ -32,8 +31,8 @@ summary(mod1)
 mod2 <- lm(data = lg, formula = germ ~ mean_MJ_day + I(mean_MJ_day^2))
 summary(mod2)
 
-pred_germ0 <- tibble(pred_germ = predict(object = mod2, newdata = tibble(mean_MJ_day = seq(0,2,length.out = 200))), mean_MJ_day = seq(0,2,length.out = 200))
-pred_germ <- tibble(pred_germ = predict(object = mod1, newdata = tibble(mean_MJ_day = seq(0,2,length.out = 200))), mean_MJ_day = seq(0,2,length.out = 200))
+pred_germ0 <- tibble(pred_germ = predict(object = mod2, newdata = tibble(mean_MJ_day = seq(0,17,length.out = 200))), mean_MJ_day = seq(0,17,length.out = 200))
+pred_germ <- tibble(pred_germ = predict(object = mod1, newdata = tibble(mean_MJ_day = seq(0,17,length.out = 200))), mean_MJ_day = seq(0,17,length.out = 200))
 
 #relationship between predicted ppfd (from red:far-red ratios) and germination observatinos
 #this is a logarithmic relationship
@@ -57,6 +56,8 @@ print("b1_light_germ:")
 print(b1_light_germ)
 
 
+
+#function that goes in the model
 light_germ <- function(light.x){
   if(PFT %in% c("LD_DT","LD_DI")){
     germ_rate <- b1_light_germ[PFT]*log(light.x) + b0_light_germ[PFT]
@@ -67,7 +68,7 @@ light_germ <- function(light.x){
 }
 
 
-  
+
 
 
 
