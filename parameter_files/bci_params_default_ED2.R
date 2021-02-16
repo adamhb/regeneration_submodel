@@ -23,11 +23,14 @@ litter_0 = 0 # the initial mass of carbon in the litter pool (g C)
 #########################
 
 #reproductive allocation
-Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) # was 895,861,545,557 before I fixed the weighted average issue
-names(Dmax) <- pft_names
+Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) was 895,861,545,557 before I fixed the weighted average issue
+RA_0 <- c(-3.1380, -2.4607, -2.6518, -2.6171)
+names(RA_0) <- pft_names
+RA_1 <- c(0.0058, 0.0059, 0.0042, 0.0049)
+names(RA_1) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
-F_seed <- 0.5 #the fraction of reproductive carbon that is seed
+F_seed <- 0.5 * 0.5 #the fraction of reproductive carbon that is seed
 k <- 0.0125 #shape parameter relating dbh to reproductive probability
 
 #seed bank dynamics

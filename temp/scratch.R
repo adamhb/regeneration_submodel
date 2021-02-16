@@ -102,6 +102,10 @@ pfts_assgn %>%
 
 
 
+full_output %>%
+  filter(yr == "2010", PFT_record == "LD_DT") %>%
+  pull(R) %>% sum() #39-
+
 
 
 
@@ -150,4 +154,9 @@ modify_if(.x = nummies,.p = nummies==2,.f = function(x){x+10})
 read_csv("temp/N_recs_per_yr_default_params.csv") %>%
   filter(pft == "ST_DT") %>%
   pull(submodel) %>% summary()
+
+
+full_out
+
+
 

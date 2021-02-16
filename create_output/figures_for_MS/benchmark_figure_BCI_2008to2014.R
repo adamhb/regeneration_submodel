@@ -47,6 +47,10 @@ bench_data <- bench4graph %>%
 N_recs_per_year_default_params <- read_csv("temp/N_recs_per_yr_default_params.csv")
 benchmark_fig_log <- N_recs_per_year_default_params %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
   mutate(facetVar = model) %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
@@ -82,7 +86,8 @@ benchmark_fig_log <- N_recs_per_year_default_params %>%
   theme(legend.position = "none",
         axis.title.x = element_blank()) +
   #guides(colour = guide_legend(override.aes = list(size = 10)))+
-  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2))))
+  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2))),
+         color = guide_legend(override.aes = list(shape = 15)))
 
 benchmark_fig_log
 
@@ -99,6 +104,10 @@ benchmark_fig_log
 N_recs_per_year_BCI_params <- read_csv("temp/N_recs_per_yr_bci_params.csv")
 benchmark_fig_linear_axis <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
   mutate(facetVar = model) %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
@@ -132,7 +141,8 @@ benchmark_fig_linear_axis <- N_recs_per_year_pfts %>%
   #labs(title = "Predicting rank order \n of PFT-specific recruitment") +
   adams_theme_benchFig +
   #guides(colour = guide_legend(override.aes = list(size = 10)))+
-  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2)))) +
+  guides(shape = guide_legend(override.aes = list(shape = c(10,1,2))),
+         color = guide_legend(override.aes = list(shape = 15))) +
   facet_wrap(~facetVar)+
   theme(strip.text.x = element_text(size=0),
         axis.title.y = element_blank(),

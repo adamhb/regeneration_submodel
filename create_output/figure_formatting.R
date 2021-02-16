@@ -20,6 +20,8 @@ adams_guides <- guides(color = guide_legend(override.aes = list(size=6)),
                        shape = guide_legend(override.aes = list(size=6)),
        fill=guide_legend(title="PFT"))
 
+color_guide <-  guides(color = guide_legend(override.aes = list(shape = 15)))
+
 rec.y.axis <- ylab(expression(paste('N recruits [ha'^'-1','yr'^'-1',"]")))
 
 #set theme for the plots

@@ -1,4 +1,4 @@
-from_new_data <- FALSE
+from_new_data <- F
 print("creating recruitment vs. SMP figure...")
 
 
@@ -48,10 +48,11 @@ rec_vs_smp <- summary_data %>%
   ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab(paste0("20-yr mean patch-level \n soil matric potential (MPa)")) +
   #labs(title = "Moisture-sensitive recruitment \n among patches (2% TOC light)") +
-  annotate(geom = "text", x = -3, y = 30, label = "recruitment failure \n under chronically dry conditions", size = 4) +
-  geom_segment(aes(x = -3.5, y = 20, xend = -3.5, yend = 3),
-               arrow = arrow(length = unit(0.5, "cm")), color = "black") +
-  adams_theme #+
+  #annotate(geom = "text", x = -3, y = 30, label = "recruitment failure \n under chronically dry conditions", size = 4) +
+  #geom_segment(aes(x = -3.5, y = 20, xend = -3.5, yend = 3),
+  #             arrow = arrow(length = unit(0.5, "cm")), color = "black") +
+  adams_theme +
+  guides(color = guide_legend(override.aes = list(shape = 15)))
   
 makePNG(fig = rec_vs_smp, 
         path_to_output.x = path_to_MS_figures, 

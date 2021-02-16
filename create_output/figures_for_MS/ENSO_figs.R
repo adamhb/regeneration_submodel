@@ -13,9 +13,13 @@ point <- geom_point(size = 2.5, stroke = 1, alpha = 1)
 
 ENSO_long_term <- N_recs_per_year_pfts %>%
   gather(submodel:ED2, key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
-  mutate(model = factor(model,levels =  c("submodel","ED2"))) %>%
+  mutate(model = factor(model,levels =  c("TRS","ED2"))) %>%
   #filter(model != "ED2") %>%
   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
   geom_line() +
@@ -31,12 +35,12 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
                           as.Date("2035-01-01")),
                #date_breaks = "5 year", 
                labels = date_format("%y")) +
-  scale_shape_manual(values = c(21,24)) +
-  scale_y_continuous(limits = c(50,350), breaks = c(50,100,150,200,250,300,350)) +
+  scale_shape_manual(values = c(24,21)) +
+  scale_y_continuous(limits = c(0,350), breaks = c(0,50,100,150,200,250,300,350)) +
   #scale_y_log10(limits = c(0,360), breaks = lseq(from = )) +
-  geom_vline(xintercept = as.Date("2010-01-01"), linetype = "dotted", alpha = 0.4, color = "red") +
-  annotate(geom = "text", x = as.Date("2005-01-01"), y = 350, label = "a", size = 8) +
-  geom_vline(xintercept = as.Date("2030-01-01"), linetype = "dotted", alpha = 0.4, color = "red") +
+  geom_vline(xintercept = as.Date("2010-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
+  #annotate(geom = "text", x = as.Date("2005-01-01"), y = 350, label = "a", size = 8) +
+  geom_vline(xintercept = as.Date("2030-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
   #scale_linetype_manual(values = c("dotted","dashed")) +
   #scale_y_log10(labels = c(0,10,100)) +
   #scale_y_continuous(limits = c(0,300)) + 
@@ -58,7 +62,8 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm")) +
   guides(color = guide_legend(override.aes = list(size=3)),
          shape = guide_legend(override.aes = list(size=3)),
-         fill=guide_legend(title="PFT"))
+         fill=guide_legend(title="PFT")) +
+  color_guide
   
 
 
@@ -71,6 +76,10 @@ dev.off()
 ENSO <- full_output %>%
   rename(submodel = R, ED2 = ED2_R) %>%
   gather(c(submodel,ED2), key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
   filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   arrange(desc(pft)) %>% 
   ggplot(aes(x = as.Date(date), y = R*365, color = pft, linetype = model)) +
@@ -80,7 +89,7 @@ ENSO <- full_output %>%
   scale_linetype_manual(values = c("dashed","solid")) +
   #year_axis +
   ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
-  scale_y_continuous(limits = c(0,560), breaks = c(0,50,100,150,200,250,300,350,400,450,500,550)) +
+  scale_y_continuous(limits = c(0,710), breaks = c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700)) +
   scale_x_date(limits = c(as.Date("2028-10-01"),as.Date("2029-10-01")), 
                date_breaks = "2 months", 
                labels = date_format("%b")) +
@@ -90,8 +99,7 @@ ENSO <- full_output %>%
   #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
   long_term_sim_theme +
   adams_guides +
-  theme(axis.title.y=element_blank(),
-        legend.position = c(0.2,0.8),
+  theme(legend.position = c(0.2,0.8),
         #legend.direction = "horizontal",
         legend.box.background = element_rect(colour = "black"),
         legend.text = element_text(size = 12),

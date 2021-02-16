@@ -1,10 +1,33 @@
-rm(list = ls())
-gc()
+from_new_data <- F
 
-high_light <- T
-source('runs/ED2_DRY_DS.R')
-source("create_output/figure_formatting.R")
-
+if(from_new_data == T){
+  rm(list = ls())
+  gc()
+  high_light <- T
+  source('runs/ED2_DRY_DS.R')
+  source("create_output/figure_formatting.R")
+  write.csv(x = N_recs_per_year_pfts, file = "temp/DRY_DS_output.csv")
+  
+  full_output %>% select(yr, date, SMP) %>%
+    group_by(yr) %>%
+    summarise(meanSMP = mean(SMP)) %>%
+    mutate_at(.vars = "yr",.funs = as.numeric) %>%
+    ggplot(aes(yr,meanSMP)) + geom_line() +
+    geom_point() +
+    scale_x_continuous(breaks = seq(from = 2000, to = 2030, by = 3)) +
+    adams_theme
+  dryYears <- full_output %>% select(yr, date, SMP) %>%
+    group_by(yr) %>%
+    summarise(meanSMP = mean(SMP)) %>%
+    mutate_at(.vars = "yr",.funs = as.numeric) %>%
+    filter(meanSMP < -50000) %>% pull(yr)
+  
+}else{
+  source('utils/system_settings.R')
+  source('create_output/figure_formatting.R')
+  N_recs_per_year_pfts <- read_csv(file = "temp/DRY_DS_output.csv")
+  dryYears <- c(2001, 2002, 2007, 2008, 2009, 2014, 2015, 2016, 2021, 2022, 2023, 2028, 2029, 2030)
+}
 
 # N_recs_per_year_pfts_low_light <- N_recs_per_year_pfts %>%
 #   gather(submodel:ED2, key = "model", value = "R") %>%
@@ -32,8 +55,16 @@ N_recs_per_year_pfts_high_light <- N_recs_per_year_pfts %>%
   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
   mutate(facet_var = paste0(model," ",percent_light * 100, "% TOC")) %>%
-  ungroup() %>%
-  mutate(facet_var = factor(facet_var, levels = c("submodel 20% TOC","ED2 20% TOC")))
+  ungroup() %>% mutate(facet_var = case_when(
+    facet_var == "submodel 20% TOC" ~ "TRS 20% TOC",
+    facet_var == "ED2 20% TOC" ~ "ED2 20% TOC" 
+  )) %>%
+  mutate(facet_var = factor(facet_var, levels = c("TRS 20% TOC","ED2 20% TOC"))) %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
+  mutate(model = factor(x = model, levels = c("TRS","ED2")))
 
 
 
@@ -85,6 +116,8 @@ smp.model <- c(rep("submodel",nrow(smp.yr)/2),rep("ED2",nrow(smp.yr)/2))
 
 #smp.yr$model <- smp.model
 
+
+
 DRY_DS_high_light <- N_recs_per_year_pfts_high_light  %>%
   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model), color = "blue") +
   geom_line() +
@@ -101,51 +134,38 @@ DRY_DS_high_light <- N_recs_per_year_pfts_high_light  %>%
                           as.Date("2020-01-01"), as.Date("2025-01-01"), as.Date("2030-01-01"), as.Date("2035-01-01")),
                #date_breaks = "5 year", 
                labels = date_format("%y")) +
-  scale_shape_manual(values = c(21,24)) +
+  scale_shape_manual(values = c(24,21)) +
   #scale_y_log10(labels = c(0,10,100)) +
   rec.y.axis +
   facet_wrap(~model) +
-  geom_text(x = as.Date("2002-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2007-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2009-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2014-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2016-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2021-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2023-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2028-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  geom_text(x = as.Date("2030-01-01"),  y = 200, 
-            label = "X", 
-            colour = "red") +
-  scale_y_continuous(limits = c(50,300), breaks = c(50,100,150,200,250,300))+
+  geom_vline(xintercept = as.Date(paste0(dryYears,"-01-01")),linetype = "dotted", alpha = 0.4, color = "black") + #where mean annual SMP < 0.5 MPa
+  scale_y_continuous(limits = c(0,300), breaks = c(0,50,100,150,200,250,300))+
                      #sec.axis = sec_axis(~ . * 270, name = "SMP")) +
   #scale_y_log10(limits = c(1,300), breaks = lseq(from = 1,to = 300,length.out = 7)) +
   xlab(bquote('simulation year'))+
   #labs(title = paste("DRY-DS",percent_light * 100,"% light")) +
   adams_theme +
   long_term_sim_theme +
-  adams_guides 
+  adams_guides +
+  theme(legend.title = element_blank()) +
+  theme(legend.position = c(.25,.75), 
+        legend.text = element_text (size = 12),
+        legend.spacing.x = unit(0.2, 'cm'),
+        legend.spacing.y = unit(0.2, 'cm'), #this changes the spacing between groups of legend symbols
+        legend.key.size = unit(0.1, "cm"),
+        panel.spacing = unit(0.01, "lines"),
+        legend.box.background = element_rect(colour = "black"),
+        legend.direction = "horizontal",
+        legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm")) +
+  guides(color = guide_legend(override.aes = list(size=3, shape = 15)),
+         shape = guide_legend(override.aes = list(size=3)),
+         fill=guide_legend(title="PFT"))
   # theme(
   #   axis.title.y = element_text(color = "black"),
   #   axis.title.y.right = element_text(color = "blue"))
   #theme(legend.position = "none")
 
-makePNG(fig = DRY_DS_high_light,path_to_output.x = paste0(path_to_output,"forMS/"),file_name = "DRY_DS_long_term", height = 5, width = 7, units = 'in', res = 100)
+makePNG(fig = DRY_DS_high_light,path_to_output.x = paste0(path_to_output,"forMS/"),file_name = "DRY_DS_long_term", height = 5, width = 8.5, units = 'in', res = 100)
 
 
 
@@ -158,7 +178,13 @@ makePNG(fig = DRY_DS_high_light,path_to_output.x = paste0(path_to_output,"forMS/
 # dev.off()
 
 
-
-
 print("FINISHED making DRY DS figure")
+
+
+
+#plot SMP
+
+
+
+
 

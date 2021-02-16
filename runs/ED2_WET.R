@@ -20,7 +20,7 @@ patch_run_type <- "one" #"many" #one or "many"
 synthetic_patches <- F  # T or F
 run_name <- "WET_no_emerg_max"
 start_date <- "2001-01-01"
-end_date <- "2034-12-31"
+end_date <- "2044-12-31" #was 2034
 n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 

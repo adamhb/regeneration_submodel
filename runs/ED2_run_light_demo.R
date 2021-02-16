@@ -35,7 +35,7 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 model_area <- 10000 #area in square meters
 
 #source parameter values
-source("parameter_files/bci_params_default_ED2.R")
+source("parameter_files/bci_params_default_ED2.R") #changed this to BCI params; was bci_params_ed2_default
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 

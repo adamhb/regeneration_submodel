@@ -77,13 +77,13 @@ Rvsl <- summary_data %>%
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer (% TOC)") +
-  geom_vline(xintercept = 46, linetype = "dotted") +
-  annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
+  #geom_vline(xintercept = 46, linetype = "dotted") +
+  #annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
   #labs(title = "Light-sensitive recruitment \n among patches") +
   geom_segment(aes(x = 1.5, y = 80, xend = 1.3, yend = 5),
                arrow = arrow(length = unit(0.5, "cm")), color = "black") +
-  annotate(geom = "text", x = 1.5, y = 110, label = "LD recruitment\nfails", size = 4) +
-  annotate(geom = "text", x = 7, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
+  #annotate(geom = "text", x = 1.5, y = 110, label = "LD recruitment\nfails", size = 4) +
+  #annotate(geom = "text", x = 7, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
   geom_segment(aes(x = 7, y = 350, xend = 25, yend = 350),
                arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #plot_title +
@@ -109,12 +109,16 @@ Rvsl_submodel <- summary_data %>%
 gather(submodel:ED2, key = "model", value = "R") %>% 
   left_join(se_df, by = c("model","mean_pct_light","pft")) %>%
   mutate_at(.vars = "sd", .funs = function(x){x / sqrt(yrs_in_analysis)}) %>%
-  filter(model == "submodel") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
+  filter(model == "TRS") %>%
   ggplot(aes(x = mean_pct_light * 100, y = R * 365, color = pft, shape = model)) +
   #geom_point() +
   geom_point(size = psize, stroke = 1) +
   geom_line(show.legend = F) +
-  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = psize, stroke = 2) +
+  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = psize, stroke = 2, position = pd) +
   
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
   scale_color_manual(values = pft.cols) +
@@ -123,18 +127,18 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   scale_x_log10(breaks = round(lseq(from = 1, to = 100,length.out = 5)),
                 labels = round(lseq(from = 1, to = 100,length.out = 5)),
                 limits = c(1,100)) +
-  scale_y_continuous(limits = c(0,400), breaks = seq(0,400,100)) +
+  scale_y_continuous(limits = c(0,300), breaks = seq(0,300,100)) +
   #scale_y_log10() +
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer [% TOC]") +
-  geom_vline(xintercept = 46, linetype = "dotted") +
-  annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
-  labs(title = "submodel") +
+  #geom_vline(xintercept = 46, linetype = "dotted") +
+  #annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
+  labs(title = "TRS") +
   #geom_segment(aes(x = 1.5, y = 80, xend = 1.3, yend = 5),
   #             arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #annotate(geom = "text", x = 2, y = 115, label = "LD recruitment\nfails", size = 4) +
-  annotate(geom = "text", x = 3, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
+  #annotate(geom = "text", x = 3, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
   geom_segment(aes(x = 7, y = 350, xend = 25, yend = 350),
                arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #plot_title +
@@ -142,7 +146,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   adams_theme +
   #geom_hline(yintercept=46,color = "red") +
   theme(legend.position = "none",
-        axis.title.x = element_blank())
+        axis.title.x = element_blank()) +
+  guides(color = guide_legend(override.aes = list(shape = 15)))
   # theme(#axis.text.x=element_blank()),
   #       axis.text.y=element_blank(),axis.ticks=element_blank(),
   #       axis.title.y=element_blank())
@@ -158,6 +163,10 @@ Rvsl_ED2 <- summary_data %>%
 gather(submodel:ED2, key = "model", value = "R") %>% 
   left_join(se_df, by = c("model","mean_pct_light","pft")) %>%
   mutate_at(.vars = "sd", .funs = function(x){x / sqrt(yrs_in_analysis)}) %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
   filter(model == "ED2") %>%
   ggplot(aes(x = mean_pct_light * 100, y = R * 365, color = pft, shape = model)) +
   #geom_point() +
@@ -168,7 +177,11 @@ gather(submodel:ED2, key = "model", value = "R") %>%
                gather(submodel:ED2, key = "model", value = "R") %>% 
                left_join(se_df, by = c("model","mean_pct_light","pft")) %>%
                mutate_at(.vars = "sd", .funs = function(x){x / sqrt(yrs_in_analysis)}) %>%
-               filter(model == "submodel"), mapping = aes(x = mean_pct_light * 2e6, y = R*2e6, color = pft, shape = model), size = psize) +
+               mutate(model = case_when(
+                 model == "submodel" ~ "TRS",
+                 model == "ED2" ~ "ED2" 
+               )) %>%
+               filter(model == "TRS"), mapping = aes(x = mean_pct_light * 2e6, y = R*2e6, color = pft, shape = model), size = psize) +
   geom_line(show.legend = F) +
   geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = psize, stroke = 2) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
@@ -178,14 +191,14 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   scale_x_log10(breaks = round(lseq(from = 1, to = 100,length.out = 5)),
                 labels = round(lseq(from = 1, to = 100,length.out = 5)),
                 limits = c(1,100)) +
-  scale_y_continuous(limits = c(0,400), breaks = seq(0,400,100)) +
+  scale_y_continuous(limits = c(0,300), breaks = seq(0,300,100)) +
   #scale_y_log10() +
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer [% TOC]") +
   labs(title = "ED2") +
-  geom_vline(xintercept = 46, linetype = "dotted") +
-  annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
+  #geom_vline(xintercept = 46, linetype = "dotted") +
+  #annotate(geom = "text", x = 46, y = 50, label = "46% TOC", size = 4) +
   #labs(title = "Light-sensitive recruitment \n among patches") +
   #plot_title +
   #facet_wrap(~model) +
@@ -193,7 +206,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   theme(#axis.text.x=element_blank()),
     axis.text.y=element_blank(),axis.ticks=element_blank(),
     axis.title.y=element_blank(),
-    axis.title.x = element_blank())
+    axis.title.x = element_blank()) +
+  guides(color = guide_legend(override.aes = list(shape = 15)))
     #legend.position = c(0.5,0.8))
   
 
