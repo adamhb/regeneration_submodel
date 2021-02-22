@@ -23,11 +23,21 @@
 #   return(Pm_day)
 # }
 
-light_mort2 <- function(light = 5000000*60, seedpool.x = 750000){
+#deriving W_ML
+#The week at which mortality rates in the light deviate from mortality rates in the shade from 
+#Carrol Augspurger's (1984) seedling light-based mortality experiment
+print(paste("the value for M_ML is", mean(c(5,10,10,1,5,18,5,2,15,5,10,10,1,10,30)) * 7, "days"))
+
+source("utils/system_settings.R")
+source("utils/supporting_funcs.R")
+source("create_output/figure_formatting.R")
+source2("parameter_files/default_parameters.R", start = 1, end = 92)
+
+light_mort2 <- function(light, seedpool.x = 1){
   
   
   #browser()
-  pct_light <- (light / (14.11947 * 90)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
+  pct_light <- (light / (14.11947 * W_ML)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
   
   #seedlings_N <- seedpool.x / Z0_seedling[PFT]
   
@@ -36,9 +46,9 @@ light_mort2 <- function(light = 5000000*60, seedpool.x = 750000){
   
   Ml <- A * exp(-B*pct_light)
   
-  Pm_yr <- 1 - exp(-Ml*3)
+  Pm_yr <- 1 - exp(-Ml*(W_ML/30.4))
   
-  Pm_day <- Pm_yr / 90 # divide by 90 here because 3 (for 3 months) is in the numerator
+  Pm_day <- Pm_yr / W_ML # divide by 90 here because 3 (for 3 months) is in the numerator
   
   #N_mort <- Pm_day * seedlings_N
   
@@ -46,6 +56,7 @@ light_mort2 <- function(light = 5000000*60, seedpool.x = 750000){
   
   return(Pm_day)
 }
+
 
 
 #seedling light mort
@@ -70,8 +81,8 @@ for(p in pft_names){
 }
 
 
-mean_bci <- 52.2 # MJ of light in prior 3 months
-mean_bci_TOC <- 1512 
+mean_bci <- (52.2) * 64/90 # MJ of light in prior 3 months
+mean_bci_TOC <- 1512 * 64/90
 
 
 light_mort_data <- tibble(pft = pft,
@@ -84,7 +95,7 @@ viz_light_mort <- light_mort_data %>%
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
   ylab(label = "monthly light-based \n seedling mortality rate") +
-  xlab(label = expression(paste("cum. light in prior 3 months ","(MJ m"^"-2",")"))) +
+  xlab(label = expression(paste("cum. light in prior 2 months ","(MJ m"^"-2",")"))) +
   labs(title = "Light-based seedling mortality") +
   geom_vline(xintercept = mean_bci, linetype = "dotted") +
   geom_vline(xintercept = mean_bci_TOC, linetype = "dotted") +
@@ -103,20 +114,19 @@ summary(LDmod)
 
 exp(predict(object = LDmod, newdata = light_mort_data %>% filter(pft == "LD_DI")))
 
-P1light_mort <- c(rep(coef(LDmod)[2],2),rep(coef(STmod)[2],2))
-names(P1light_mort) <- pft_names
-P2light_mort <- c(rep(coef(LDmod)[1],2),rep(coef(STmod)[1],2))
-names(P2light_mort) <- pft_names
+a.ML <- c(rep(coef(LDmod)[2],2),rep(coef(STmod)[2],2))
+names(a.ML ) <- pft_names
+b.ML <- c(rep(coef(LDmod)[1],2),rep(coef(STmod)[1],2))
+names(b.ML ) <- pft_names
 
 #seedling light mort
-
 light_mort3 <- function(light = 90, seedpool.x = 1){
   
   #browser()
-  P1light_mort.x <- P1light_mort[PFT]
-  P2light_mort.x <- P2light_mort[PFT]
+  a.ML.x <- a.ML[PFT]
+  b.ML.x <- b.ML[PFT]
   
-  Pm_day <- exp(P1light_mort.x * light + P2light_mort.x)
+  Pm_day <- exp(a.ML.x * light +  b.ML.x)
   
   #N_mort <- Pm_day * seedlings_N
   
@@ -125,30 +135,16 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
   return(Pm_day)
 }
 
-
-#deriving W_ML
-#The week at which mortality rates in the light deviate from mortality rates in the shade from 
-#Carrol Augspurger's (1984) seedling light-based mortality experiment
-print(paste("the value for M_ML is", mean(c(5,10,10,1,5,18,5,2,15,5,10,10,1,10,30)) * 7, "days"))
-
-
-
 #makePNG(fig = viz_light_mort, path_to_output.x = path_to_output, file_name = "viz_light_mort")
 
 
 # P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
 # P2light_mort <- c(-3.817788, -3.817788, -7.142556, -7.142556)
 
+# 
+# P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
+# P2light_mort <- c(-4.217788, -4.217788, -7.142556, -7.142556)
 
-P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
-P2light_mort <- c(-4.217788, -4.217788, -7.142556, -7.142556)
-
-mean_bci <- 52.2 # MJ of light in prior 3 months
-mean_bci_TOC <- 1512 
-
-
-names(P1light_mort) <- pft_names
-names(P2light_mort) <- pft_names
 
 light_mort_rates <- c()
 lights <- 30:2081 
@@ -173,7 +169,7 @@ viz_light_mort <- light_mort_data %>%
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
   ylab(label = "monthly light-based \n seedling mortality rate") +
-  xlab(label = expression(paste("cum. light in prior 3 months ","(MJ m"^"-2",")"))) +
+  xlab(label = expression(paste("cum. light in prior 2 months ","(MJ m"^"-2",")"))) +
   labs(title = "Light-based seedling mortality") +
   geom_vline(xintercept = mean_bci, linetype = "dotted") +
   geom_vline(xintercept = mean_bci_TOC, linetype = "dotted") +
@@ -184,6 +180,6 @@ viz_light_mort <- light_mort_data %>%
   theme_minimal() +
   multipanel_theme
 
-
+makePNG(fig = viz_light_mort, path_to_output.x = path_to_output, file_name = "viz_light")
 
 
