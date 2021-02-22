@@ -1,9 +1,9 @@
 library(lme4)
 library(tidyverse)
+source('create_output/figures_for_MS/benchmark_figure_BCI_2008to2014.R')
 
 path_to_observations <- "~/cloud/gdrive/rec_submodel/data/observations/"
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
-
 
 pft_assignments <- read_csv(file = "benchmarking/pft_assignments.csv")
 
@@ -12,14 +12,13 @@ seed_dyn <- readRDS(paste0(path_to_observations,"bci_seeding_data_for_Adam.RDS")
 seed_dyn$start.date <- as.Date(seed_dyn$start, origin = as.Date("2001-1-15", format = "%Y-%m-%d"))
 seed_dyn$stop.date <- as.Date(seed_dyn$stop, origin = as.Date("2001-1-15", format = "%Y-%m-%d"))
 
-
 pft_specific_annual_mort_rate <- seed_dyn %>%
   mutate_at(.vars = "SPP", .funs = tolower) %>% 
   rename(sp = SPP) %>%
   filter(habitat == "slope") %>%
   filter(sp %in% unique(pft_assignments$sp)) %>%
   mutate(census_length_days = as.numeric(stop.date - start.date)) %>%
-  merge(., pft_assignments, by = "sp") %>%
+  merge(., pft_assignments, by = "sp") %>% 
   group_by(pft) %>%
   summarise(mort_rate = (sum(mort)/length(mort)), mean_cen_length = mean(census_length_days)) %>%
   mutate(annual_mort_rate = (mort_rate / mean_cen_length)*365) %>%

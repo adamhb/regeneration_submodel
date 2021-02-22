@@ -86,7 +86,7 @@ fig_total_ba_bci <- total_ba_per_pft_grform_at_bci %>%
 makePNG(fig = fig_total_ba_bci,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "fig_total_ba_bci.png")
 
 #graph showing the amount of basal area covered by the species sampled in the Visser data
-ba_coverage <- total_ba_gr_pft %>%
+ba_coverage <- total_ba_gr_pft %>% 
   ggplot(aes(pft,ba.gr.pft,fill=grform)) +
   geom_bar(stat="identity") +
   geom_point(data = total_ba_per_pft_at_bci, mapping = aes(pft,ba.gr.pft)) +
@@ -94,6 +94,9 @@ ba_coverage <- total_ba_gr_pft %>%
   adams_theme
 makePNG(fig = ba_coverage,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "ba_coverage.png")
 
+
+total_ba_gr_pft %>%
+  filter(grform == "T")
 
 
 #cleaning RA obs data

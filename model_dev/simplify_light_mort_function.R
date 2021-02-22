@@ -1,27 +1,27 @@
 #light-based seedling mortality
-light_mort <- function(light = 5000000*60, seedpool.x = 750000){
-  
-  pct_light <- (light / (15750113 * 90 / 1e6)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
-  
-  #seedlings_N <- seedpool.x / Z0_seedling[PFT]
-  
-  A <- P1light_mort[PFT]
-  B <- P2light_mort[PFT]
-  
-  ifelse((test = PFT == "ST_DI" | PFT == "ST_DT" | (PFT == "LD_DI" & pct_light <= LD_light_thresh) | (PFT == "LD_DT" & pct_light <= LD_light_thresh)), 
-         yes = Ml <- A * exp(-B*pct_light),
-         no = Ml <- A * exp(-B*LD_light_thresh))
-  
-  Pm_yr <- 1 - exp(-Ml*3)
-  
-  Pm_day <- Pm_yr / 90 # why did I divide by 90 here instead of 365, check Kobe paper on this
-  
-  #N_mort <- Pm_day * seedlings_N
-  
-  #frac_mort <- (N_mort * Z0_seedling[PFT]) / seedpool.x
-  
-  return(Pm_day)
-}
+# light_mort <- function(light = 5000000*60, seedpool.x = 750000){
+#   
+#   pct_light <- (light / (15750113 * 90 / 1e6)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
+#   
+#   #seedlings_N <- seedpool.x / Z0_seedling[PFT]
+#   
+#   A <- P1light_mort[PFT]
+#   B <- P2light_mort[PFT]
+#   
+#   ifelse((test = PFT == "ST_DI" | PFT == "ST_DT" | (PFT == "LD_DI" & pct_light <= LD_light_thresh) | (PFT == "LD_DT" & pct_light <= LD_light_thresh)), 
+#          yes = Ml <- A * exp(-B*pct_light),
+#          no = Ml <- A * exp(-B*LD_light_thresh))
+#   
+#   Pm_yr <- 1 - exp(-Ml*3)
+#   
+#   Pm_day <- Pm_yr / 90 # why did I divide by 90 here instead of 365, check Kobe paper on this
+#   
+#   #N_mort <- Pm_day * seedlings_N
+#   
+#   #frac_mort <- (N_mort * Z0_seedling[PFT]) / seedpool.x
+#   
+#   return(Pm_day)
+# }
 
 light_mort2 <- function(light = 5000000*60, seedpool.x = 750000){
   
@@ -53,7 +53,7 @@ P1light_mort <- c(0.752, 0.752, 0.0241, 0.0241)
 names(P1light_mort) <- pft_names
 P2light_mort <- c(0.1368, 0.1368, 0.0404, 0.0404)
 names(P2light_mort) <- pft_names
-LD_light_thresh <- 18.98 # from Kobe
+#LD_light_thresh <- 18.98 # from Kobe
 
 
 light_mort_rates <- c()
@@ -126,15 +126,18 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
 }
 
 
-
+#deriving W_ML
+#The week at which mortality rates in the light deviate from mortality rates in the shade from 
+#Carrol Augspurger's (1984) seedling light-based mortality experiment
+print(paste("the value for M_ML is", mean(c(5,10,10,1,5,18,5,2,15,5,10,10,1,10,30)) * 7, "days"))
 
 
 
 #makePNG(fig = viz_light_mort, path_to_output.x = path_to_output, file_name = "viz_light_mort")
 
 
-P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
-P2light_mort <- c(-3.817788, -3.817788, -7.142556, -7.142556)
+# P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
+# P2light_mort <- c(-3.817788, -3.817788, -7.142556, -7.142556)
 
 
 P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)

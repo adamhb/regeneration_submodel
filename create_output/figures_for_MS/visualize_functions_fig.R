@@ -4,8 +4,8 @@
 source("create_output/figure_formatting.R")
 #visualize efrac
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/forMS/"
-source2('parameter_files/bci_params_default_ED2.R',start = 1,end = 80)
-source2('model/regeneration_submodel.R',start = 9,end = 235) #source the model functions
+source2('parameter_files/bci_params_default_ED2.R',start = 1,end = 96)
+source2('model/regeneration_submodel.R',start = 9,end = 250) #source the model functions
 
 #png options
 PNGheight = 11/3
@@ -28,7 +28,7 @@ subplot_heading_size <- 12
 #############        repro alloc        #######
 ###############################################
 
-sizes <- 1:1300 
+sizes <- 1:1500 
 pft <- c()
 
 for(i in pft_names){

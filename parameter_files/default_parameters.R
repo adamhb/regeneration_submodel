@@ -8,7 +8,7 @@ percent_light <- 0.02
 model_area <- 10000 #area in square meters
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 plot_input_vars <- "Y" #do you want to plot submodel output?
-photoblastic_germ_rate_modifier_switch <- F
+photoblastic_germ_rate_modifier_switch <- T
 ####################
 #initial conditions#
 ####################
@@ -35,7 +35,7 @@ k <- 0.0125 #shape parameter relating dbh to reproductive probability
 
 #seed bank dynamics
 S_decay <- 0.51 #the annual decay rate of the seedbank
-a_emerg <- rep(0.004, 4) #the average daily fraction of the seedbank that moves to the seedling pool (annual average), was previously 0.5/365
+a_emerg <- rep(0.007, 4) #was 0.004 the average daily fraction of the seedbank that moves to the seedling pool (annual average), was previously 0.5/365
 names(a_emerg) <- pft_names
 b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
@@ -45,7 +45,7 @@ b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
 names(b0_light_germ) <- pft_names
 b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
 names(b1_light_germ) <- pft_names
-l_crit <- 22.3
+l_crit <- 70 #was 22.3
 
 #light-based seedling mortality
 a.ML <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
@@ -68,7 +68,8 @@ MDDs_crit <- rep(c(4.6e6,1.4e6),2) #this parameter avoids negative values of mor
 names(MDDs_crit) <- pft_names
 
 #background seedling mortality
-M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
+#M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
+M_background <- c(0.1739748, 0.1834359, 0.1893379, 0.1085371) 
 names(M_background) <- pft_names
 #light-based seed to sapling transition rate
 # a_TR <- rep(rep(18e-6,4)) #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data

@@ -5,8 +5,8 @@
 #Comparative drought-resistance of seedlings of 28 species of co-occurring tropical woody plants. 
 #Oecologia, 136(3), 383–393. 
 #https://doi.org/10.1007/s00442-003-1290-8
-rm(list = rm())
-gc()
+#rm(list = rm())
+#gc()
 library(tidyverse)
 library(lubridate)
 
@@ -16,7 +16,6 @@ pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 
 source("benchmarking/assigning_pfts.R")
 source("create_output/figure_formatting.R")
-
 
 
 seedling_mort_over_time <- read_csv(paste0(path_to_observational_data,"engelbrecht_seedling_mort_over_time.csv"),
@@ -35,7 +34,7 @@ moisture_stress_points_pft <- moisture_stress_points %>%
   )) %>%
   drop_na() %>%
   group_by(pft) %>%
-  summarise(mean_wilt_50_week = mean(week_50_slight_wilt)) %>%
+  summarise(mean_wilt_50_week = mean(week_50_slight_wilt), n = length(week_50_slight_wilt)) %>%
   mutate(day = round(as.numeric((eng_start_date + mean_wilt_50_week * 7) - eng_start_date)))
   
 
@@ -249,13 +248,6 @@ pred_data$quad <- predict(DT_mod_Quad, newdata = pred_data)
 
 
 #the quadratic relationship is best for DT
-DT_mort_data %>%
-  ggplot(aes(DDs,M_daily)) +
-  geom_point() +
-  geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
-  geom_line(data = pred_data, mapping = aes(DDs,quad), linetype = "dashed") +
-  scale_y_continuous(limits = c(0,8e-4)) +
-  adams_theme
 
 
 DI_mort_data <- seedling_mort_over_time2 %>%
@@ -269,8 +261,50 @@ summary(DT_mod_Quad)
 pred_data_DI <- tibble(DDs = seq(min(DI_mort_data$DDs),max(DI_mort_data$DDs),length.out = 100))
 pred_data_DI$quad <- predict(DI_mod_Quad, newdata = pred_data_DI)
 
+
+
+DT_MDDs_vs_M <- DT_mort_data %>%
+  ggplot(aes(DDs * 1e-5,M_daily* 1e3)) +
+  geom_point(shape = 2, size = 3) +
+  #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
+  geom_line(data = pred_data %>% filter(DDs > 1e6), 
+            mapping = aes(DDs * 1e-5,quad * 1e3), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,1.3)) +
+  #geom_vline(xintercept = 1.4, linetype = "dotted") +
+  xlab(label = "Moisture deficit days [MPa days]") +
+  ylab(label = expression(paste("Daily mortality rate [x 10"^"-3","]"))) +
+  adams_theme +
+  theme(legend.position = c(0.25,0.75))
+
+#makePNG(fig = DT_MDDs_vs_M, file_name = "DT_MDDs_vs_Mort", path_to_output.x = paste0(path_to_output,"forMS/"),height = 4, width = 6, units = "in",res = 600)
+
+DI_MDDs_vs_M <- DI_mort_data %>%
+  ggplot(aes(DDs * 1e-5,M_daily * 1e3)) +
+  geom_point(shape = 2, size = 3) +
+  #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
+  geom_line(data = pred_data_DI %>% filter(DDs > 1e6), 
+            mapping = aes(DDs * 1e-5,quad * 1e3), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,13)) +
+  #geom_vline(xintercept = 1.4, linetype = "dotted") +
+  xlab(label = "Moisture deficit days [MPa days]") +
+  ylab(label = expression(paste("Daily mortality rate [x 10"^"-3","]"))) +
+  adams_theme +
+  theme(legend.position = c(0.25,0.75))
+  # theme(legend.position = c(0.25,0.75)) +
+  # guides(shape = "legend")
+
+
+MDDsVsM <- cowplot::plot_grid(DI_MDDs_vs_M, DT_MDDs_vs_M, labels = c("(a)","(b)"))
+makePNG(fig =MDDsVsM, file_name = "MDDsVsM", path_to_output.x = paste0(path_to_output,"forMS/"),height = 5, width = 10, units = "in",res = 600)
+
+
+makePNG(fig = DI_MDDs_vs_M, file_name = "DI_MDDs_vs_Mort", path_to_output.x = paste0(path_to_output,"forMS/"),height = 4, width = 6, units = "in",res = 600)
+
+
+
 DI_mort_data %>%
-  ggplot(aes(DDs,M_daily)) +
+  #rbind(DT_mort_data) %>%
+  ggplot(aes(DDs,M_daily,color=pft)) +
   geom_point() +
   #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
   geom_line(data = pred_data_DI, mapping = aes(DDs,quad), linetype = "dashed") +

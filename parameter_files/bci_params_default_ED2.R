@@ -68,7 +68,8 @@ MDDs_crit <- rep(c(4.6e6,1.4e6),2) #this parameter avoids negative values of mor
 names(MDDs_crit) <- pft_names
 
 #background seedling mortality
-M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
+#M_background <- c(0.4150849, 0.1670488, 0.1723011, 0.1302036)
+M_background <- c(0.1739748, 0.1834359, 0.1893379, 0.1085371) 
 names(M_background) <- pft_names
 
 #light-based seed to sapling transition rate

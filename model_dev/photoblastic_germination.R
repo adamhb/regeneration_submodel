@@ -23,4 +23,4 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional 
 ul <- seq(from = 300000, to = 5e6, length.out = 200)
 plot(x = ul, y = photoblastic_germ_rate_modifier(light.x = ul))
 
-
+photoblastic_germ_rate_modifier(light.x = ul)
