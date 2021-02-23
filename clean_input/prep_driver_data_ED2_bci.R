@@ -6,11 +6,11 @@
 # }
 
 prob_repro <- function(size_mm,PFT.x){
-    RA_0.x <- RA_0[PFT.x]
-    RA_1.x <- RA_1[PFT.x]
-    y <- (exp(RA_0.x+RA_1.x*size_mm) / (1 + exp(RA_0.x+RA_1.x*size_mm)))
-    return(y)
-  }
+  a_RA.x <- a_RA[PFT.x]
+  b_RA.x <- b_RA[PFT.x]
+  y <- (exp(b_RA.x+a_RA.x*size_mm) / (1 + exp(b_RA.x+a_RA.x*size_mm)))
+  return(y)
+}
 
 efrac <- function(N, co_dbh_ind, PFT){
   N_repro <- prob_repro(size_mm = co_dbh_ind, PFT.x = PFT) * N

@@ -1,8 +1,6 @@
 library(scales)
 library(cowplot)
 
-source('utils/supporting_funcs.R')
-
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 path_to_MS_figures <- paste0(path_to_output,"forMS/")
 

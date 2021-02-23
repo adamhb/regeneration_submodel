@@ -1,5 +1,30 @@
 library(stringr)
 library(tidyverse)
+library(broom)
+
+path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
+path_to_observations <- path_to_observational_data
+path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+
+options(dplyr.print_max = 1e5)
+options(max.print=1e4)
+options(tibble.print_max = 1e4)
+
+
+draw_key_polygon3 <- function(data, params, size) {
+  lwd <- min(data$size, min(size) / 4)
+  
+  grid::rectGrob(
+    width = grid::unit(0.3, "npc"),
+    height = grid::unit(0.3, "npc"),
+    gp = grid::gpar(
+      col = data$colour,
+      fill = alpha(data$fill, data$alpha),
+      lty = data$linetype,
+      lwd = lwd * .pt,
+      linejoin = "mitre"
+    ))
+}
 
 
 dateFromFile <- function(filename){
@@ -39,3 +64,8 @@ lseq <- function(from=1, to=100000, length.out=6) {
   # blatantly stolen from library("emdbook"), because need only this
   round(exp(seq(log(from), log(to), length.out = length.out)))
 }
+
+source2(file = "parameter_files/bci_parameters.R", start = 1, end = 98)
+source("create_output/figure_formatting.R")
+
+
