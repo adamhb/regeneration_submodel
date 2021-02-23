@@ -47,7 +47,6 @@ tibble(l = l, r = rf(l), pft = "LD") %>%
   scale_x_continuous(limits = c(20,100)) +
   scale_y_continuous(limits = c(0,0.0015))
 
-
 b <- c(1.0653, 0.8615)
 names(b) <- c("LD","ST")
 

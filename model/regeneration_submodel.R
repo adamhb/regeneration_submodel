@@ -220,11 +220,9 @@ light_mort <- function(light = 90, seedpool.x = 1){
 
 
 rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.x){
-  # log10tr <- a_rec.x + b_rec.x*log10(l)
-  # frac_rec <- 10^log10tr
   
   frac_rec <- a_TR.x * l^b_TR.x
-   
+  
   if(SMP.x < psi_crit[PFT]){
     frac_rec <- 0
   }
@@ -238,7 +236,6 @@ rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.
   names(out) <- c("frac_rec", "C_rec", "N_rec")
   
   return(out) 
-  
 }
 
 
@@ -383,20 +380,20 @@ for(PFT in pft_names){
         - ((light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
         - (input_vars$H20_mort_rate[i] * seedpool[i]) %>%
         - (seedpool[i]*M_background[PFT]/365) %>%
-        - (rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001),
+        - (rec_func(l = ifelse(test = i > W_TR, yes = mean(input_vars$light[(i-W_TR):i] +0.0001), no = mean(input_vars$light[(i+W_TR):i]) + 0.0001),
                     seedpool.x = seedpool[i], 
                     SMP.x = input_vars$SMP[i])$C_rec)
       
       light_mort_rate[i+1] <- (light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i]))
       
-      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
+      frac_rec.t[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = mean(input_vars$light[(i-W_TR):i] +0.0001), no = mean(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
                                   SMP.x = input_vars$SMP[i])$frac_rec
     
     
       
       
       #recruitment and litter pool dynamics
-      R[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = sum(input_vars$light[(i-W_TR):i] +0.0001), no = sum(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
+      R[i+1] <- rec_func(l = ifelse(test = i > W_TR, yes = mean(input_vars$light[(i-W_TR):i] +0.0001), no = mean(input_vars$light[(i+W_TR):i]) + 0.0001), seedpool.x = seedpool[i],
                          SMP.x = input_vars$SMP[i])$N_rec
       
       N[i+1] <- N[i] %>%

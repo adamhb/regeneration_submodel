@@ -79,11 +79,11 @@ names(M_background) <- pft_names
 # names(a_TR) <- pft_names
 # b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 # names(b_TR) <- pft_names
-a_TR <- c(rep(1.771e-5,2),rep(4.085e-5,2)) #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data
+a_TR <- c(0.004405853, 0.004405853, 0.003523462, 0.003523462) 
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names
-W_TR <- 183
+W_TR <- 64
 
 
 ############################
