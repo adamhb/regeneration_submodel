@@ -43,6 +43,8 @@ if(emulate_ED2 == T){
 
 source("model/regeneration_submodel.R") #run the submodel
 
+write_csv(full_output,'temp/full_output.csv')
+write_csv(input_vars,"temp/input_vars.csv")
 
 source("create_output/create_output.R") #create submodel output
 

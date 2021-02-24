@@ -1,6 +1,8 @@
 #the critical PAR level for photoblasitic germination used as a shape parameter in the germination rate modifier
-l_crit <- 22.3 # umol m-2 s-1; Pearson et al., 2002
-
+l_crit <- 70 # umol m-2 s-1; The light level in a small gap, Pearson et al., 2002
+mean_bci <- 0.334 #mean understory light at BCI MJ m-2 day-1
+mean_bci_20pct_gap <- 16.7 * 0.2
+print(paste("l_crit =",l_crit))
 photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional form matches observations from (find this obs)
          median_TOC_light = median(input_vars$FSDS), #median TOC light (J m-2 -day)
          light.x){ #understory light in current time step (J m-2 -day)
@@ -13,14 +15,40 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional 
   
     #relative resource amount (% of median TOC light)
   germ_rate_modifier <- x/(x + x_prime) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
-  if(photoblastic_germ_rate_modifier_switch == T & PFT %in% c("LD_DI","LD")){
+  if(photoblastic_germ_rate_modifier_switch == T & PFT %in% c("LD_DI","LD_DT")){
     return(germ_rate_modifier)
   } else{
     return(1)
   }
 }
 
+#germ data
 ul <- seq(from = 300000, to = 5e6, length.out = 200)
-plot(x = ul, y = photoblastic_germ_rate_modifier(light.x = ul))
 
-photoblastic_germ_rate_modifier(light.x = ul)
+germ_data <- tibble()
+for(p in pft_names){
+  PFT <- p
+  tmp <- tibble(light = ul,
+                rate_mod = photoblastic_germ_rate_modifier(light.x = ul),
+                pft = PFT)
+  germ_data <- rbind(germ_data,tmp)
+}
+
+
+photoblastic_germ_fig <- germ_data %>%
+  ggplot(aes(x = light / 1e6, y = rate_mod, color = pft, linetype = pft)) +
+  geom_line(size = 2) +
+  scale_color_manual(values = pft.cols) +
+  #annotate(geom = "text", x = 0, y = 0.035, label = "d", size = subplot_heading_size) +
+  scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
+  ylab(label = "emergence rate modifier") +
+  xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
+  labs(title = "Photoblastic germination") +
+  theme_minimal() +
+  geom_vline(xintercept = mean_bci, linetype = "dotted") +
+  geom_vline(xintercept = mean_bci_20pct_gap, linetype = "dashed") +
+  # annotate(geom = "text", x = mean_bci + 400, y = 0.09, label = "BCI mean \n at smallest cohort", size = 5) +
+  # annotate(geom = "text", x = mean_bci_TOC, y = 0.09, label = "BCI mean \n TOC", size = 5) +
+  multipanel_theme
+
+print("made photoblastic_germ_fig")

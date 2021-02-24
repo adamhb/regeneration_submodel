@@ -81,6 +81,7 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, S
 
 
 
+
 def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
   def <- (abs(psi_crit.x) - abs(soil_moist))*-1
   no_def <- def < 0 
@@ -91,7 +92,6 @@ def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
   }
   return(deficit_days)
 }
-
 
 
 
