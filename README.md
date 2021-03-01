@@ -1,4 +1,4 @@
-# The Tree Recruitment Submodel
+# The Tree Recruitment Scheme
 
 The Tree Recruitment Submodel is designed to predict environmentally sensitive tree recruitment rates within Vegetation Demographic Models (VDMs). 
 
