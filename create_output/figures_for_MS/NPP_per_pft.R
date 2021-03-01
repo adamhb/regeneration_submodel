@@ -3,7 +3,7 @@
 #load libraries
 library(ncdf4)
 library(ncdf.tools)
-from_new_data <- F
+from_new_data <- T
 
 library(magrittr)
 library(tidyverse)
