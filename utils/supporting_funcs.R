@@ -1,5 +1,6 @@
 library(stringr)
 library(tidyverse)
+library(lubridate)
 library(broom)
 
 path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
@@ -67,5 +68,6 @@ lseq <- function(from=1, to=100000, length.out=6) {
 
 source2(file = "parameter_files/bci_parameters.R", start = 1, end = 98)
 source("create_output/figure_formatting.R")
+source("parameter_files/param_names.R")
 
 

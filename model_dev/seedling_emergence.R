@@ -150,8 +150,14 @@ i <- 300
 emerg_data <- tibble()
 for(p in pft_names){
   PFT <- p
-  tmp <- tibble(SMP1 = full_output$SMP[365:(365*5)], SMP2 = lag(full_output$SMP[365:(365*5)], 14)) %>%
+  
+  SMP1 = full_output$SMP[365:(365*5)]
+  SMP1 = runif(n = length(SMP1), min = min(SMP1), max = max(SMP1))
+  SMP2 = lag(full_output$SMP[365:(365*5)], 14)
+  
+  tmp <- tibble(SMP1 = SMP1, SMP2 = SMP2) %>%
     mutate(pft = p)
+  
   emerge_rates <- emerg_func(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago = tmp$SMP1,
                              SMP.4.to.2.wks.ago = tmp$SMP2,
                              seedbank.x = 1,
@@ -159,6 +165,8 @@ for(p in pft_names){
   tmp <- tmp %>% mutate(emerg = emerge_rates)
   emerg_data <- rbind(emerg_data,tmp)
 }
+
+
 
 #create figure
 emerg_vs_SMP_fig <- emerg_data %>%
@@ -168,6 +176,7 @@ emerg_vs_SMP_fig <- emerg_data %>%
   geom_line(size = 2) +
   #annotate(geom = "text", x = -0.5, y = 0.05, label = "b", size = subplot_heading_size) +
   scale_x_continuous(limits = c(0,100)) +
+  scale_y_continuous(limits = c(0,0.25)) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
   ylab(label = "fraction of \n seedbank emerging") +
@@ -175,7 +184,7 @@ emerg_vs_SMP_fig <- emerg_data %>%
   labs(title = "Seedling emergence") +
   theme_minimal() +
   multipanel_theme
-
+emerg_vs_SMP_fig
 
 print("made emerg_vs_SMP_fig")
 

@@ -1,4 +1,4 @@
-from_new_data <- F
+from_new_data <- T
 
 if(from_new_data == T){
   rm(list = ls())

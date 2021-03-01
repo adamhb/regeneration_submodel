@@ -222,7 +222,7 @@ DT_mort_data <- seedling_mort_over_time2 %>%
 DT_mod_Quad <- lm(data = DT_mort_data, formula = M_daily ~ DDs + I(DDs^2))
 summary(DT_mod_Quad)
 
-pred_data <- tibble(DDs = seq(0,6e6,length.out = 100))
+pred_data <- tibble(DDs = seq(0,1.1e7,length.out = 100))
 #pred_data$logLin <- exp(predict(DT_mod_lnLin, newdata = pred_data))
 pred_data$quad <- predict(DT_mod_Quad, newdata = pred_data)
 
@@ -238,7 +238,7 @@ DI_mort_data <- seedling_mort_over_time2 %>%
 DI_mod_Quad <- lm(data = DI_mort_data, formula = M_daily ~ DDs + I(DDs^2))
 summary(DT_mod_Quad)
 
-pred_data_DI <- tibble(DDs = seq(0,6e6,length.out = 100))
+pred_data_DI <- tibble(DDs = seq(0,1.1e7,length.out = 100))
 pred_data_DI$quad <- predict(DI_mod_Quad, newdata = pred_data_DI)
 
 
@@ -302,6 +302,38 @@ names(MDDs_crit) <- pft_names
 print("MDDs_crit:")
 print(MDDs_crit) #in units of m of H20 suction
 
+
+###########################################
+##visualizing moisture deficit days########
+###########################################
+
+SMP_data <- read_csv('temp/SMP_data_for_deficit_graph.csv')
+
+moisture_def_fig <- ggplot(SMP_data, aes(x = day, y = SMP/1e5)) +
+  labs(title = "") +
+  theme_classic()+
+  geom_smooth(size = 1.8, color = "black", se = FALSE)+
+  #smooth_line +
+  #year_axis_def +
+  scale_x_continuous(limits = c(1400,1600))+
+  ylab(expression(paste("Soil matric potential (MPa)")))+
+  xlab(bquote('day of simulation'))+
+  theme(legend.position = "none") +
+  geom_hline(yintercept = psi_crit[1]/1e5, size = 1.8, color = "darkolivegreen2")+
+  #annotate(geom = "text", x = 1500, y = -0.5, label = "e", size = subplot_heading_size) +
+  geom_hline(yintercept = psi_crit[2]/1e5, size = 1.8, color = "darkolivegreen4")+
+  annotate(geom = "text", x = 1575, y = psi_crit[2]/1e5, label = "DI \n threshold", size = 5) + 
+  annotate(geom = "text", x = 1575, y = psi_crit[1]/1e5, label = "DT \n threshold", size = 5) +
+  annotate(geom = "text", x = 1485, y = -2.2, label = "deficit days \n grow \n here", size = 4) +
+  multipanel_theme +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=5))
+
+
+
+
+
+
+
 #defining the new H20 mortality function 
 H20_mort <- function(deficit_days, pft.x){
   PFT <- pft.x
@@ -322,7 +354,7 @@ for(p in c("LD_DT","ST_DT","LD_DI","ST_DI")){
   pft_col <- append(pft_col,tmp)
 }
 
-Fig_seedling_mort_H20 <- pred_data %>%
+data_for_H20_mort_fig <- pred_data %>%
   rbind(pred_data) %>%
   rbind(pred_data_DI) %>%
   rbind(pred_data_DI) %>%
@@ -331,14 +363,18 @@ Fig_seedling_mort_H20 <- pred_data %>%
     DDs < 1e6 | quad < 0 ~ 0,
     DDs >= 1e6 & quad >= 0 ~ quad
   )) %>%
-  mutate(pft = factor(pft,levels = pft_names)) %>%
-  ggplot(aes(x = DDs / 1e5, y = M * 30.4, color = pft, linetype = pft)) +
+  mutate(pft = factor(pft,levels = pft_names))
+
+
+
+Fig_seedling_mort_H20 <- data_for_H20_mort_fig %>%
+  ggplot(aes(x = DDs / 1e5, y = M, color = pft, linetype = pft)) +
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   #annotate(geom = "text", x = 0, y = 0.035, label = "d", size = subplot_heading_size) +
   scale_linetype_manual(values=c("solid", "solid","dashed","dashed"))+
-  ylab(label = "monthly moisture-based \n seedling mortality rate") +
-  xlab(label = "moisture deficit days [MPa days]") +
+  ylab(label = "Daily moisture-based \n seedling mortality rate") +
+  xlab(label = "Moisture deficit days [MPa days]") +
   labs(title = "Moisture-based \n seedling mortality") +
   theme_minimal() +
   # geom_vline(xintercept = mean_bci, linetype = "dotted") +

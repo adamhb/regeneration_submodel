@@ -287,26 +287,7 @@ light_rec_fig <- light_rec_data %>%
 #   write_csv(path = "temp/SMP_data_for_deficit_graph.csv")
 
 
-SMP_data <- read_csv('temp/SMP_data_for_deficit_graph.csv')
 
-moisture_def_fig <- ggplot(SMP_data, aes(x = day, y = SMP/1e5)) +
-  labs(title = "") +
-  theme_classic()+
-  geom_smooth(size = 1.8, color = "black", se = FALSE)+
-  #smooth_line +
-  #year_axis_def +
-  scale_x_continuous(limits = c(1400,1600))+
-  ylab(expression(paste("Soil matric potential (MPa)")))+
-  xlab(bquote('day of simulation'))+
-  theme(legend.position = "none") +
-  geom_hline(yintercept = psi_crit[1]/1e5, size = 1.8, color = "darkolivegreen2")+
-  #annotate(geom = "text", x = 1500, y = -0.5, label = "e", size = subplot_heading_size) +
-  geom_hline(yintercept = psi_crit[2]/1e5, size = 1.8, color = "darkolivegreen4")+
-  annotate(geom = "text", x = 1575, y = psi_crit[2]/1e5, label = "DI \n threshold", size = 5) + 
-  annotate(geom = "text", x = 1575, y = psi_crit[1]/1e5, label = "DT \n threshold", size = 5) +
-  annotate(geom = "text", x = 1485, y = -2.2, label = "deficit days \n grow \n here", size = 4) +
-  multipanel_theme +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size=5))
 
 #makePNG(fig = moisture_def_fig, path_to_output.x = path_to_output, file_name = "viz_def_days")
 

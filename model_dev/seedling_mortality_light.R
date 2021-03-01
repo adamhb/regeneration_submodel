@@ -78,8 +78,9 @@ for(p in pft_names){
 }
 
 
-mean_bci <- (52.2) * 64/90 # MJ of light in prior 3 months
-mean_bci_TOC <- 1512 * 64/90
+mean_bci_understory <- 0.334 * W_ML  # MJ of light in prior W_ML days (64)
+mean_bci_20_pct_gap <- 16.7 * W_ML * 0.2
+mean_bci_TOC <- 16.7 * W_ML # MJ of light at TOC in prior W_ML days (64)
 
 
 light_mort_data <- tibble(pft = pft,
@@ -150,9 +151,12 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
 # P1light_mort <- c(-0.010673455, -0.010673455, -0.003168996, -0.003168996)
 # P2light_mort <- c(-4.217788, -4.217788, -7.142556, -7.142556)
 
+#added this as experiment
+#b.ML <- rep(0,4)
+#names(b.ML) <- pft_names
 
 light_mort_rates <- c()
-lights <- 30:2081 
+lights <- seq(from = mean_bci_understory * 0.6, to = 1.1 * mean_bci_TOC)
 pft <- c()
 for(p in pft_names){
   for(i in 1:length(lights)){
@@ -169,18 +173,20 @@ light_mort_data <- tibble(pft = pft,
                           light_mort_rates = light_mort_rates) 
 
 viz_light_mort <- light_mort_data %>%
-  ggplot(aes(x = lights, y = light_mort_rates * 30, color = pft, linetype = pft)) +
+  ggplot(aes(x = lights, y = light_mort_rates, color = pft, linetype = pft)) +
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "monthly light-based \n seedling mortality rate") +
-  xlab(label = expression(paste("cum. light in prior 2 months ","(MJ m"^"-2",")"))) +
+  ylab(label = "daily light-based \n seedling mortality rate") +
+  xlab(label = expression(atop(paste("Forest floor PAR [MJ m"^"-2","]"),"cum. sum prior 2 months"))) +
+  #xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
   labs(title = "Light-based seedling mortality") +
-  geom_vline(xintercept = mean_bci, linetype = "dotted") +
-  geom_vline(xintercept = mean_bci_TOC, linetype = "dashed") +
+  geom_vline(xintercept = mean_bci_understory, linetype = "dotted") +
+  geom_vline(xintercept = mean_bci_20_pct_gap, linetype = "dashed") +
+  scale_x_continuous(limits = c(0,300)) +
   #annotate(geom = "text", x = 700, y = 0.15, label = "BCI mean \n at smallest cohort", size = 5) +
-  geom_segment(aes(x = 350, y = 0.12, xend = 70, yend = 0.05),
-               arrow = arrow(length = unit(0.5, "cm")), color = "black") +
+  #geom_segment(aes(x = 350, y = 0.12, xend = 70, yend = 0.05),
+              # arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #annotate(geom = "text", x = mean_bci_TOC, y = 0.09, label = "BCI mean \n TOC", size = 5) +
   theme_minimal() +
   multipanel_theme

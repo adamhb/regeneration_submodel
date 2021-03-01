@@ -24,15 +24,15 @@ litter_0 = 0 # the initial mass of carbon in the litter pool (g C)
 #########################
 
 #reproductive allocation
-Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) was 895,861,545,557 before I fixed the weighted average issue
+#Dmax <- c(1295, 1775, 942, 1127) #maximum diamater (mm) was 895,861,545,557 before I fixed the weighted average issue
 b_RA <- c(-3.1380, -2.4607, -2.6518, -2.6171)
 names(b_RA) <- pft_names
 a_RA <- c(0.0058, 0.0059, 0.0042, 0.0049)
 names(a_RA) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
-F_seed <- 0.5 * 0.5 #the fraction of reproductive carbon that is seed
-k <- 0.0125 #shape parameter relating dbh to reproductive probability
+F_seed <- 0.5 * 0.45 #the fraction of reproductive carbon that is seed
+#k <- 0.0125 #shape parameter relating dbh to reproductive probability
 
 #seed bank dynamics
 S_decay <- 0.51 #the annual decay rate of the seedbank
@@ -42,10 +42,10 @@ b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for 
 names(b_emerg) <- pft_names
 W_emerg <- 28
 emerg_thresh <- -15744.65
-b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
-names(b0_light_germ) <- pft_names
-b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
-names(b1_light_germ) <- pft_names
+#b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
+#names(b0_light_germ) <- pft_names
+#b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
+#names(b1_light_germ) <- pft_names
 l_crit <- 70
 
 #light-based seedling mortality
@@ -85,7 +85,7 @@ a_TR <- c(0.004405853, 0.004405853, 0.003523462, 0.003523462)
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names
-W_TR <- 64
+#W_TR <- 64
 
 
 ############################
@@ -100,26 +100,18 @@ seedling_mortality <- 0.98 # mortality rate in every time step. Taken from ED2 c
 #########################################
 #record the paramater values of this run#
 #########################################
+source('parameter_files/param_names.R')
+clps <- function(x){paste0(eval(as.name(x)), collapse = ",")}
+model_params_of_run <- unlist(map(.x = param_names, .f = clps))
+
 paramsOFrun <- tibble(
-  param_names = c("Dmax", "F_repro","k", 
-                "F_seed","S_decay","a_emerg", "b_emerg", 
-                "a.ML","b.ML","W_ML", 
-                "a.MH20","b.MH20","c.MH20","psi_crit","W_psi",
-                "M_background",
-                "a_TR","b_TR","W_TR", 
-                "percent_light","start_date", "end_date","driver_data",
-                "gitCommit"),
-  param_vals = c(paste0(Dmax, collapse = ","),paste0(F_repro, collapse = ","), k,
-                F_seed, S_decay, paste0(a_emerg, collapse = ","), paste0(b_emerg, collapse = ","), 
-                paste0(a.ML, collapse = ","), paste0(b.ML, collapse = ","), W_ML,
-                paste0(a.MH20, collapse = ","),paste0(b.MH20, collapse = ","),paste0(c.MH20, collapse = ","),paste0(psi_crit, collapse = ","),W_psi, 
-                paste0(M_background, collapse = ","),
-                paste0(a_TR, collapse = ","), paste0(b_TR, collapse = ","), W_TR,
-                percent_light, start_date, end_date, basename(driver_data_path),
-                system("git rev-parse HEAD", intern=TRUE)) 
-  )
-
-
+  param_names = c(param_names,
+                  "percent_light","start_date", "end_date","driver_data",
+                  "gitCommit"),
+  param_vals = c(model_params_of_run,
+                 percent_light, start_date, end_date, basename(driver_data_path),
+                 system("git rev-parse HEAD", intern=TRUE)) 
+)
 ##########
 #scratch##
 ##########

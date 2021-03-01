@@ -41,10 +41,10 @@ b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for 
 names(b_emerg) <- pft_names
 W_emerg <- 28
 emerg_thresh <- -15744.65
-b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
-names(b0_light_germ) <- pft_names
-b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
-names(b1_light_germ) <- pft_names
+# b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
+# names(b0_light_germ) <- pft_names
+# b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
+# names(b1_light_germ) <- pft_names
 l_crit <- 22.3
 
 #light-based seedling mortality
@@ -83,7 +83,7 @@ a_TR <- c(0.004405853, 0.004405853, 0.003523462, 0.003523462)
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names
-W_TR <- 64
+#W_TR <- 64
 
 
 ############################
@@ -98,24 +98,18 @@ seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 c
 #########################################
 #record the paramater values of this run#
 #########################################
+source('parameter_files/param_names.R')
+clps <- function(x){paste0(eval(as.name(x)), collapse = ",")}
+model_params_of_run <- unlist(map(.x = param_names, .f = clps))
+
 paramsOFrun <- tibble(
-  param_names = c("Dmax", "F_repro","k", 
-                "F_seed","S_decay","a_emerg", "b_emerg", 
-                "a.ML","b.ML","W_ML", 
-                "a.MH20","b.MH20","c.MH20","psi_crit","W_psi",
-                "M_background",
-                "a_TR","b_TR","W_TR", 
-                "percent_light","start_date", "end_date","driver_data",
-                "gitCommit"),
-  param_vals = c(paste0(Dmax, collapse = ","),paste0(F_repro, collapse = ","), k,
-                F_seed, S_decay, paste0(a_emerg, collapse = ","), paste0(b_emerg, collapse = ","), 
-                paste0(a.ML, collapse = ","), paste0(b.ML, collapse = ","), W_ML,
-                paste0(a.MH20, collapse = ","),paste0(b.MH20, collapse = ","),paste0(c.MH20, collapse = ","),paste0(psi_crit, collapse = ","),W_psi, 
-                paste0(M_background, collapse = ","),
-                paste0(a_TR, collapse = ","), paste0(b_TR, collapse = ","), W_TR,
-                percent_light, start_date, end_date, basename(driver_data_path),
-                system("git rev-parse HEAD", intern=TRUE)) 
-  )
+  param_names = c(param_names,
+                  "percent_light","start_date", "end_date","driver_data",
+                  "gitCommit"),
+  param_vals = c(model_params_of_run,
+                 percent_light, start_date, end_date, basename(driver_data_path),
+                 system("git rev-parse HEAD", intern=TRUE)) 
+)
 
 
 ##########

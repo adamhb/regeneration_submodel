@@ -12,9 +12,11 @@ visualize_process_functions_fig <- plot_grid(F_repro_fig,
                                              Fig_seedling_mort_H20,
                                              viz_light_mort,
                                              light_rec_fig, 
-                                                 nrow = 3,labels = paste0("(",letters[1:6],")"))
+                                                 nrow = 3,labels = paste0("(",letters[1:6],")"), label_size = 20)
 
 makePNG(fig = visualize_process_functions_fig, 
         path_to_output.x = paste0(path_to_output,"forMS/"), 
         file_name = "process_functions",
-        height = 14,width = 12,units = "in",res = 600)
+        height = 14,width = 12,units = "in",res = 70)
+
+print(paste("made visualize process functions figure in",paste0(path_to_output,"forMS/")))

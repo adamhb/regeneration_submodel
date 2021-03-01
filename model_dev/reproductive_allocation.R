@@ -195,6 +195,10 @@ for(i in pft_names){
 efrac(N = 1000, co_dbh_ind = 500, PFT = "ST_DI")
 
 
+#added as experiment
+#b_RA <- rep(0,4)
+#names(b_RA) <- pft_names
+
 F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_names[1]),
                                   efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_names[2]),
                                   efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_names[3]),
@@ -206,13 +210,13 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "solid","solid","solid")) +
   ylab(expression(atop(paste("fraction of ",C[g+r]),"allocated to reproduction"))) +
-  xlab("dbh [mm]") +
+  xlab("cohort dbh [mm]") +
   #annotate(geom = "text", x = 0, y = 0.1, label = "a", size = subplot_heading_size) +
   labs(title = "Allocation to reproduction") +
   theme_minimal() +
   multipanel_theme +
   #legend.key.size = unit(2,"line")) +
-  theme(legend.position = c(0.2,0.8), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
+  theme(legend.position = c(0.75,0.25), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
   guides(color = guide_legend(override.aes = list(size=8)))
 
 makePNG(fig = F_repro_fig, path_to_output.x = paste0(path_to_output,"model_dev_figs/"), file_name = "reproductive_allocation")

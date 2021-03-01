@@ -3,7 +3,7 @@ source("utils/supporting_funcs.R")
 
 BCImeanTOC <- 16.7 #MJ m-2 day-1
 BCImeanUnderstory <- BCImeanTOC* 0.02 #MJ m-2 day-1
-BCImeanUnderstory.W_TR <- BCImeanUnderstory * W_TR # MJ m-2 W_TR-1
+BCImean_20_pct_gap <- BCImeanTOC* 0.2
 
 #deriving a.TR: the mean transition rate under mean light
 a.TR.LD <- (0.5/365) %>% #the default fraction of the seed bank that emerges in FATES and CLM(ED)
@@ -36,6 +36,8 @@ light_MJ_per_m2_day <- BCImeanTOC * RIs
 
 #use rec function to create range of transition rates
 
+
+
 light_rec_data3 <- tibble()
 
 #for(i in pft_names[c(1,3)]){
@@ -55,15 +57,15 @@ for(i in pft_names){
 }
 
 light_rec_fig <- light_rec_data3 %>%
-  ggplot(aes(x = light, y = daily_transition_rate * 30.4, color = pft, linetype = pft)) +
+  ggplot(aes(x = light, y = daily_transition_rate, color = pft, linetype = pft)) +
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values = c("solid","dashed","solid","dashed")) +
-  ylab(label = "monthly seedling to \n sapling transition rate") +
+  ylab(label = "daily seedling to \n sapling transition rate") +
   scale_x_continuous(limits = c(0,BCImeanTOC * 0.25)) +
-  scale_y_continuous(limits = c(0,0.7)) +
+  scale_y_continuous(limits = c(0,0.02)) +
   #xlab(label = "cumulative solar radiation at seedling layer \n (MJ accumulated in prior 6 months)") +
-  xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
+  xlab(expression(atop(paste("Forest floor PAR [MJ m"^"-2"," day"^"-1","]"),"mean over prior 2 months"))) +
   labs(title = "Seedling to sapling transition") +
   geom_vline(xintercept = BCImeanTOC * 0.2, linetype = "dashed") +
   #annotate("text", x = 2, y = 0.1, label = "mean light at \n BCI seedling layer", size = 5) +
