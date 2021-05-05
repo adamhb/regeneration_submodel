@@ -179,7 +179,7 @@ emerg_vs_SMP_fig <- emerg_data %>%
   scale_y_continuous(limits = c(0,0.25)) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "fraction of \n seedbank emerging") +
+  ylab(label = "daily fraction of \n seedbank emerging") +
   xlab(label = "% increase in SMP \n in prior month") +
   labs(title = "Seedling emergence") +
   theme_minimal() +

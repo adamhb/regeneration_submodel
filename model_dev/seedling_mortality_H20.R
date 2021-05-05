@@ -255,7 +255,7 @@ DT_MDDs_vs_M <- DT_mort_data %>%
   scale_y_continuous(limits = c(0,1.3)) +
   #geom_vline(xintercept = 1.4, linetype = "dotted") +
   xlab(label = "Moisture deficit days [MPa days]") +
-  ylab(label = expression(paste("Daily mortality rate [x 10"^"-3","]"))) +
+  ylab(label = expression(paste("daily mortality rate [x 10"^"-3","]"))) +
   adams_theme +
   theme(legend.position = c(0.25,0.75))
 
@@ -373,9 +373,9 @@ Fig_seedling_mort_H20 <- data_for_H20_mort_fig %>%
   scale_color_manual(values = pft.cols) +
   #annotate(geom = "text", x = 0, y = 0.035, label = "d", size = subplot_heading_size) +
   scale_linetype_manual(values=c("solid", "solid","dashed","dashed"))+
-  ylab(label = "Daily moisture-based \n seedling mortality rate") +
+  ylab(label = "Daily moisture stress \n seedling mortality rate") +
   xlab(label = "Moisture deficit days [MPa days]") +
-  labs(title = "Moisture-based \n seedling mortality") +
+  labs(title = "Moisture stress \n seedling mortality") +
   theme_minimal() +
   # geom_vline(xintercept = mean_bci, linetype = "dotted") +
   # geom_vline(xintercept = mean_bci_TOC, linetype = "dotted") +

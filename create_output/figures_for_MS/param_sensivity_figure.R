@@ -1,4 +1,4 @@
-from_new_data <- TRUE
+from_new_data <- FALSE
 print("creating parameter sensitivity figure...")
 
 #generate param sensitivity data

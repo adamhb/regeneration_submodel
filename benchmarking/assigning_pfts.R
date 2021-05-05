@@ -64,6 +64,19 @@ wsg <- wsg.ctfs3 %>%
   drop_na(sp,wsg) %>%
   distinct(Latin,sp,wsg)
 
+
+understory_greater_than_20cm <- bci.full %>% 
+  select(sp, dbh) %>% 
+  filter(dbh > 200) %>% 
+  left_join(g.forms, by = "sp") %>%
+  filter(grform == "U") %>%
+  #filter(grform != "U" & grform != "M") %>%
+  select(sp) %>% distinct(sp) %>% left_join(bci.spptable) %>% pull(Latin) %>% tibble() %>% drop_na()
+names(understory_greater_than_20cm) <- "Latin"
+
+write_csv(x = understory_greater_than_20cm, path = "understory_greater_than_20cm.csv")
+
+
 #defining canopy species according to Powell et al. 2018
 canopy_species_bci <- bci.full %>% 
   select(sp, dbh) %>% 
