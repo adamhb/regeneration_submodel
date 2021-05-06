@@ -5,8 +5,9 @@ source("utils/supporting_funcs.R")
 ###########################
 germ_data_Pearson <- read_csv(paste0(path_to_observations,"Pearson_et_al_2002_Fig2_data.csv"))  #data from Pearson et al., 2002
 #source2(file = "runs/ED2_BASE.R",start = 5,end = 45)
-input_vars <- read_csv("temp/input_vars.csv")
-full_output <- read_csv("temp/full_output.csv")
+source(file = 'runs/ED2_BASE.R')
+#input_vars <- read_csv("temp/input_vars.csv")
+#full_output <- read_csv("temp/full_output.csv")
 source("model_dev/photoblastic_germination.R")
 
 
@@ -16,15 +17,46 @@ source("model_dev/photoblastic_germination.R")
 #This function was created by looking at seasonal seedling emergence observations (Garwood, 1983)
 
 
-emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x, light.xx){
+#old params
+# a_emerg <- rep(0.0006,4)
+# names(a_emerg) <- pft_names
+# b_emerg <- c(1.6,1.6,1.2,1.2)
+# names(b_emerg) <- pft_names
+
+
+#new params
+
+# emerg_func_old <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x, light.xx){
+#   
+#   if(input_vars$SMP[i] < emerg_thresh){
+#     frac_emerg <- 0
+#   } else {
+#     
+#     log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
+#     
+#     frac_emerg <- (10^log10_frac_emerg) *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+#     
+#     #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+#     
+#   }
+#   
+#   C_emerg <- frac_emerg * seedbank.x
+#   
+#   out <- list(frac_emerg, C_emerg)
+#   names(out) <- c("frac_emerg", "C_emerg")
+#   return(out)
+# }
+
+
+emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
   
-  if(input_vars$SMP[i] < emerg_thresh){
+  wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
+  
+  if(SMP.2.to.0.wks.ago < emerg_thresh){
     frac_emerg <- 0
   } else {
     
-    log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
-    
-    frac_emerg <- (10^log10_frac_emerg) *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
     
     #if(frac_emerg > 0.07){frac_emerg <- 0.07}
     
@@ -37,13 +69,79 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, S
   return(out)
 }
 
+
+#emerg_func(a = 0.0006, b = 1.2, SMP.2.to.0.wks.ago = -1471, light.xx = 0.334, seedbank.x = 1)
+
+#create the data with the emerg func
+emerg_data <- tibble()
+SMPrange <- seq(from = summary(input_vars$SMP)[1], to = summary(input_vars$SMP)[6], length.out = 200)
+for(p in pft_names){
+  
+    PFT <- p
+    tmp <- tibble(SMP = SMPrange) %>%
+      mutate(pft = p)
+    
+    emergs <- c()
+    for(i in 1:length(SMPrange)){
+    
+      emerg_rate_i <- emerg_func(a = a_emerg[PFT], 
+                               b = b_emerg[PFT], 
+                               SMP.2.to.0.wks.ago = tmp$SMP[i],
+                               #SMP.4.to.2.wks.ago = tmp$SMP2,
+                               seedbank.x = 1,
+                               light.xx = 16.7)$frac_emerg
+    emergs <- append(emergs,emerg_rate_i)
+  }
+  tmp <- tmp %>% mutate(emerg = emergs)
+  emerg_data <- rbind(emerg_data,tmp)
+}
+
+
+#create figure
+emerg_vs_SMP_fig <- emerg_data %>%
+  drop_na() %>%
+  #mutate(delta = (abs(SMP2) - abs(SMP1)) / abs(SMP2) ) %>%
+  ggplot(aes(x = SMP/1e5, y = emerg, color = pft, linetype = pft)) +
+  geom_line(size = 2) +
+  #annotate(geom = "text", x = -0.5, y = 0.05, label = "b", size = subplot_heading_size) +
+  scale_x_continuous(limits = c(-0.25,0)) +
+  scale_y_continuous(limits = c(0,0.25)) +
+  scale_color_manual(values = pft.cols) +
+  scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
+  ylab(label = "daily fraction of \n seedbank emerging") +
+  xlab(label = "SMP \n in prior two weeks") +
+  labs(title = "Seedling emergence") +
+  theme_minimal() +
+  multipanel_theme
+emerg_vs_SMP_fig
+
+print("made emerg_vs_SMP_fig")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ########################
 #derivation of a_emerg##
 ########################
+##DEPRECATED
 ##the mean emergence when light and moisture are not limiting
-a_emerg <- germ_data_Pearson %>% pull(germ) %>% mean() %>% `/` (100*60) %>% rep(.,4) #data from Pearson et al., 2002
-names(a_emerg) <- pft_names
-print(paste("a_emerge =",a_emerg,"for all PFTs"))
+# a_emerg <- germ_data_Pearson %>% pull(germ) %>% mean() %>% `/` (100*60) %>% rep(.,4) #data from Pearson et al., 2002
+# names(a_emerg) <- pft_names
+# print(paste("a_emerge =",a_emerg,"for all PFTs"))
+
+
+
+
 
 ###############################################################
 #derivation of psi_emerge (soil moisture emergence threshold)##
@@ -145,48 +243,6 @@ print("made seasonal_emergence_graph")
 
 
 
-i <- 300
-#create the data
-emerg_data <- tibble()
-for(p in pft_names){
-  PFT <- p
-  
-  SMP1 = full_output$SMP[365:(365*5)]
-  SMP1 = runif(n = length(SMP1), min = min(SMP1), max = max(SMP1))
-  SMP2 = lag(full_output$SMP[365:(365*5)], 14)
-  
-  tmp <- tibble(SMP1 = SMP1, SMP2 = SMP2) %>%
-    mutate(pft = p)
-  
-  emerge_rates <- emerg_func(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago = tmp$SMP1,
-                             SMP.4.to.2.wks.ago = tmp$SMP2,
-                             seedbank.x = 1,
-                             light.xx = 16.7)$frac_emerg
-  tmp <- tmp %>% mutate(emerg = emerge_rates)
-  emerg_data <- rbind(emerg_data,tmp)
-}
-
-
-
-#create figure
-emerg_vs_SMP_fig <- emerg_data %>%
-  drop_na() %>%
-  mutate(delta = (abs(SMP2) - abs(SMP1)) / abs(SMP2) ) %>%
-  ggplot(aes(x = delta * 100, y = emerg, color = pft, linetype = pft)) +
-  geom_line(size = 2) +
-  #annotate(geom = "text", x = -0.5, y = 0.05, label = "b", size = subplot_heading_size) +
-  scale_x_continuous(limits = c(0,100)) +
-  scale_y_continuous(limits = c(0,0.25)) +
-  scale_color_manual(values = pft.cols) +
-  scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "daily fraction of \n seedbank emerging") +
-  xlab(label = "% increase in SMP \n in prior month") +
-  labs(title = "Seedling emergence") +
-  theme_minimal() +
-  multipanel_theme
-emerg_vs_SMP_fig
-
-print("made emerg_vs_SMP_fig")
 
 
 

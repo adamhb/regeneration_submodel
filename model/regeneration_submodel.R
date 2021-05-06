@@ -58,18 +58,39 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional 
 
 
 
-emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x, light.xx){
+# emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, SMP.4.to.2.wks.ago, seedbank.x, light.xx){
+#   
+#   if(input_vars$SMP[i] < emerg_thresh){
+#     frac_emerg <- 0
+#   } else {
+#   
+#   log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
+#   
+#   frac_emerg <- (10^log10_frac_emerg) *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+#                                                                           
+#   #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+#   
+#   }
+#   
+#   C_emerg <- frac_emerg * seedbank.x
+#   
+#   out <- list(frac_emerg, C_emerg)
+#   names(out) <- c("frac_emerg", "C_emerg")
+#   return(out)
+# }
+
+emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
   
-  if(input_vars$SMP[i] < emerg_thresh){
+  wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
+  
+  if(SMP.2.to.0.wks.ago < emerg_thresh){
     frac_emerg <- 0
   } else {
-  
-  log10_frac_emerg <- log10(a) + b*log10(abs(SMP.4.to.2.wks.ago)/abs(SMP.2.to.0.wks.ago)) 
-  
-  frac_emerg <- (10^log10_frac_emerg) *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
-                                                                          
-  #if(frac_emerg > 0.07){frac_emerg <- 0.07}
-  
+    
+    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+    
+    #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+    
   }
   
   C_emerg <- frac_emerg * seedbank.x
@@ -78,8 +99,6 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, S
   names(out) <- c("frac_emerg", "C_emerg")
   return(out)
 }
-
-
 
 
 def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
@@ -348,8 +367,6 @@ for(PFT in pft_names){
         #- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg %>%
         - emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
                                                   no = input_vars$SMP[i])), 
-                     SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
-                                                  no = input_vars$SMP[i])),
                      seedbank.x = seedbank[i],
                      light.xx = input_vars$light[i])$C_emerg %>%
         + (F_seed * input_vars$c_repro[i])
@@ -358,8 +375,6 @@ for(PFT in pft_names){
       
       frac_emerging[i+1] <- emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
                                                                     no = input_vars$SMP[i])), 
-                                       SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
-                                                                    no = input_vars$SMP[i])),
                                        seedbank.x = seedbank[i],
                                        light.xx = input_vars$light[i])$frac_emerg
       
@@ -373,8 +388,6 @@ for(PFT in pft_names){
         #+ (emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg)  %>%
         + emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
                                                   no = input_vars$SMP[i])), 
-                     SMP.4.to.2.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):(i-round(W_emerg)/2)]), 
-                                                  no = input_vars$SMP[i])),
                      seedbank.x = seedbank[i],
                      light.xx = input_vars$light[i])$C_emerg %>%
         - ((light_mort(light = ifelse(test = i > W_ML, yes = sum(input_vars$light[(i-W_ML):i] +0.0001), no = input_vars$light[i]*W_ML + 0.00001), seedpool.x = seedpool[i])) * seedpool[i]) %>%
