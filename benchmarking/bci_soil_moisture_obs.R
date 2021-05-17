@@ -18,7 +18,7 @@ PTF_func <- function(sgwc){
 
 path_to_benchmarking_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 
-sm.obs <- read_csv(paste0(path_to_benchmarking_data,"bci_lutz_soil_man.csv"))
+sm.obs <- read_csv(paste0(path_to_benchmarking_data,"bci_lutz_soil_man.csv")) # https://smithsonian.figshare.com/articles/dataset/Barro_Colorado_Island_Lutz_catchment_Soil_moisture_manual/10042517/3
 
 Lutz.smp <- sm.obs %>%
   filter(site == "LUTZ *",

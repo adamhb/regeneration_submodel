@@ -215,6 +215,8 @@ ED2_data1 <- ED2_data %>%
   mutate(Date = ymd(date)) 
 
 
+  
+
 #converting ED2 data to daily timestep
 ED2_data_daily <- tibble()
 PFTs <- pft_names

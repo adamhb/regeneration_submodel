@@ -44,10 +44,14 @@ bench_data <- bench4graph %>%
 ##################################
 #making figure with default params
 ##################################
+addline_format <- function(x,...){
+  gsub('\\s','\n',x)
+}
+
 N_recs_per_year_BCI_params <- read_csv("temp/N_recs_per_yr_bci_params.csv") %>% mutate(t_vs_u = "tuned")
 N_recs_per_year_default_params <- read_csv("temp/N_recs_per_yr_default_params.csv") %>% mutate(t_vs_u = "untuned")
 
-benchmark_fig <- N_recs_per_year_default_params %>%
+benchmark_fig_data <- N_recs_per_year_default_params %>%
   rbind(N_recs_per_year_BCI_params) %>% 
   gather(submodel:ED2, key = "model", value = "R") %>%
   mutate(model = case_when(
@@ -60,33 +64,43 @@ benchmark_fig <- N_recs_per_year_default_params %>%
   rename(R = Rmean) %>% 
   ungroup() %>%
   rbind(bench_data) %>%
-  mutate(model = factor(model,levels = c("ED2 untuned","TRS untuned","BCI obs.","ED2 tuned","TRS tuned"))) %>%
+  mutate(model = factor(model,levels = c("ED2 untuned","TRS untuned","BCI obs.","ED2 tuned","TRS tuned")))
+
+
+benchmark_fig <- benchmark_fig_data %>%
   ggplot(mapping = aes(x = model, y = R, color = pft)) +
   geom_point(size = psize, stroke = 1, alpha = 1, shape = 1, position = position_dodge(width = 0.1)) +
   scale_color_manual(values = pft.cols) +
   scale_y_log10(limits = c(1,300), breaks = round(lseq(from = 1, to = 300,length.out = 7)),labels = round(lseq(from = 2, to = 300,length.out = 7))) +
+  scale_x_discrete(breaks=unique(levels(benchmark_fig_data$model)), 
+                   labels=addline_format(unique(levels(benchmark_fig_data$model)))) +
   geom_errorbar(aes(ymin= (R - se_R), ymax = (R + se_R)), width=0, show.legend = F,
                 position = position_dodge(width = 0.1)) +
   ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
   xlab(bquote('model'))+
   adams_theme_benchFig +
-  theme(legend.position = "top",
+  theme(legend.position = c(0.5,0.25),
         legend.direction = "horizontal",
         legend.background = element_rect(fill = "white"),
-        #legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm"),
+        legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm"),
+        legend.key.size = unit(0.1, "cm"),
+        panel.spacing = unit(0.1, "cm"),
         legend.text = element_text(size = 12),
         axis.text.x = element_text(angle = 90, vjust = 0, hjust = 0, size = 15),
         axis.title.x = element_blank()) +
-  guides(color = guide_legend(override.aes = list(shape = 15)))
-
+  guides(color = guide_legend(override.aes = list(shape = 15)),
+         fill=guide_legend(title="PFT"))
 benchmark_fig
+
+
 
 makePNG(fig = benchmark_fig, path_to_output.x = paste0(path_to_output,"forMS/"), 
         file_name = "benchmark_fig",width = 6)
 
 
 
-##################################
+
+  ################################
 #making figure with BCI params
 ##################################
 

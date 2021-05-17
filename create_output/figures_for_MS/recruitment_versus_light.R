@@ -31,13 +31,21 @@ source("create_output/figure_formatting.R")
 
 #import benchmarking data
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
+
 bench4graph <- bench %>%
+  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
   filter(date > start_date,
          date < end_date) %>%
-  group_by(pft) %>%
-  summarise(R_bench = mean(rec_rate)) %>%
+  group_by(pft,int) %>%
+  summarise(BCI_obs = mean(rec_rate),
+            start_dateB = min(date),
+            end_dateB = max(date),
+            date = mean(date)) %>%
+  mutate(model = "BCI obs.") %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  group_by(pft) %>% summarise(R = mean(BCI_obs), se_R = sd(BCI_obs)/sqrt(length(BCI_obs))) %>%
   mutate(light = 2) %>%
-  mutate(model = "BCI obs.")
+  mutate(model = "BCI obs.") 
 
 
 psize <- 5
@@ -118,7 +126,7 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   #geom_point() +
   geom_point(size = psize, stroke = 1) +
   geom_line(show.legend = F) +
-  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = psize, stroke = 2, position = pd) +
+  geom_point(data = bench4graph, mapping = aes(x = light, y = R, color = pft, shape = model), size = psize, stroke = 2, position = pd) +
   
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
   scale_color_manual(values = pft.cols) +
@@ -183,7 +191,7 @@ gather(submodel:ED2, key = "model", value = "R") %>%
                )) %>%
                filter(model == "TRS"), mapping = aes(x = mean_pct_light * 2e6, y = R*2e6, color = pft, shape = model), size = psize) +
   geom_line(show.legend = F) +
-  geom_point(data = bench4graph, mapping = aes(x = light, y = R_bench, color = pft, shape = model), size = psize, stroke = 2) +
+  geom_point(data = bench4graph, mapping = aes(x = light, y = R, color = pft, shape = model), size = psize, stroke = 2) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
   scale_color_manual(values = pft.cols) +
   #scale_shape_manual(values = c(10,1,2)) +
@@ -206,7 +214,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   theme(#axis.text.x=element_blank()),
     axis.text.y=element_blank(),axis.ticks=element_blank(),
     axis.title.y=element_blank(),
-    axis.title.x = element_blank()) +
+    axis.title.x = element_blank(),
+    legend.position = "none") +
   guides(color = guide_legend(override.aes = list(shape = 15)))
     #legend.position = c(0.5,0.8))
   
@@ -223,15 +232,17 @@ gather(submodel:ED2, key = "model", value = "R") %>%
 #   and the global y-axis title.
 # The outer grid.arrange() function arranges and draws the arrangeGrob object and the legend.
 
-
-
 plot1 <- Rvsl_submodel
 plot2 <- Rvsl_ED2
 
-# test_plot.x <- plot_grid(plot1, plot2,
-#                        rel_widths = c(2,2.5))
 
-test_plot <- ggdraw(add_sub(test_plot.x, "light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), size = axis_size ))
+
+
+test_plot.x <- plot_grid(plot1, plot2,
+                        rel_widths = c(2.2,2), labels = c("(a)","(b)"), label_x = 0.2)
+
+test_plot <- ggdraw(add_sub(test_plot.x, "light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), 
+                            size = axis_size))
 test_plot
 
 PNGwidth <- 9

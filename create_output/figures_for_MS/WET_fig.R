@@ -140,7 +140,7 @@ WET_2pct <- N_recs_per_year_pfts_low_light %>%
         legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm")) +
   guides(color = guide_legend(override.aes = list(size=3, shape = 15)),
          shape = guide_legend(override.aes = list(size=3)),
-         fill=guide_legend(title="PFT"))
+           fill=guide_legend(title="PFT"))
 
 
 WET <- plot_grid(WET_2pct, WET_20_pct, nrow = 2)
