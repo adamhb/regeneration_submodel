@@ -38,9 +38,9 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   scale_shape_manual(values = c(24,21)) +
   scale_y_continuous(limits = c(0,350), breaks = c(0,50,100,150,200,250,300,350)) +
   #scale_y_log10(limits = c(0,360), breaks = lseq(from = )) +
-  geom_vline(xintercept = as.Date("2010-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
+  geom_vline(xintercept = as.Date("2009-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
   #annotate(geom = "text", x = as.Date("2005-01-01"), y = 350, label = "a", size = 8) +
-  geom_vline(xintercept = as.Date("2030-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
+  geom_vline(xintercept = as.Date("2029-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
   #scale_linetype_manual(values = c("dotted","dashed")) +
   #scale_y_log10(labels = c(0,10,100)) +
   #scale_y_continuous(limits = c(0,300)) + 
@@ -80,16 +80,17 @@ ENSO <- full_output %>%
     model == "submodel" ~ "TRS",
     model == "ED2" ~ "ED2" 
   )) %>%
+  mutate(model = factor(model,levels = c("TRS","ED2"))) %>%
   filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   arrange(desc(pft)) %>% 
-  ggplot(aes(x = as.Date(date), y = R*365, color = pft, linetype = model)) +
+  ggplot(aes(x = as.Date(date), y = R*365, color = pft)) +
   #custom_line +
   geom_line(position=position_dodge(width = 1)) +
   #scale_y_log10() +
-  scale_linetype_manual(values = c("dashed","solid")) +
+  #scale_linetype_manual(values = c("dashed","solid")) +
   #year_axis +
-  ylab(expression(paste('N recruits'," ha"^"-1"," year"^"-1")))+
-  scale_y_continuous(limits = c(0,710), breaks = c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700)) +
+  ylab(expression(paste('N recruits'," [ha"^"-1"," year"^"-1","]")))+
+  scale_y_continuous(limits = c(0,355), breaks = c(0,50,100,150,200,250,300,350)) +
   scale_x_date(limits = c(as.Date("2028-10-01"),as.Date("2029-10-01")), 
                date_breaks = "2 months", 
                labels = date_format("%b")) +
@@ -97,9 +98,10 @@ ENSO <- full_output %>%
   #labs(title = paste('Recruitment across \n an ENSO event at',percent_light * 100,"% light")) +
   scale_color_manual(values = pft.cols) +
   #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
+  facet_wrap(~model) +
   long_term_sim_theme +
   adams_guides +
-  theme(legend.position = c(0.2,0.8),
+  theme(legend.position = "none",
         #legend.direction = "horizontal",
         legend.box.background = element_rect(colour = "black"),
         legend.text = element_text(size = 12),
@@ -137,6 +139,44 @@ makePNG(fig = ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_nam
 # library(grid)
 
 
+#calculating recruitment drop over ENSO years
+EnsoData <- full_output %>%
+  rename(submodel = R, ED2 = ED2_R) %>%
+  gather(c(submodel,ED2), key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
+  mutate(model = factor(model,levels = c("TRS","ED2"))) %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  arrange(desc(pft))
+
+names(EnsoData)
+
+EnsoData1 <- EnsoData %>% dplyr::select(yr,date,pft,R,model) %>% arrange(yr,date,model,pft,R) %>%
+  group_by(yr,pft,model) %>%
+  summarise(r = sum(R)) %>%
+  filter(yr %in% c(2008,2009,2028,2029)) %>%
+  mutate(dtvsdi = case_when(
+    pft %in% c("LD_DI","ST_DI") ~ "DI",
+    pft %in% c("LD_DT","ST_DT") ~ "DT"
+  )) %>%
+  mutate(ENSOyr = case_when(
+    yr %in% c("2009","2029") ~ TRUE,
+    TRUE ~ FALSE
+  )) %>% 
+  group_by(model,ENSOyr) %>%
+  summarise(r = mean(r))
+
+
+trs <- EnsoData1 %>% filter(model == "TRS") %>%
+  pull(r)
+trs_pct_reduction <- (trs[1] - trs[2]) / trs[1]
+
+
+ED2 <- EnsoData1 %>% filter(model == "ED2") %>%
+  pull(r)
+ED2_pct_reduction <- (ED2[1] - ED2[2]) / ED2[1]
 
 
 

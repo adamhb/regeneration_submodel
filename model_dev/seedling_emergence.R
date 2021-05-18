@@ -5,7 +5,7 @@ source("utils/supporting_funcs.R")
 ###########################
 germ_data_Pearson <- read_csv(paste0(path_to_observations,"Pearson_et_al_2002_Fig2_data.csv"))  #data from Pearson et al., 2002
 #source2(file = "runs/ED2_BASE.R",start = 5,end = 45)
-source(file = 'runs/ED2_BASE.R')
+#source(file = 'runs/ED2_BASE.R')
 #input_vars <- read_csv("temp/input_vars.csv")
 #full_output <- read_csv("temp/full_output.csv")
 source("model_dev/photoblastic_germination.R")
@@ -74,7 +74,9 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
 
 #create the data with the emerg func
 emerg_data <- tibble()
-SMPrange <- seq(from = summary(input_vars$SMP)[1], to = summary(input_vars$SMP)[6], length.out = 200)
+SMPrange <- read_csv(file = 'temp/SMPrange.csv')
+SMPrange <- SMPrange$SMPrange
+
 for(p in pft_names){
   
     PFT <- p
@@ -109,7 +111,7 @@ emerg_vs_SMP_fig <- emerg_data %>%
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
   ylab(label = "daily fraction of \n seedbank emerging") +
-  xlab(label = "SMP \n in prior two weeks") +
+  xlab(label = "SMP [MPa] \n in prior two weeks") +
   labs(title = "Seedling emergence") +
   theme_minimal() +
   multipanel_theme
@@ -200,7 +202,8 @@ seasonal_emergence_graph <- ggplot(data = SMP_frac_emerg,
 
 print("made seasonal_emergence_graph")
 
-#makePNG(fig = emergence_graph, path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "emergence_vs_moisture")
+makePNG(fig = seasonal_emergence_graph, path_to_output.x = paste0(path_to_output,"model_dev_figs/"),
+        file_name = "seasonal_emergence_graph")
 
 
 #####################################
