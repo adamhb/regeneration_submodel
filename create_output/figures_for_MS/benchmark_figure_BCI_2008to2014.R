@@ -65,8 +65,8 @@ benchmark_fig_data <- N_recs_per_year_default_params %>%
   ungroup() %>%
   rbind(bench_data) %>%
   mutate(model = factor(model,levels = c("ED2 untuned","TRS untuned","BCI obs.","ED2 tuned","TRS tuned"))) %>%
-  #filter(model %in% c("ED2 untuned","TRS untuned","BCI obs."))
-  filter(model %in% c("BCI obs.","ED2 tuned","TRS tuned"))
+  filter(model %in% c("ED2 untuned","TRS untuned","BCI obs."))
+  #filter(model %in% c("BCI obs.","ED2 tuned","TRS tuned"))
 
 
 benchmark_fig <- benchmark_fig_data %>%
