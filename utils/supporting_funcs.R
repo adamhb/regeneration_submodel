@@ -35,6 +35,10 @@ dateFromFile <- function(filename){
   return(date)
 }
 
+
+
+
+
 makePNG <- function(fig, path_to_output.x = path_to_output, file_name = "unamed_graph",
                     height=PNGheight,  width=PNGwidth, units=PNGunits, res = PNGres){
   
@@ -58,6 +62,13 @@ source2 <- function(file, start, end, ...) {
   file.lines.collapsed <- paste(file.lines, collapse='\n')
   source(textConnection(file.lines.collapsed), ...)
 }
+
+
+load_basic_inputData <- function(){
+
+  source2(file = 'runs/ED2_BASE.R',start = )
+}
+
 
 #generate a log sequence
 lseq <- function(from=1, to=100000, length.out=6) {
