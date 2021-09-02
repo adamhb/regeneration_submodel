@@ -212,7 +212,7 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
   ylab(expression(atop(paste("fraction of ",C[g+r]),"allocated to reproduction"))) +
   xlab("cohort dbh [mm]") +
   #annotate(geom = "text", x = 0, y = 0.1, label = "a", size = subplot_heading_size) +
-  labs(title = "Allocation to reproduction") +
+  labs(title = "Size & \n reproductive allocation") +
   theme_minimal() +
   multipanel_theme +
   #legend.key.size = unit(2,"line")) +

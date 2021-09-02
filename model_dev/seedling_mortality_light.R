@@ -156,7 +156,7 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
 #names(b.ML) <- pft_names
 
 light_mort_rates <- c()
-lights <- seq(from = mean_bci_understory * 0.6, to = 1.1 * mean_bci_TOC)
+lights <- seq(from = mean_bci_understory * 0.6, to = 1.1 * mean_bci_TOC) 
 pft <- c()
 for(p in pft_names){
   for(i in 1:length(lights)){
@@ -178,9 +178,9 @@ viz_light_mort <- light_mort_data %>%
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
   ylab(label = "daily light stress \n seedling mortality rate") +
-  xlab(label = expression(atop(paste("Forest floor PAR [MJ m"^"-2","]"),"cum. sum prior 2 months"))) +
+  xlab(label = expression(atop(paste("forest floor light [MJ PAR m"^"-2","]"),"cum. sum prior 2 months"))) +
   #xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
-  labs(title = "Light stress seedling mortality") +
+  labs(title = "Light & \n seedling mortality") +
   geom_vline(xintercept = mean_bci_understory, linetype = "dotted") +
   geom_vline(xintercept = mean_bci_20_pct_gap, linetype = "dashed") +
   scale_x_continuous(limits = c(0,300)) +

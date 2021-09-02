@@ -1,0 +1,6 @@
+source('create_output/figures_for_MS/recruitment_versus_light.R')
+source('create_output/figures_for_MS/recruitment_vs_SMP.R')
+source('create_output/figures_for_MS/WET_fig.R')
+source('create_output/figures_for_MS/ENSO_figs.R')
+source('create_output/figures_for_MS/param_sensivity_figure.R')
+source('create_output/figures_for_MS/DRY_DS_fig (2).R')

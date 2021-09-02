@@ -64,9 +64,9 @@ benchmark_fig_data <- N_recs_per_year_default_params %>%
   rename(R = Rmean) %>% 
   ungroup() %>%
   rbind(bench_data) %>%
-  mutate(model = factor(model,levels = c("ED2 untuned","TRS untuned","BCI obs.","ED2 tuned","TRS tuned"))) %>%
+  mutate(model = factor(model,levels = c("ED2 untuned","TRS untuned","BCI obs.","ED2 tuned","TRS tuned"))) 
   #filter(model %in% c("ED2 untuned","TRS untuned","BCI obs."))
-  filter(model %in% c("BCI obs.","ED2 tuned","TRS tuned"))
+  #filter(model %in% c("BCI obs.","ED2 tuned","TRS tuned"))
 
 
 benchmark_fig <- benchmark_fig_data %>%
@@ -81,8 +81,8 @@ benchmark_fig <- benchmark_fig_data %>%
   ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
   xlab(bquote('model'))+
   adams_theme_benchFig +
-  theme(legend.position = c(0.5,0.25),
-        legend.direction = "horizontal",
+  theme(legend.position = c(0.15,0.2),
+        legend.direction = "vertical",
         legend.background = element_rect(fill = "white"),
         legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm"),
         legend.key.size = unit(0.1, "cm"),

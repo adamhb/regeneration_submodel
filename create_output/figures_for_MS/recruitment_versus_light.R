@@ -135,8 +135,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   scale_x_log10(breaks = round(lseq(from = 1, to = 100,length.out = 5)),
                 labels = round(lseq(from = 1, to = 100,length.out = 5)),
                 limits = c(1,100)) +
-  scale_y_continuous(limits = c(0,300), breaks = seq(0,300,100)) +
-  #scale_y_log10() +
+  #scale_y_continuous(limits = c(0,500), breaks = seq(0,500,100)) +
+  scale_y_log10(limits = c(5,500)) +
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer [% TOC]") +
@@ -147,8 +147,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   #             arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #annotate(geom = "text", x = 2, y = 115, label = "LD recruitment\nfails", size = 4) +
   #annotate(geom = "text", x = 3, y = 350, label = "LD_DT recruitment\ndominates", size = 4) +
-  geom_segment(aes(x = 7, y = 350, xend = 25, yend = 350),
-               arrow = arrow(length = unit(0.5, "cm")), color = "black") +
+  #geom_segment(aes(x = 7, y = 350, xend = 25, yend = 350),
+  #             arrow = arrow(length = unit(0.5, "cm")), color = "black") +
   #plot_title +
   #facet_wrap(~model) +
   adams_theme +
@@ -199,8 +199,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   scale_x_log10(breaks = round(lseq(from = 1, to = 100,length.out = 5)),
                 labels = round(lseq(from = 1, to = 100,length.out = 5)),
                 limits = c(1,100)) +
-  scale_y_continuous(limits = c(0,300), breaks = seq(0,300,100)) +
-  #scale_y_log10() +
+  #scale_y_continuous(limits = c(0,500), breaks = seq(0,500,100)) +
+  scale_y_log10(limits = c(5,500)) +
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer [% TOC]") +
@@ -239,7 +239,7 @@ plot2 <- Rvsl_ED2
 
 
 test_plot.x <- plot_grid(plot1, plot2,
-                        rel_widths = c(2.2,2), labels = c("(a)","(b)"), label_x = 0.2)
+                        rel_widths = c(2.2,2), labels = c("(a)","(b)"), label_x = -0.02, label_size = 24)
 
 test_plot <- ggdraw(add_sub(test_plot.x, "light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), 
                             size = axis_size))

@@ -65,8 +65,8 @@ light_rec_fig <- light_rec_data3 %>%
   scale_x_continuous(limits = c(0,BCImeanTOC * 0.25)) +
   scale_y_continuous(limits = c(0,0.02)) +
   #xlab(label = "cumulative solar radiation at seedling layer \n (MJ accumulated in prior 6 months)") +
-  xlab(expression(atop(paste("Forest floor PAR [MJ m"^"-2"," day"^"-1","]"),"mean over prior 2 months"))) +
-  labs(title = "Seedling to sapling transition") +
+  xlab(expression(atop(paste("forest floor light [MJ PAR m"^"-2"," day"^"-1","]"),"mean over prior 2 months"))) +
+  labs(title = "Light & \n sapling recruitment") +
   geom_vline(xintercept = BCImeanTOC * 0.2, linetype = "dashed") +
   #annotate("text", x = 2, y = 0.1, label = "mean light at \n BCI seedling layer", size = 5) +
   geom_vline(xintercept = BCImeanTOC * 0.02, linetype = "dotted") +

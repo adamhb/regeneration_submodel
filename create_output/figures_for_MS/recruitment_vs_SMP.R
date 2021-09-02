@@ -106,7 +106,7 @@ Rvsmp_ED2 <- summary_data %>%
   guides(color = guide_legend(override.aes = list(shape = 15)))
 
 rvssmp <- plot_grid(Rvsmp_TRS, Rvsmp_ED2,
-                         rel_widths = c(2,2), labels = c("(c)","(d)"), label_x = 0.2)
+                         rel_widths = c(2,2), labels = c("(c)","(d)"), label_x = -0.02, label_size = 24)
 
 rvssmp
 rvssmp2 <- ggdraw(add_sub(rvssmp, "20-yr mean patch-level \n soil matric potential [MPa]",
