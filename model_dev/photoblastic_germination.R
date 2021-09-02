@@ -43,9 +43,9 @@ photoblastic_germ_fig <- germ_data %>%
   scale_color_manual(values = pft.cols) +
   #annotate(geom = "text", x = 0, y = 0.035, label = "d", size = subplot_heading_size) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "emergence rate modifier") +
-  xlab(expression(paste("Forest floor PAR [MJ m"^"-2"," day"^"-1","]"))) +
-  labs(title = "Photoblastic germination") +
+  ylab(label = "emergence rate \n modifier") +
+  xlab(expression(atop("forest floor light", paste("[MJ PAR m"^"-2"," day"^"-1","]")))) +
+  labs(title = "Light & seedling emergence") +
   theme_minimal() +
   geom_vline(xintercept = mean_bci_understory, linetype = "dotted") +
   geom_vline(xintercept = mean_bci_20pct_gap, linetype = "dashed") +

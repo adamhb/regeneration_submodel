@@ -30,10 +30,10 @@ driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 #source parameter values
-source("parameter_files/bci_params_default_ED2.R")
+source("parameter_files/bci_parameters.R")
 
 #changes from default parameter values
-percent_light <- 0.2
+percent_light <- 0.02
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 

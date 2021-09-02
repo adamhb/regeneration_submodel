@@ -17,6 +17,6 @@ visualize_process_functions_fig <- plot_grid(F_repro_fig,
 makePNG(fig = visualize_process_functions_fig, 
         path_to_output.x = paste0(path_to_output,"forMS/"), 
         file_name = "process_functions",
-        height = 14,width = 12,units = "in",res = 70)
+        height = 14,width = 12.5,units = "in",res = 70)
 
 print(paste("made visualize process functions figure in",paste0(path_to_output,"forMS/")))

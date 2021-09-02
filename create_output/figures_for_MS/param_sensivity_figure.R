@@ -1,3 +1,4 @@
+source('utils/supporting_funcs.R')
 from_new_data <- TRUE
 print("creating parameter sensitivity figure...")
 

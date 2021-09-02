@@ -41,7 +41,7 @@ names(a_emerg) <- pft_names
 b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
 W_emerg <- 14 #was 28
-emerg_thresh <- -15744.65
+emerg_thresh <- -15744.65 # mm H20 suction
 #b0_light_germ <- c(0.5171172,0.5171172,NA,NA)
 #names(b0_light_germ) <- pft_names
 #b1_light_germ <- c(0.1729696,0.1729696,NA,NA)

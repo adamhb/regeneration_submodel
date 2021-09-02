@@ -23,7 +23,8 @@ n_PFTs <- 4
 soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 
 #set path to driver data
-driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
+#driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
+driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_dryDS/analy_dry75/" #param ssensitivity under dry conditions
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
 
@@ -36,7 +37,7 @@ param_sens_data <- tibble()
 
 for(param in params_in_sens){
   
-  source("parameter_files/default_parameters.R")
+  source("parameter_files/bci_parameters.R")
   
   assign(x = param,value = eval(as.name(param)) * 1.1)
   

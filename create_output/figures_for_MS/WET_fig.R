@@ -71,8 +71,8 @@ WET_20_pct <- N_recs_per_year_pfts_high_light %>%
   #scale_y_log10(labels = c(0,10,100)) +
   rec.y.axis +
   facet_wrap(~facet_var) +
-  scale_y_continuous(limits = c(0,350), breaks = c(0,50,100,50,100,150,200,250,300,350)) +
-  #scale_y_log10() +
+  #scale_y_continuous(limits = c(0,350), breaks = c(0,50,100,50,100,150,200,250,300,350)) +
+  scale_y_log10(limits = c(30,400),breaks = lseq(from = 30,to = 400,length.out = 7)) +
   xlab(bquote('simulation year'))+
   #labs(title = paste("WET",percent_light * 100,"% light")) +
   adams_theme +
@@ -122,14 +122,14 @@ WET_2pct <- N_recs_per_year_pfts_low_light %>%
   rec.y.axis +
   facet_wrap(~facet_var) +
   #scale_y_continuous(limits = c(0,350), breaks = c(0,50,100,150,200,250,300,350)) +
-  scale_y_log10(limits = c(1,350), breaks = lseq(from = 1,to = 350,length.out = 8)) +
+  #scale_y_log10(limits = c(1,350), breaks = lseq(from = 1,to = 350,length.out = 8)) +
   xlab(bquote('simulation year'))+
   #labs(title = paste("WET",percent_light * 100,"% light")) +
   adams_theme +
   long_term_sim_theme +
   adams_guides +
   theme(legend.title = element_blank()) +
-  theme(legend.position = c(.75,.5), 
+  theme(legend.position = c(.75,.2), 
         legend.text = element_text (size = 12),
         legend.spacing.x = unit(0.2, 'cm'),
         legend.spacing.y = unit(0.2, 'cm'), #this changes the spacing between groups of legend symbols

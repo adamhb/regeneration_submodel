@@ -184,7 +184,7 @@ H20_mort <- function(deficit_days, pft.x){
 
 #third light mort (simple negative exponential)
 
-light_mort <- function(light = 90, seedpool.x = 1){
+light_mort <- function(light = 90, seedpool.x = 1){ #input: cumulative light (MJ m-2) at seedling layer over prior 64 days
   
   #browser()
   a.ML.x <- a.ML[PFT]
@@ -196,7 +196,7 @@ light_mort <- function(light = 90, seedpool.x = 1){
   
   #frac_mort <- (N_mort * Z0_seedling[PFT]) / seedpool.x
   
-  return(Pm_day)
+  return(Pm_day) #output: daily mortality rate
 }
 
 
@@ -365,7 +365,7 @@ for(PFT in pft_names){
       seedbank[i+1] <- seedbank[i] %>%
         - (S_decay/365 * seedbank[i]) %>%
         #- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg %>%
-        - emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
+        - emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):i]), 
                                                   no = input_vars$SMP[i])), 
                      seedbank.x = seedbank[i],
                      light.xx = input_vars$light[i])$C_emerg %>%
@@ -373,7 +373,7 @@ for(PFT in pft_names){
       
       #frac_emerging[i+1] <- emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$frac_emerg
       
-      frac_emerging[i+1] <- emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
+      frac_emerging[i+1] <- emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):i]), 
                                                                     no = input_vars$SMP[i])), 
                                        seedbank.x = seedbank[i],
                                        light.xx = input_vars$light[i])$frac_emerg
@@ -386,7 +386,7 @@ for(PFT in pft_names){
       
       seedpool[i+1] <- seedpool[i] %>%
         #+ (emerg_func(SMP.x = (ifelse(test= i > 14, yes = mean(input_vars$SMP[(i-13):i]), no = input_vars$SMP[i])), seedbank.x = seedbank[i])$C_emerg)  %>%
-        + emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)/2):i]), 
+        + emerg_func(SMP.2.to.0.wks.ago = (ifelse(test= i > round(W_emerg), yes = mean(input_vars$SMP[(i-round(W_emerg)):i]), 
                                                   no = input_vars$SMP[i])), 
                      seedbank.x = seedbank[i],
                      light.xx = input_vars$light[i])$C_emerg %>%
