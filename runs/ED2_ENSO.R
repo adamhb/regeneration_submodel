@@ -29,11 +29,13 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_ENSO/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
+percent_light <- 0.02
+
 #source parameter values
 source("parameter_files/bci_parameters.R")
 
-#changes from default parameter values
-percent_light <- 0.02
+
+
 
 source("clean_input/prep_driver_data_ED2_bci.R")
 

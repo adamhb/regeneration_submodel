@@ -1,7 +1,7 @@
 #derive seedling to sapling transition function
 source("utils/supporting_funcs.R")
 
-BCImeanTOC <- 16.7 #MJ m-2 day-1
+BCImeanTOC <- summary(input_data$FSDS)[3] / 1e6 #16.7 #MJ m-2 day-1
 BCImeanUnderstory <- BCImeanTOC* 0.02 #MJ m-2 day-1
 BCImean_20_pct_gap <- BCImeanTOC* 0.2
 

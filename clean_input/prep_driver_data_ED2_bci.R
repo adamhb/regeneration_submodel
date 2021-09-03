@@ -29,6 +29,10 @@ library(tidyverse)
 library(stringr)
 print(paste("Preparing Input Data...",Sys.time()))
 
+
+
+
+
 ###The top part of this script is based off of a script written by Tom Powell
 
 
@@ -343,7 +347,8 @@ input_data <- ED2_data_daily2 %>%
   #mutate_at(.vars = c("NPP","nppseed_pft_day"), .funs = function(x){x/10}) %>% #this converts NPP from KgC / ha / day / pft to gC / m2 / day / pft (which the submodel takes)
   mutate_at(.vars = "date",.funs = as.POSIXct) %>%
   mutate_at(.vars = "day", .funs = as.numeric) %>%
-  mutate_at(.vars = "c_repro", .funs = function(x){x * model_area})
+  mutate_at(.vars = "c_repro", .funs = function(x){x * model_area}) %>%
+  mutate_at(.vars = "FSDS", .funs = function(x){x * par_per_solar_rad}) 
   #rename(day_of_month = day) %>%
   #rowid_to_column(var = "day") %>%
   #dplyr::select(-day_of_month) %>%

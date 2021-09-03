@@ -12,6 +12,14 @@ options(max.print=1e4)
 options(tibble.print_max = 1e4)
 
 
+
+
+
+#constants
+megajoules_per_joule <- 1e-6
+par_per_solar_rad <- 0.45 #Garcia-Rodriguez et al., 2020
+
+
 draw_key_polygon3 <- function(data, params, size) {
   lwd <- min(data$size, min(size) / 4)
   
@@ -34,6 +42,10 @@ dateFromFile <- function(filename){
   date <- lubridate::ymd(paste(yr, month, "01" ,sep = "-"))
   return(date)
 }
+
+
+
+
 
 makePNG <- function(fig, path_to_output.x = path_to_output, file_name = "unamed_graph",
                     height=PNGheight,  width=PNGwidth, units=PNGunits, res = PNGres){
@@ -58,6 +70,12 @@ source2 <- function(file, start, end, ...) {
   file.lines.collapsed <- paste(file.lines, collapse='\n')
   source(textConnection(file.lines.collapsed), ...)
 }
+
+
+load_basic_inputData <- function(){
+  source2(file = 'runs/ED2_BASE.R',start = 3,end = 38)
+}
+
 
 #generate a log sequence
 lseq <- function(from=1, to=100000, length.out=6) {

@@ -37,18 +37,10 @@ print(paste("Running regeneration submodel",Sys.time()))
 # }
 
 
-photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional form matches observations from (find this obs)
-                                            median_TOC_light = median(input_vars$FSDS), #median TOC light (J m-2 -day)
-                                            light.x){ #understory light in current time step (J m-2 -day)
+photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, 
+                                            light.x){ #understory light in current time step (MJ m-2 -day)
   
-  median_TOC_light_umol_s <- (median_TOC_light * 4.6) / (3600 * 12) # assuming 12 hour day 
-  understory_light_umol_s <- (light.x * 4.6) / (3600 * 12)
-  
-  x <- understory_light_umol_s/median_TOC_light_umol_s
-  x_prime <- l_crit/median_TOC_light_umol_s
-  
-  #relative resource amount (% of median TOC light)
-  germ_rate_modifier <- x/(x + x_prime) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
+  germ_rate_modifier <- light.x / (light.x + l_crit.x) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
   if(photoblastic_germ_rate_modifier_switch == T & PFT %in% c("LD_DI","LD_DT")){
     return(germ_rate_modifier)
   } else{
@@ -79,6 +71,28 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, #this functional 
 #   return(out)
 # }
 
+# emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
+#   
+#   wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
+#   
+#   if(SMP.2.to.0.wks.ago < emerg_thresh){
+#     frac_emerg <- 0
+#   } else {
+#     
+#     frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+#     
+#     #if(frac_emerg > 0.07){frac_emerg <- 0.07}
+#     
+#   }
+#   
+#   C_emerg <- frac_emerg * seedbank.x
+#   
+#   out <- list(frac_emerg, C_emerg)
+#   names(out) <- c("frac_emerg", "C_emerg")
+#   return(out)
+# }
+
+
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
   
   wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
@@ -87,7 +101,7 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
     frac_emerg <- 0
   } else {
     
-    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx)
     
     #if(frac_emerg > 0.07){frac_emerg <- 0.07}
     
@@ -99,6 +113,8 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
   names(out) <- c("frac_emerg", "C_emerg")
   return(out)
 }
+
+
 
 
 def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){

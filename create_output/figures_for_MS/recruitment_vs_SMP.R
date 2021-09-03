@@ -1,5 +1,5 @@
 source("utils/supporting_funcs.R")
-from_new_data <- F
+from_new_data <- T
 print("creating recruitment vs. SMP figure...")
 
 
@@ -41,6 +41,9 @@ bench4graph <- bench %>%
 
 
 summary_data <- read_csv('temp/SMP_summary_data.csv')
+summary_data %>%
+  filter(pft %in% c("ST_DT","LD_DT") )
+
 
 se_df <- summary_data %>%
   dplyr::select(pft, R_avg, R_avg_ED2, R_sd, R_sd_ED2, SMP_avg) %>%
@@ -118,7 +121,22 @@ makePNG(fig = rvssmp2, path_to_output.x = paste0(path_to_output,"forMS/"), file_
 
 
 
- 
+#simple statistics on summary data
+DI_end <- summary_data %>%
+  filter(R_avg != 0, pft %in% c("LD_DI","ST_DI"), patch == 5) %>% pull(R_avg) %>% mean()
+
+DI_start <- summary_data %>%
+  filter(R_avg != 0, pft %in% c("LD_DI","ST_DI"), patch == 1) %>% pull(R_avg) %>% mean()
+
+DT_end <- summary_data %>%
+  filter(R_avg != 0, pft %in% c("LD_DT","ST_DT"), patch == 5) %>% pull(R_avg) %>% mean()
+
+DT_start <- summary_data %>%
+  filter(R_avg != 0, pft %in% c("LD_DT","ST_DT"), patch == 1) %>% pull(R_avg) %>% mean()
+
+
+DI_diff <- (DI_end - DI_start) / DI_start
+DT_diff <- (DT_end - DT_start) / DT_start
 # makePNG(fig = rec_vs_smp, 
 #         path_to_output.x = path_to_MS_figures, 
 #         file_name = "rec_vs_SMP")
