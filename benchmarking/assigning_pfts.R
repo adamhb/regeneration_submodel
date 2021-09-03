@@ -1,5 +1,5 @@
 print("assigning species to pfts")
-source('utils/system_settings.R')
+source('utils/supporting_funcs.R')
 library(tidyverse)
 create_csv_of_pfts <- T
 
