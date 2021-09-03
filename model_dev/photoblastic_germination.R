@@ -2,11 +2,11 @@
 #for photoblastic germination
 
 #we use par in a small canopy gap as the threshold for photoblastic germinators
-par_in_gap <- 4.0 #mol m2-1 day-1 (from Fig. 1 in Pearson et al., 2002)
+par_in_gap <- 3 #mol m2-1 day-1 (from Fig. 1 in Pearson et al., 2002)
 mol_photons_per_joule <- 4.57 / 1e6  #Garcia-Rodriguez et al., 2020
-megajoules_per_joule <- 1e-6
-par_crit <- par_in_gap / mol_photons_per_joule * megajoules_per_joule #joules of par m2-1 day-1
-print(paste("par crit = ",par_crit, "meagjoules m2-1 day-1"))
+
+l_crit <- par_in_gap / mol_photons_per_joule * megajoules_per_joule #joules of par m2-1 day-1
+print(paste("par crit = ",l_crit, "meagjoules m2-1 day-1"))
 
 mean_bci_TOC <- summary(input_data$FSDS)[3] / 1e6
 mean_bci_understory <- mean_bci_TOC * 0.02 #mean understory light at BCI MJ m-2 day-1
@@ -33,10 +33,10 @@ mean_bci_20pct_gap <- mean_bci_TOC * 0.2
 # }
 
 
-photoblastic_germ_rate_modifier <- function(par_crit.x = par_crit, 
+photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, 
                                             light.x){ #understory light in current time step (MJ m-2 -day)
   
-  germ_rate_modifier <- light.x / (light.x + par_crit.x) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
+  germ_rate_modifier <- light.x / (light.x + l_crit.x) #rate modifier functional form is from (Bonan, 2019, p. 56, Fig. 4.3, panel b)
   if(photoblastic_germ_rate_modifier_switch == T & PFT %in% c("LD_DI","LD_DT")){
     return(germ_rate_modifier)
   } else{

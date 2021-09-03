@@ -29,11 +29,11 @@ soil_layer <- 15 #The is the soil layer of the host VDM that you want to use for
 #set path to driver data
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_output/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
+percent_light <- 0.02 #set the understory light level
 
 #source parameter values
 source("parameter_files/default_parameters.R") #source the default parameters
 #changes from default parameter values
-percent_light <- 0.02 #set the understory light level
 
 source("clean_input/prep_driver_data_ED2_bci.R") #prepare the driver data for the submodel
 

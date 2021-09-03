@@ -23,18 +23,30 @@
 #   return(Pm_day)
 # }
 
+
+source("utils/supporting_funcs.R")
+
 #deriving W_ML
 #The week at which mortality rates in the light deviate from mortality rates in the shade from 
 #Carrol Augspurger's (1984) seedling light-based mortality experiment
-source("utils/supporting_funcs.R")
 print(paste("the value for W_L is", mean(c(5,10,10,1,5,18,5,2,15,5,10,10,1,10,30)) * 7, "days"))
 
-#replicating Kobe (1990)'s statistical model, but using absolute light
+
+#replicating Kobe (1990)'s statistical model to use absolute light as the input instead of relative irradiance
+#this step generates data used to model the relationship between absolute light and seedling mortality directly
+
+#setting some intermediary parameters for this step
+
+#mean TOC solar radiation at Kobe's site (La Selva) during the period of time he did his analysis
+meanTOC_solarRad <- 14.11947 #MJ of solar radiation per day; get source or data for this
+mean_bci_TOC_par <- meanTOC_solarRad*par_per_solar_rad #megajoules of par per day
+mean_bci_understory <- mean_bci_TOC_par * 0.02 #mean understory light at BCI MJ m-2 day-1
+mean_bci_20pct_gap <- mean_bci_TOC_par * 0.2
 
 light_mort2 <- function(light, seedpool.x = 1){
   
   #browser()
-  pct_light <- (light / (14.11947 * W_ML)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
+  pct_light <- (light / (mean_bci_TOC_par * W_ML)) * 100 #the percent RI equivalent at Kobe's site in Costa Rica
   
   #seedlings_N <- seedpool.x / Z0_seedling[PFT]
   
@@ -63,9 +75,15 @@ P2light_mort <- c(0.1368, 0.1368, 0.0404, 0.0404)
 names(P2light_mort) <- pft_names
 #LD_light_thresh <- 18.98 # from Kobe
 
+#30:2081 * par_per_solar_rad / W_ML
+
 
 light_mort_rates <- c()
-lights <- 30:2081 
+lights <- 7.65:480 #a range of cumulative light levels (par in MJ m2-1 W_ML_days-1) range from intensities reflecting understory conditions to TOC solar radiation.
+
+#lights <- seq(from = (0.6 * mean_bci_understory * W_ML), to = (1.1 * mean_bci_20pct_gap * W_ML), length.out = 200)  #a range of cumulative light levels over the W_ML window that ranges from understory conditions to a 20% light gap
+
+
 pft <- c()
 for(p in pft_names){
   for(i in 1:length(lights)){
@@ -78,9 +96,9 @@ for(p in pft_names){
 }
 
 
-mean_bci_understory <- 0.334 * W_ML  # MJ of light in prior W_ML days (64)
-mean_bci_20_pct_gap <- 16.7 * W_ML * 0.2
-mean_bci_TOC <- 16.7 * W_ML # MJ of light at TOC in prior W_ML days (64)
+#mean_bci_understory <- 0.334 * W_ML  # MJ of light in prior W_ML days (64)
+#mean_bci_20_pct_gap <- 16.7 * W_ML * 0.2
+#mean_bci_TOC <- 16.7 * W_ML # MJ of light at TOC in prior W_ML days (64)
 
 
 light_mort_data <- tibble(pft = pft,
@@ -156,7 +174,7 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
 #names(b.ML) <- pft_names
 
 light_mort_rates <- c()
-lights <- seq(from = mean_bci_understory * 0.6, to = 1.1 * mean_bci_TOC) 
+lights <- seq(from = mean_bci_understory * 0.6 * W_ML, to = 1.1 * mean_bci_TOC_par * W_ML) 
 pft <- c()
 for(p in pft_names){
   for(i in 1:length(lights)){
@@ -181,9 +199,9 @@ viz_light_mort <- light_mort_data %>%
   xlab(label = expression(atop(paste("forest floor light [MJ PAR m"^"-2","]"),"cum. sum prior 2 months"))) +
   #xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
   labs(title = "Light & \n seedling mortality") +
-  geom_vline(xintercept = mean_bci_understory, linetype = "dotted") +
-  geom_vline(xintercept = mean_bci_20_pct_gap, linetype = "dashed") +
-  scale_x_continuous(limits = c(0,300)) +
+  geom_vline(xintercept = mean_bci_understory * W_ML, linetype = "dotted") +
+  geom_vline(xintercept = mean_bci_20pct_gap * W_ML, linetype = "dashed") +
+  scale_x_continuous(limits = c(mean_bci_understory * W_ML * 0.6, mean_bci_20pct_gap * W_ML * 1.1 )) +
   #annotate(geom = "text", x = 700, y = 0.15, label = "BCI mean \n at smallest cohort", size = 5) +
   #geom_segment(aes(x = 350, y = 0.12, xend = 70, yend = 0.05),
               # arrow = arrow(length = unit(0.5, "cm")), color = "black") +

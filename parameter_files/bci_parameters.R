@@ -4,7 +4,7 @@
 #########################
 
 pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
-percent_light <- 0.02
+#percent_light <- 0.02
 model_area <- 10000 #area in square meters
 Z0 <- 160 #g C of new recruit, to match the 1 cm recruit in ED2
 plot_input_vars <- "Y" #do you want to plot submodel output?
@@ -46,12 +46,21 @@ emerg_thresh <- -15744.65 # mm H20 suction
 #names(b0_light_germ) <- pft_names
 #b1_light_germ <- c(0.1729696,0.1729696,NA,NA)
 #names(b1_light_germ) <- pft_names
-l_crit <- 70
+#l_crit <- 70
+#l_crit <- 0.7658
+l_crit <- 0.656455142231947
 
 #light-based seedling mortality
-a.ML <- c(-0.015096011, -0.015096011, -0.004465246, -0.004465246)
+#a.ML <- c(-0.015096011, -0.015096011, -0.004465246, -0.004465246)
+#a.ML <- c(-0.027606436, -0.027606436, -0.009775387, -0.009775387)
+a.ML <- c(-0.033231702, -0.033231702, -0.009897694, -0.009897694)
+#a.ML <- c(-0.033518506, -0.033518506, -0.009921227, -0.009921227)
 #b.ML <- c(-4.217788, -4.217788, -7.142556, -7.142556)
-b.ML <- c(-3.760108,   -3.760108,   -7.148243,   -7.148243)
+#b.ML <- c(-3.760108,   -3.760108,   -7.148243,   -7.148243)
+#b.ML <- c(-4.193969, -4.193969, -7.163824, -7.163824)
+#b.ML <- c(-3.774901, -3.774901, -7.148919, -7.148919) 
+b.ML <- c(-3.836400, -3.836400, -7.154063, -7.154063) 
+
 W_ML <- 64
 names(a.ML) <- pft_names
 names(b.ML) <- pft_names
@@ -81,7 +90,8 @@ names(M_background) <- pft_names
 # b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 # names(b_TR) <- pft_names
 #a_TR <- c(rep(1.771e-5,2),rep(4.085e-5,2)) #this parameter can be divided by 2 to have recruitment better match the BCI forest dynamics plot data
-a_TR <- c(0.004405853, 0.004405853, 0.003523462, 0.003523462) 
+#a_TR <- c(0.004405853, 0.004405853, 0.003523462, 0.003523462) 
+a_TR <- c(0.010300421, 0.010300421, 0.007002215, 0.007002215) 
 names(a_TR) <- pft_names
 b_TR <- c(1.0653, 1.0653, 0.8615, 0.8615)
 names(b_TR) <- pft_names

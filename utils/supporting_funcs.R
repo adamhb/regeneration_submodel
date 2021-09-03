@@ -12,6 +12,14 @@ options(max.print=1e4)
 options(tibble.print_max = 1e4)
 
 
+
+
+
+#constants
+megajoules_per_joule <- 1e-6
+par_per_solar_rad <- 0.45 #Garcia-Rodriguez et al., 2020
+
+
 draw_key_polygon3 <- function(data, params, size) {
   lwd <- min(data$size, min(size) / 4)
   
@@ -65,8 +73,7 @@ source2 <- function(file, start, end, ...) {
 
 
 load_basic_inputData <- function(){
-
-  source2(file = 'runs/ED2_BASE.R',start = )
+  source2(file = 'runs/ED2_BASE.R',start = 3,end = 38)
 }
 
 

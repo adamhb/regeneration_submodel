@@ -56,7 +56,7 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
     frac_emerg <- 0
   } else {
     
-    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx * 1e6)
+    frac_emerg <- (a * wet_index^b)  *  photoblastic_germ_rate_modifier(l_crit.x = l_crit, light.x = light.xx)
     
     #if(frac_emerg > 0.07){frac_emerg <- 0.07}
     
