@@ -1,10 +1,11 @@
+
+
 library(stringr)
 library(tidyverse)
 library(lubridate)
 library(broom)
 library(hdf5r)    #package used to open hdf5 files
 library(chron) # package used for time series data
-library(stringr)
 
 path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 path_to_observations <- path_to_observational_data
@@ -13,10 +14,6 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 options(dplyr.print_max = 1e5)
 options(max.print=1e4)
 options(tibble.print_max = 1e4)
-
-
-
-
 
 #constants
 megajoules_per_joule <- 1e-6

@@ -48,8 +48,6 @@ write_csv(input_vars,"temp/input_vars.csv")
 
 source("create_output/create_output.R") #create submodel output
 
-
-
 write_csv(N_recs_per_year_pfts,"temp/N_recs_per_yr_default_params.csv")
 
 

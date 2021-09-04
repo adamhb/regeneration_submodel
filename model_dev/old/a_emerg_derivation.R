@@ -15,3 +15,6 @@ germ_data %>% pull(germ) %>% mean() %>% `/` (100*60)
 #   group_by(pft) %>%
 #   summarise(germ = mean(germ), n = length(germ)) %>%
 #   filter(pft %in% c("ST_DI","ST_DT")) %>% pull(germ) %>% mean() %>% `/` (100*60)
+
+
+0.007 = a * (1/(-1471 * 1e-5)*-1) ^ 1.6
