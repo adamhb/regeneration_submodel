@@ -35,7 +35,7 @@ F_seed <- 0.5 #the fraction of reproductive carbon that is seed
 
 #seed bank dynamics
 S_decay <- 0.51 #the annual decay rate of the seedbank
-a_emerg <- rep(0.0006,4) #was 0.007 the average daily fraction of the seedbank that moves to the seedling pool (annual average), was previously 0.5/365
+a_emerg <- rep(0.0003,4) #was 0.007 the average daily fraction of the seedbank that moves to the seedling pool (annual average), was previously 0.5/365
 names(a_emerg) <- pft_names
 b_emerg <- c(1.2,1.2, 0.8, 0.8) + 0.4 #the soil moisture response parameter for emergence
 names(b_emerg) <- pft_names
