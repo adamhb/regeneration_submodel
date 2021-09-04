@@ -4,16 +4,30 @@ source('model/process_funcs.R')
 ##################################################################################
 #Calibration of a_emerg, b_emerg, and psi_emerg to observations of seedling emergence at BCI
 
-#Calibrated to Garwood (1983)
-#Garwood NC. 1983. Seed Germination in a Seasonal Tropical Forest in Panama: A Community Study. Ecological 
-#Monographs 53: 159–181.
-
 #psi_emerg is the minimum soil matric potential (SMP) required for emergence. To capture observations that 
 #seedlings do not emerge in the dry season at BCI (Garwood, 1983), we used the minimum wet season SMP simulated 
 #by ED2-hydro under observed meterology (2008-2014) as the value for psi_emerg. 
 #This stops emergence during BCI’s dry season.
 
-#Step 1. Calculate the median soil matric potential on each day of the year
+
+
+#Step 1.
+#a_emerg is derived from germination data (Pearson et al., 2020) 
+#under non-limting light and moisture.
+#The seedling emergence function is then used to find a value of a_emerg
+#(Eqn 4) in Hanbury-Brown et al., in review.
+
+germ_data <- read_csv(paste0(path_to_observations,"Pearson_et_al_2002_Fig2_data.csv")) 
+daily_germ_rate <- germ_data %>% pull(germ) %>% mean() %>% `/` (100*60) #60 day germination trial
+
+#solve for a_emerg using Eqn 4 with the mean wetness index at BCI (excluding the dry season)
+#wetness index is 1 / (-1 * SMP) where SMP has units of MPa. mean wetness index at BCI (excluding dry season)
+#is ~15
+a_emerg_deriv <- round(daily_germ_rate / (15^1.2),4) 
+print(paste("the value of a_emerg is" , a_emerg_deriv))
+
+
+#Step 2. Calculate the median soil matric potential on each day of the year
 source('runs/ED2_BASE.R')
 SMP_frac_emerg <- full_output %>%
   select(yr:date,SMP,frac_emerging,seedbank) %>%
@@ -30,21 +44,19 @@ SMP_frac_emerg <- full_output %>%
   mutate(seeds_emerging = seedbank_med * fe_med)
 
 
-#Step. 2a. Below we visualize seasonal soil moisture and emergence in the TRS using a range values for
-#a_emerg and b_emerg.
-#This is used to find parameters for a_emerg, b_emerg that roughly match the
+#Step. 2b. Below we visualize seasonal soil moisture and emergence in the TRS using a range values for
+#b_emerg.
+#This is used to find parameters for b_emerg that roughly match the
 #observations of seasonal seedling emergence by Garwood,1983
 
-#a_emerg is calibrated such that roughly 100 g of seed per ha per day emerges in the wet season
-#Assuming a mean seed mass of 0.6 mg, this quantity of seed 
-#roughly produces the mean emergence density
-#found by Garwood (1983), p.165; ~13 seedlings / m2
-#More empirical work is needed to better constrain this parameter!
+#Garwood NC. 1983. Seed Germination in a Seasonal Tropical Forest in Panama: A Community Study. Ecological 
+#Monographs 53: 159–181.
+
 
 #b_emerg is calibrated to Garwood's observations such that the timing of seasonal
 #seedling emergence matches her observations. See Garwood (1983) Fig. 7. 
 
-#values of a_emerg = 0.0006, and b_emerg = 1.2 / 1.6 (shade tolerant / light demanding respectively)
+#values of b_emerg = 1.2 / 1.6 (shade tolerant / light demanding respectively)
 #produces the below graph that roughly matches observations by Garwood
 
 seasonal_emergence_graph <- ggplot(data = SMP_frac_emerg,
@@ -67,7 +79,7 @@ print("made seasonal_emergence_graph")
 makePNG(fig = seasonal_emergence_graph, path_to_output.x = paste0(path_to_output,"model_dev_figs/"),
         file_name = "seasonal_emergence_graph")
 
-#Step. 2b Determine the wet season by looking at inflection points in soil mositure throughout the year.
+#Step. 2c Determine the wet season by looking at inflection points in soil mositure throughout the year.
 #using the seasonal_emergence_graph above
 
 #Step 3. Calculate the minimum soil moisture in the wet season

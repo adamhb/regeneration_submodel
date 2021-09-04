@@ -1,6 +1,5 @@
 #derivation of a_emerg, the mean emergence when light and moisture are not limiting
-germ_data <- read_csv(paste0(path_to_observations,"Pearson_et_al_2002_Fig2_data.csv")) 
-germ_data %>% pull(germ) %>% mean() %>% `/` (100*60)
+
 
 # a_germ_LD <- germ_data %>%
 #   left_join(pfts, by = "Latin") %>%

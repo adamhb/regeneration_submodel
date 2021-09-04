@@ -84,7 +84,7 @@ lseq <- function(from=1, to=100000, length.out=6) {
   round(exp(seq(log(from), log(to), length.out = length.out)))
 }
 
-source2(file = "parameter_files/bci_parameters.R", start = 1, end = 98)
+#source2(file = "parameter_files/bci_parameters.R", start = 1, end = 98)
 source("create_output/figure_formatting.R")
 source("parameter_files/param_names.R")
 
