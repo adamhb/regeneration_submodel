@@ -1,11 +1,9 @@
+#This script creates the benchmarking figure used in
+#Hanbury-Brown et al., in prep Fig. 4
 
 source('runs/ED2_BASE.R')
 source('utils/supporting_funcs.R')
 print("making benchmarking figure...")
-# ED2_data_for_fig <- N_recs_per_year_pfts %>%
-#   gather(submodel:ED2, key = "model", value = "R") %>%
-#   filter(model == "ED2")
-
 
 psize <- 5
 axis_size <- 20
@@ -26,13 +24,6 @@ adams_theme_benchFig <- theme_minimal() + theme(plot.title = element_text(hjust 
 
 
 bench_data <- bench4graph %>%
-  #rename(pftold = pft) %>%
-  # mutate(pft = case_when(
-  #   pftold == "earlydi" ~ "LD_DI",
-  #   pftold == "earlydt" ~ "LD_DT",
-  #   pftold == "latedi" ~  "ST_DI",
-  #   pftold == "latedt" ~  "ST_DT"
-  # )) %>%
   filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
   group_by(pft) %>% summarise(R = mean(BCI_obs), se_R = sd(BCI_obs)/sqrt(length(BCI_obs))) %>%
   mutate(simYr = 10, model = "BCI obs.") %>%
@@ -98,188 +89,6 @@ benchmark_fig
 
 makePNG(fig = benchmark_fig, path_to_output.x = paste0(path_to_output,"forMS/"), 
         file_name = "benchmark_fig_tuned",width = 6)
-
-
-
-################################
-#making figure with BCI params
-##################################
-
-
-# benchmark_fig_linear_axis <- N_recs_per_year_BCI_params %>%
-#   gather(submodel:ED2, key = "model", value = "R") %>%
-#   mutate(model = case_when(
-#     model == "submodel" ~ "TRS",
-#     model == "ED2" ~ "ED2" 
-#   )) %>%
-#   mutate(facetVar = model) %>%
-#   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-#   #filter(as.numeric(stringr::str_sub(year, start = 1, end = 4)) %% 2 == 0) %>%
-#   mutate(simYr = as.numeric(stringr::str_sub(year, start = 1, end = 4)) - 2000) %>%
-#   #filter(model != "ED2") %>%
-#   
-#   #rename(pftold = pft) %>%
-#   # mutate(pft = case_when(
-#   #   pftold == "earlydi" ~ "LD_DI",
-#   #   pftold == "earlydt" ~ "LD_DT",
-#   #   pftold == "latedi" ~  "ST_DI",
-#   #   pftold == "latedt" ~  "ST_DT"
-#   # )) %>% 
-#   #filter(model != "ED2") %>%
-#   ggplot(mapping = aes(x = simYr, y = R, color = pft, shape = model)) +
-#   geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 0)) +
-#   geom_point(data = bench_data,
-#              mapping = aes(x = simYr, y = R, color = pft), size = psize, stroke = 2,
-#              position = position_jitter(width = 0, height = 0)) +
-#   #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
-#   scale_color_manual(values = pft.cols) +
-#   #scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
-#   scale_x_continuous(breaks = seq(5,20,5)) +
-#   #scale_y_log10(limits = c(2,305), breaks = round(lseq(from = 2, to = 300,length.out = 7)),labels = round(lseq(from = 2, to = 300,length.out = 7))) +
-#   #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-#   scale_shape_manual(values = c(10,21,24)) + #21 and 24
-#   #scale_y_log10(labels = c(0,10,100)) +
-#   scale_y_continuous(limits = c(1,65), breaks = round(seq(1,65,length.out = 7))) + 
-#   ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
-#   xlab(bquote('simulation year'))+
-#   #labs(title = "Predicting rank order \n of PFT-specific recruitment") +
-#   adams_theme_benchFig +
-#   #guides(colour = guide_legend(override.aes = list(size = 10)))+
-#   guides(shape = guide_legend(override.aes = list(shape = c(10,1,2))),
-#          color = guide_legend(override.aes = list(shape = 15))) +
-#   facet_wrap(~facetVar)+
-#   theme(strip.text.x = element_text(size=0),
-#         axis.title.y = element_blank(),
-#         axis.title.x = element_blank(),
-#         legend.text = element_text(size = 12))
-# 
-# benchmark_fig_linear_axis
-# 
-# #5 by 8 inches
-# #makePNG(fig = benchmark_fig_linear_axis, path_to_output.x = paste0(path_to_output,"forMS/"),file_name = paste0("benchmark_fig_linear_axis"))
-# 
-# 
-# final_plot <- plot_grid(benchmark_fig_log, benchmark_fig_linear_axis,
-#                         rel_widths = c(2,3), labels = c("(a)","(b)"), label_size = 14)
-# final_plot2 <- ggdraw(add_sub(final_plot, "simulation year", vpadding=grid::unit(1,"lines"), size = axis_size ))
-# 
-
-# test_plot <- ggdraw(add_sub(test_plot.x, "light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), size = axis_size ))
-# test_plot
-# 
-# PNGwidth <- 9
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# benchmark_fig_sec_axis <- N_recs_per_year_pfts %>%
-#   gather(submodel:ED2, key = "model", value = "R") %>%
-#   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-#   filter(model == "submodel") %>%
-#   #filter(model != "ED2") %>%
-#   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
-#   geom_point(size = psize) +
-#   #geom_point(position=position_jitter(h=8, w=0), alpha = 0.99, stroke = 1, size = psize) +
-#   geom_line(linetype = "solid", size = 1) +
-#   geom_point(data = ED2_data_for_fig, mapping = aes(x = year, y = R/5, color = pft, shape = model),
-#              alpha = 0.99, stroke = 1, size = psize) +
-#   geom_line(data = ED2_data_for_fig, mapping = aes(x = year, y = R/5, color = pft, shape = model),
-#              linetype = "dotted", size = 1) +
-#   #geom_point(size = psize, stroke = 1, alpha = 1) +
-#   geom_point(data = bench4graph %>%
-#                filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
-#              mapping = aes(x = date, y = BCI_obs, color = pft), size = psize+3, position = position_jitter(width = 5)) +
-#   #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
-#   scale_color_manual(values = pft.cols) +
-#   scale_x_date(limits = c(as.Date("2007-10-01"),as.Date("2014-01-01")), date_breaks = "1 year", labels = date_format("%Y")) +
-#   scale_shape_manual(values = c(10,21,24)) +
-#   scale_y_continuous(
-#     "submodel", 
-#     sec.axis = sec_axis(~ . * 5, name = "ED2")
-#   ) +
-#   #scale_y_log10(labels = c(0,10,100)) +
-#   #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-#   ylab(expression(paste("N recruits"," ha"^"-1"," yr"^"-1")))+
-#   xlab(bquote('year'))+
-#   labs(title = "BASE 2% light") +
-#   adams_theme_benchFig 
-# 
-# png(paste0(path_to_output,"forMS/","benchmark_fig_sec_axis.png"), height=5, width=8, units="in", res = 100)
-# print(benchmark_fig_sec_axis)
-# dev.off()
-
-
-
-
-# benchmark_fig <- N_recs_per_year_pfts %>%
-#   gather(submodel:ED2, key = "model", value = "R") %>%
-#   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-#   #filter(model != "ED2") %>%
-#   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
-#   geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 10)) +
-#   geom_point(data = bench4graph %>%
-#                filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
-#              mapping = aes(x = date - 80, y = BCI_obs, color = pft), size = psize+2,
-#              position = position_jitter(width = 1)) +
-#   #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
-#   scale_color_manual(values = pft.cols) +
-#   scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
-#   scale_shape_manual(values = c(10,21,24)) +
-#   #scale_y_log10(labels = c(0,10,100)) +
-#   #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-#   ylab(expression(paste("N recruits"," ha"^"-1"," yr"^"-1")))+
-#   xlab(bquote('year'))+
-#   labs(title = "Predicting rank order \n of PFT-specific recruitment") +
-#   adams_theme_benchFig 
-# 
-# benchmark_fig
-# 
-# png(paste0(path_to_output,"forMS/","benchmark_fig.png"), height=5, width=8, units="in", res = 100)
-# print(benchmark_fig)
-# dev.off()
-# 
-# 
-# benchmark_fig_sub_only <- N_recs_per_year_pfts %>%
-#   gather(submodel:ED2, key = "model", value = "R") %>%
-#   filter(year > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-#   filter(model != "ED2") %>%
-#   ggplot(mapping = aes(x = year, y = R, color = pft, shape = model)) +
-#   geom_point(size = psize, stroke = 1, alpha = 1, position = position_jitter(height = 0, width = 10)) +
-#   geom_point(data = bench4graph %>%
-#                filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")),
-#              mapping = aes(x = date - 80, y = BCI_obs, color = pft), size = psize+2,
-#              position = position_jitter(width = 1)) +
-#   #geom_segment(data = bench4graph, mapping = aes(x = start_dateB, xend = end_dateB, y = BCI_obs, yend = BCI_obs, color = pft)) +
-#   scale_color_manual(values = pft.cols) +
-#   scale_x_date(limits = c(as.Date("2007-08-01"),as.Date("2014-01-21")), date_breaks = "1 year", labels = date_format("%Y")) +
-#   scale_shape_manual(values = c(10,24)) +
-#   #scale_y_log10(labels = c(0,10,100)) +
-#   #scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = c(0,1,10,100,200,300), breaks = c(0,1,10,100,200,300)) + 
-#   ylab(expression(paste("N recruits"," ha"^"-1"," yr"^"-1")))+
-#   xlab(bquote('year'))+
-#   labs(title = "") +
-#   adams_theme_benchFig +
-#   theme(legend.position = "none")
-# 
-# benchmark_fig_sub_only
-# 
-# png(paste0(path_to_output,"forMS/","benchmark_fig_sub_only.png"), height=5, width=6, units="in", res = 100)
-# print(benchmark_fig_sub_only)
-# dev.off()
-# 
 
 
 print("FINISHED making benchmarking figure!")

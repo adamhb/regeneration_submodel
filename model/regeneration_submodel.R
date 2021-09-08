@@ -20,6 +20,7 @@ input_data <- input_data %>%
 
 #If tree was in negative carbon balance, then reproductive carbon allocation is zero
 input_data <- input_data %>%
+  mutate(e_frac = base::mapply(FUN = efrac, N = (input_data$N_co), co_dbh_ind = (input_data$dbh), PFT = input_data$pft)) %>% #Adding the "effective fraction" of NPP that gets allocated to reproduction in each time step. Note that this is calculated within cohorts in the clean_input/prep_driver_data... script which is used to calculate reproductive carbon. It is recalculated here at the pft level as a diagnostic variable. 
   mutate_at(.tbl = .,.vars = vars(c_repro), .funs = function(x){ifelse(x < 0, 0, x)}) %>% 
   arrange(., day,pft) 
 
