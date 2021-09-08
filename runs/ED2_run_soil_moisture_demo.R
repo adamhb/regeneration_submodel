@@ -1,3 +1,9 @@
+#This script runs the Tree Recruitment Scheme in 20 different patches
+#that vary in soil moisture to demonstrate the TRS's recruitment sensitivity to
+#patch-level conditions.
+#It does this using data from ED2 for a simulation at Barro Colorado Island.
+
+
 rm(list = ls())
 gc()
 

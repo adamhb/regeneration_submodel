@@ -1,3 +1,7 @@
+#This scripts runs a parameter sensitivity test, where each parameter
+#is increased by 10 percent, while the others are left at their default 
+#values to get a first impression of parameter sensitivity
+
 #load libraries
 library(ncdf4)
 library(ncdf.tools)
