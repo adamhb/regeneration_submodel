@@ -31,7 +31,7 @@ a_RA <- c(0.0058, 0.0059, 0.0042, 0.0049)
 names(a_RA) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
-F_seed <- 0.5 * 0.82 #the fraction of reproductive carbon that is seed
+F_seed <- 0.5 * 0.89 #the fraction of reproductive carbon that is seed; was .82
 
 
 #seed bank dynamics
