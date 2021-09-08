@@ -1,4 +1,6 @@
-
+#This script contains the functions that represent the
+#environmentally sensitive regeneration processes.
+#See the methods section of Hanbury-Brown et al., in prep for a description of each process.
 
 #########################################
 #####reproductive allocation#############
@@ -20,6 +22,8 @@ efrac <- function(N, co_dbh_ind, PFT){
 #################################################
 ##############seedling emergence#################
 #################################################
+
+#modifies seedling emergence based on light for photoblastic germinators
 photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit, 
                                             light.x){ #understory light in current time step (MJ m-2 -day)
   
@@ -32,8 +36,7 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit,
 }
 
 
-
-
+#predicts seedling emergence as a function of light
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
   
   wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
@@ -97,9 +100,7 @@ H20_mort <- function(deficit_days, pft.x){
 }
 
 
-
-
-#light-based seedling to sapling transition.
+#light-based seedling to sapling transition (i.e. recruitment)
 rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.x){
   frac_rec <- a_TR.x * l^b_TR.x
   if(SMP.x < psi_crit[PFT]){
