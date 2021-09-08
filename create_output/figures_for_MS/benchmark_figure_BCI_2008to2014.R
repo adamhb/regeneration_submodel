@@ -101,8 +101,7 @@ makePNG(fig = benchmark_fig, path_to_output.x = paste0(path_to_output,"forMS/"),
 
 
 
-
-  ################################
+################################
 #making figure with BCI params
 ##################################
 

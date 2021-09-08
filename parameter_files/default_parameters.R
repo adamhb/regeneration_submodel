@@ -103,7 +103,8 @@ seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 c
 #########################################
 source('parameter_files/param_names.R')
 clps <- function(x){paste0(eval(as.name(x)), collapse = ",")}
-model_params_of_run <- unlist(map(.x = param_names, .f = clps))
+
+model_params_of_run <- unlist(purrr::map(.x = param_names, .f = clps))
 
 paramsOFrun <- tibble(
   param_names = c(param_names,

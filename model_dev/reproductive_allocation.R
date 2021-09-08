@@ -1,10 +1,27 @@
-source('utils/supporting_funcs.R')
+#This script calculates the parameters of the reproductive allocation function
+#These parameters are used Eqn 1 (main text) which relate dbh to the probability of 
+#being reproductive, which is subsequently used to calculate the effective fraction of
+#carbon for growth and reproduction that is allocated to reproduction at the cohort-level.
 
-#load data
-RAobs <- read_csv(paste0(path_to_observational_data,"Dataset3_BCIreproduction.csv")) %>% #BCI Tree reproduction dataset
+#load supporting functions
+source('utils/supporting_funcs.R')
+source('runs/generate_input_data.R')
+source('model/process_funcs.R')
+
+#load the BCI Tree reproduction dataset
+#available here: 
+#The Barro Colorado Island Tree Reproduction Dataset is openly available through the 
+#Smithsonian Tropical Research Institute at https://doi.org/10.5479/si.data.201511251100 
+
+RAobs <- read_csv(paste0(path_to_observational_data,"Dataset3_BCIreproduction.csv")) %>% 
   mutate_at(.vars = "sp",.funs = tolower)
+
+#load the species assignments to each PFT
 pfts <- read_csv("benchmarking/pft_assignments.csv")
-g.forms <- read_csv(paste0(path_to_observational_data,"bci50splistwrepthresh.csv")) %>% #expert knowledge of growth form dataset
+
+#load the expert identification of species growth forms
+#This is used to remove understory specialists.
+g.forms <- read_csv(paste0(path_to_observational_data,"bci50splistwrepthresh.csv")) %>% 
   rename(sp = sp6)
 
 #number of species in the RAobs dataset
@@ -13,12 +30,13 @@ N_sp_RAobs <- length(unique(RAobs$sp))
 #number of species comprising submodel's PFTs
 length(unique(pfts$sp))
 
-
 #basal area per species in most recent census (2015)
 if(file.exists("temp/ba_per_sp_2015.R") == F){ 
   source('model_dev/Dmax_BCI.R')
 }
+
 ba_per_sp <- read_csv(file = "temp/ba_per_sp_2015.R") #basal area calculated from Knox's benchmarking driver
+
 total_ba <- sum(ba_per_sp$ba)
 
 #calculating fraction of total ba for each species
@@ -29,6 +47,13 @@ ba_per_sp <- ba_per_sp %>%
 ###############################################
 ##############Analysis of Basal Area###########
 ###############################################
+#This analysis of basal area is a preamble to the derivation of
+#reproductive allocation parameters. It is used to check how much
+#the species in the tree reproduction data set account for total basal
+#at BCI, to know how representative these parameter would be for BCI.
+
+#This is also used to generate a basal-area weighted mean
+#contribution of each species to the repoductive allocation curves
 
 #fraction of total ba covered by Visser obs is 63%
 tmp <- unique(RAobs$sp) %>%
@@ -98,12 +123,11 @@ ba_coverage <- total_ba_gr_pft %>%
 makePNG(fig = ba_coverage,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "ba_coverage.png")
 
 
-###############################################
-###############################################
-###############################################
+###################################################
+##############END Analysis of Basal Area###########
+###################################################
 
-
-#cleaning RA obs data
+#Joining data and cleaning RA observation data
 RA <- pfts %>%
   left_join(RAobs,by = "sp") %>%
   left_join(g.forms) %>%
@@ -112,13 +136,12 @@ RA <- pfts %>%
   mutate_at(.vars = c("pft","grform"), as.factor) %>%
   drop_na(rep) 
 
-
-#defining a function to add the predictions to data frame
+#Defining a function to add the model predictions to data frame
 adams_augment <- function(d){
   augment(d,type.predict = "response", se.fit = T)
 }
 
-#logistic regression
+#Logistic regression to find reproductive allocation parameters
 #pooling by PFT
 RA2 <- RA %>%
   left_join(ba_per_sp,by = "sp") %>%
@@ -134,7 +157,7 @@ RA2 <- RA %>%
   select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
   rename(rep_fitted = .fitted, se = .se.fit)
 
-#plotting the reproductive allocation curves
+#Plotting the reproductive allocation curves
 curves_allsp <- RA2 %>%
   ggplot(aes(dbh,rep_fitted,color = pft)) +
   geom_line(size = 1) +
@@ -169,35 +192,19 @@ print('b_RA:')
 print(round(b_RA,4))
 
 
-#model function
-prob_repro <- function(size_mm,PFT.x){
-  a_RA.x <- a_RA[PFT.x]
-  b_RA.x <- b_RA[PFT.x]
-  y <- (exp(b_RA.x+a_RA.x*size_mm) / (1 + exp(b_RA.x+a_RA.x*size_mm)))
-  return(y)
-}
-
-efrac <- function(N, co_dbh_ind, PFT){
-  N_repro <- prob_repro(size_mm = co_dbh_ind, PFT.x = PFT) * N
-  fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
-  return(e_frac)
-}
 
 
-sizes <- 1:1500 
+###################################################
+#visualize the reproductive allocation function####
+###################################################
+#generate a range of dbh sizes
+sizes <- 1:1500 #dbh in mm
 pft <- c()
 
 for(i in pft_names){
   pft <- append(pft,rep(i,length(sizes)))
 }
 
-efrac(N = 1000, co_dbh_ind = 500, PFT = "ST_DI")
-
-
-#added as experiment
-#b_RA <- rep(0,4)
-#names(b_RA) <- pft_names
 
 F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_names[1]),
                                   efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_names[2]),
@@ -221,62 +228,5 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
 
 makePNG(fig = F_repro_fig, path_to_output.x = paste0(path_to_output,"model_dev_figs/"), file_name = "reproductive_allocation")
 print("made F_repro_fig")
-
-
-
-#figure out what to do with the below code (i.e. supporting analyses below)
-
-#AS DEMONSTRATION I DID THE SAME AS ABOVE BUT BROKE OUT BY GROWTH FORM
-#logistic regression
-#pooling by PFT and growth form
-# RA3 <- RA %>%
-#   left_join(ba_per_sp,by = "sp") %>%
-#   group_by(pft,grform) %>%
-#   nest() %>%
-#   mutate(model = purrr::map(data, ~glm(rep ~ dbh, data = .,family = "binomial", weights = ba))) %>%
-#   ungroup() %>%
-#   mutate(augs = purrr::map(.x = model,.f = adams_augment)) %>%
-#   mutate(coefs = purrr::map(.x = model,.f = coef)) %>%
-#   unnest(cols = data,augs) %>%
-#   unnest(cols = coefs) %>%
-#   select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
-#   rename(rep_fitted = .fitted, se = .se.fit)
-# 
-# 
-# #plotting the reproductive allocation curves
-# curves_by_grform <- RA3 %>%
-#   ggplot(aes(dbh,rep_fitted,color = pft,linetype = pft)) +
-#   geom_line(size = 1) +
-#   facet_wrap(~grform,scales = "fixed",nrow = 3) +
-#   scale_color_manual(values = pft.cols) +
-#   scale_linetype_manual(values = c(rep("solid",3),"dashed")) +
-#   ylab("probability reproductive") +
-#   adams_theme
-#   
-# makePNG(fig = curves_by_grform,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "curves_by_grform_fixed_axes.png")
-# 
-# 
-# #extra
-# #figures showing mean size of reproductive and non-reproductive trees
-# fig.allsp <- RA %>%
-#   ggplot(aes(rep,dbh,fill = pft)) +
-#   geom_boxplot() +
-#   ylab("dbh (mm)") +
-#   xlab("reproductive status") +
-#   scale_fill_manual(values = pft.cols) +
-#   adams_theme 
-# 
-# #faceted by growth form
-# fig.facet.grform <- RA %>%
-#   ggplot(aes(rep,dbh,fill = pft)) +
-#   geom_boxplot() +
-#   facet_grid(~grform) +
-#   ylab("dbh (mm)") +
-#   xlab("reproductive status") +
-#   scale_fill_manual(values = pft.cols) +
-#   adams_theme 
-# makePNG(fig = fig.allsp,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "boxplot_allsp_mean_dbh_repro")
-# makePNG(fig = fig.facet.grform,path_to_output.x = paste0(path_to_output,"model_dev_figs/"),file_name = "boxplot_mean_dbh_repro_by_grform")
-# 
 
 

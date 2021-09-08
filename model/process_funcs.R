@@ -13,7 +13,7 @@ prob_repro <- function(size_mm,PFT.x){
 efrac <- function(N, co_dbh_ind, PFT){
   N_repro <- prob_repro(size_mm = co_dbh_ind, PFT.x = PFT) * N
   fraction_reproductive <- N_repro / N
-  e_frac <- fraction_reproductive * F_repro[PFT] #frac repro for now is just a fixed percent of NPP (10%), need better data to get better numbers for this
+  e_frac <- fraction_reproductive * F_repro[PFT] 
   return(e_frac)
 }
 
@@ -53,3 +53,68 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
   names(out) <- c("frac_emerg", "C_emerg")
   return(out)
 }
+
+
+#light-based seedling mortality
+light_mort3 <- function(light = 90, seedpool.x = 1){
+  
+  a.ML.x <- a.ML[PFT]
+  b.ML.x <- b.ML[PFT]
+  
+  Pm_day <- exp(a.ML.x * light +  b.ML.x)
+  
+  return(Pm_day)
+}
+
+
+
+#moisture-based seedling mortality
+
+#Function to accumulate moisture deficit days.
+def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
+  def <- (abs(psi_crit.x) - abs(soil_moist))*-1
+  no_def <- def < 0 
+  def[no_def] <- 0
+  deficit_days <- c()
+  for(i in 1:length(def)){
+    deficit_days[i] <- ifelse(i < window, sum(def[1:i]), sum(def[(i-window):i]))
+  }
+  return(deficit_days)
+}
+
+#Function to calculate seedling mortality as a function of moisture deficit days 
+H20_mort <- function(deficit_days, pft.x){
+  PFT <- pft.x
+  
+  daily_mort_rate <- a.MH20[PFT] * deficit_days^2 + b.MH20[PFT] * deficit_days + c.MH20[PFT]
+  
+  if(deficit_days < MDDs_crit[PFT]){
+    daily_mort_rate <- 0
+  }
+  
+  return(daily_mort_rate)
+}
+
+
+
+
+#light-based seedling to sapling transition.
+rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.x){
+  frac_rec <- a_TR.x * l^b_TR.x
+  if(SMP.x < psi_crit[PFT]){
+    frac_rec <- 0
+  }
+  C_rec <- frac_rec * seedpool.x
+  N_rec <- C_rec / Z0
+  out <- list(frac_rec,C_rec, N_rec)
+  names(out) <- c("frac_rec", "C_rec", "N_rec")
+  return(out) 
+}
+
+
+
+
+
+
+
+

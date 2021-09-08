@@ -117,35 +117,6 @@ emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, s
 
 
 
-def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
-  def <- (abs(psi_crit.x) - abs(soil_moist))*-1
-  no_def <- def < 0 
-  def[no_def] <- 0
-  deficit_days <- c()
-  for(i in 1:length(def)){
-    deficit_days[i] <- ifelse(i < window, sum(def[1:i]), sum(def[(i-window):i]))
-  }
-  return(deficit_days)
-}
-
-
-
-
-
-
-
-H20_mort <- function(deficit_days, pft.x){
-  PFT <- pft.x
-  
-  daily_mort_rate <- a.MH20[PFT] * deficit_days^2 + b.MH20[PFT] * deficit_days + c.MH20[PFT]
-  
-  if(deficit_days < MDDs_crit[PFT]){
-    daily_mort_rate <- 0
-  }
-  
-  return(daily_mort_rate)
-}
-
 
 #light-based seedling mortality
 # light_mort <- function(light = 5000000*60, seedpool.x = 750000){

@@ -2,10 +2,13 @@
 
 library(stringr)
 library(tidyverse)
+library(purrr)
 library(lubridate)
 library(broom)
 library(hdf5r)    #package used to open hdf5 files
 library(chron) # package used for time series data
+
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 
 path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
 path_to_observations <- path_to_observational_data
