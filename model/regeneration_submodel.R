@@ -1,6 +1,7 @@
 #This is the primary script that drives the Tree Recruitment Scheme
 #However, to set up a run, the user needs to use one of the scripts in the 'run' folder
 #The functions that represent the environmentally sensitive processes are in 'model/process_funcs.R'
+source('model/process_funcs.R')
 
 print(paste("Running regeneration submodel",Sys.time()))
 
