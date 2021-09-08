@@ -33,6 +33,7 @@ photoblastic_germ_rate_modifier <- function(l_crit.x = l_crit,
 
 
 
+
 emerg_func <- function(a = a_emerg[PFT], b = b_emerg[PFT], SMP.2.to.0.wks.ago, seedbank.x, light.xx){
   
   wet_index <- 1 / (SMP.2.to.0.wks.ago * -1 / 1e5)
@@ -65,7 +66,7 @@ light_mort3 <- function(light = 90, seedpool.x = 1){
   
   return(Pm_day)
 }
-
+light_mort <- light_mort3
 
 
 #moisture-based seedling mortality
