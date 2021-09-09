@@ -1,6 +1,7 @@
 #source scripts that create figures displaying the functions behavior
 source("model_dev/reproductive_allocation.R")
 source("model_dev/seedling_emergence.R")
+source('model_dev/photoblastic_germination.R')
 source('model_dev/seedling_mortality_H20.R')
 source("model_dev/seedling_to_sapling_transition.R")
 source("model_dev/seedling_mortality_light.R")

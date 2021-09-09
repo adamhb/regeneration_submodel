@@ -1,14 +1,31 @@
-#derive seedling to sapling transition function
-source("utils/supporting_funcs.R")
+#this script derives parameters for the seedling to sapling transition function
 
-BCImeanTOC <- summary(input_data$FSDS)[3] / 1e6 #16.7 #MJ m-2 day-1
+source('utils/supporting_funcs.R')
+source('model/process_funcs.R')
+source('runs/generate_input_data.R')
+
+#determine light levels at BCI
+BCImeanTOC <- 7.524879 #MJ m-2 day-1 of PAR at the top of canopy
 BCImeanUnderstory <- BCImeanTOC* 0.02 #MJ m-2 day-1
 BCImean_20_pct_gap <- BCImeanTOC* 0.2
 
-#deriving a.TR: the mean transition rate under mean light
-a.TR.LD <- (0.5/365) %>% #the default fraction of the seed bank that emerges in FATES and CLM(ED)
+
+#aTR is a coefficient in the seedling to sapling transition rate power function (Eqn 8). Its 
+#value was back-calculated using Eqn 8 and assuming the mean transition rate was equal to the
+#current transition out of the seed bank to the seedling pool in VDMs (Fisher et al., 2015) 
+#under mean light levels at BCI. Although this is based on a different demographic stage, this parameter is not equivalent to a transition probability because individual seedlings are not tracked. We use this parameter here as a starting point, but it should be better constrained in future work. 
+#See discussion of main text for more discussion on this.
+
+# Fisher RA, Muszala S, Verteinstein M, Lawrence P, Xu C, McDowell NG, Knox RG, Koven C, Holm
+#J, Rogers BM, et al. 2015. Taking off the training wheels: The properties of a dynamic 
+#vegetation model without climate envelopes, CLM4.5(ED). Geoscientific Model Development 8: 
+#3593–3619.
+
+annual_transition_prob_in_FATES <- 0.5
+
+a.TR.LD <- (annual_transition_prob_in_FATES/365) %>% #the default fraction of the seed bank that emerges in FATES and CLM(ED)
   `/` (BCImeanUnderstory^b_TR["LD_DI"]) 
-a.TR.ST <- (0.5/365) %>% #the default fraction of the seed bank that emerges in FATES and CLM(ED)
+a.TR.ST <- (annual_transition_prob_in_FATES/365) %>% #the default fraction of the seed bank that emerges in FATES and CLM(ED)
   `/` (BCImeanUnderstory^b_TR["ST_DI"]) 
 
 a_TR <- c(rep(a.TR.LD,2),rep(a.TR.ST,2))
@@ -16,30 +33,19 @@ names(a_TR) <- pft_names
 print("a.TR =")
 print(a_TR)
 
-#rec function
-rec_func <- function(a_TR.x = a_TR[PFT], b_TR.x = b_TR[PFT], l, SMP.x, seedpool.x){
-  frac_rec <- a_TR.x * l^b_TR.x
-  if(SMP.x < psi_crit[PFT]){
-    frac_rec <- 0
-  }
-  C_rec <- frac_rec * seedpool.x
-  N_rec <- C_rec / Z0
-  out <- list(frac_rec,C_rec, N_rec)
-  names(out) <- c("frac_rec", "C_rec", "N_rec")
-  return(out) 
-}
+#Note that the values for b_TR were taken directly from Ruger et al., 2009
+#Rüger N, Huth A, Hubbell SP, Condit R. 2009. Response of recruitment to light availability 
+#across a tropical lowland rain forest community. Journal of Ecology 97: 1–3.
 
-#visualize rec function
-#creating range of light levels from 0 to TOC at BCI
+
+#create light data used to
+#visualize the seedling to sapling transition function
+#as a function of light.
 RIs <- seq(from = 0, to = 100, length.out = 100)/100
-light_MJ_per_m2_day <- BCImeanTOC * RIs
+light_MJ_per_m2_day <- BCImeanTOC * RIs #of PAR
 
 #use rec function to create range of transition rates
-
-
-
 light_rec_data3 <- tibble()
-
 #for(i in pft_names[c(1,3)]){
 for(i in pft_names){
   PFT <- i

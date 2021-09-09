@@ -1,3 +1,7 @@
+#This script uses the output of the Tree Regeneration Scheme to create figures
+#that are primarily diagnostic.
+#This script is required to generate figures for Hanbury-Brown et al., in prep
+
 source("create_output/figure_formatting.R")
 print(paste("generating output figures...",Sys.time()))
 
@@ -540,14 +544,6 @@ Submodel_annual_rec <- N_recs_per_year_pfts %>%
 png(paste0(path_to_this_run_output,"/16_Recruitment_Annual_Sums.png"), height=5, width=8, units="in", res = 100)
 print(Submodel_annual_rec)
 dev.off()
-
-
-
-
-
-
-
-
 
 
 

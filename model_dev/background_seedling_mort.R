@@ -1,3 +1,5 @@
+#This script calculates the background seedling mortality rate from seedling census observations
+
 library(lme4)
 library(tidyverse)
 source('create_output/figures_for_MS/benchmark_figure_BCI_2008to2014.R')
@@ -40,7 +42,8 @@ print(mean_annual_mort_rate)
 
 
 
-
+#Below we substract the mean mortality rate from moisture stress and
+#light stress to get the background mortality rate.
 H20andlightMort <- full_output %>%
   group_by(pft) %>%
   summarise(light_mort_rate = mean(light_mort_rate),

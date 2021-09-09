@@ -1,24 +1,32 @@
-##WATER STRESS MORTALITY FUNCTION##
 
-#The relationship between soil matric potential (MPa) and seedling mortality rates is derived in this script from: 
-#Engelbrecht, B. M. J., & Kursar, T. A. (2003). 
-#Comparative drought-resistance of seedlings of 28 species of co-occurring tropical woody plants. 
-#Oecologia, 136(3), 383–393. 
-#https://doi.org/10.1007/s00442-003-1290-8
-#rm(list = rm())
-#gc()
+#The functional relationship between soil matric potential (MPa) and seedling mortality rates is derived in this script 
+#from Engelbrecht and Kursar (2003).
+
+#Parameters for seedling drought stress mortality are derived in this script 
 
 
-#load required data
+#Load supporting functions
 source("utils/supporting_funcs.R")
+#load the regeneration process functions
+source("model/process_funcs.R")
+#Run the script that assigns species to plant functional types
+source("benchmarking/assigning_pfts.R")
+
+#Load seedling mortality observations from Engelbrecht and Kursar's manipulative drought experiment.
+#These observations have been tabulated by Adam Hanbury-Brown using Figures in Engelbrecht and Kursar (2003),
+#Engelbrecht et al., 2005, and Engelbrecht et al., 2007
 engelbrecht_mort_data <- read_csv(paste0(path_to_observational_data,"engelbrecht_mort_data.csv"))
 seedling_mort_over_time <- read_csv(paste0(path_to_observational_data,"engelbrecht_seedling_mort_over_time.csv"),
                                     col_names = c("week","pct_indvls_alive","engelbrecht_id","treatment","Latin","N_start"))
 moisture_stress_points <- read_csv(paste0(path_to_observational_data,"engelbrecht_wilt_50.csv"))
 eng_start_date <- dmy("18-12-2000")
-source("benchmarking/assigning_pfts.R")
-#path_to_observational_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
-#pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
+
+#Engelbrecht BMJ, Kursar TA, Tyree MT. 2005. Drought effects on seedling survival in a tropical moist forest. Tree: 312–321.
+#Engelbrecht BMJ, Comita LS, Condit R, Kursar T, Tyree MT, Turner BL, Hubbell SP. 2007. Drought sensitivity shapes species distribut
+#ion patterns in tropical forests. Nature 447: 80–82.
+#Engelbrecht, B. M. J., & Kursar, T. A. (2003). 
+#Comparative drought-resistance of seedlings of 28 species of co-occurring tropical woody plants.Oecologia, 136(3), 383–393. https://doi.org/10.1007/s00442-003-1290-8
+
 
 #determining psi_crit for the species in the drought experiment
 moisture_stress_points_pft <- moisture_stress_points %>%
@@ -34,8 +42,8 @@ moisture_stress_points_pft <- moisture_stress_points %>%
   mutate(day = round(as.numeric((eng_start_date + mean_wilt_50_week * 7) - eng_start_date)))
   
 
-#pedotransfer function based on data provided in Engelbrecht et al. 2003
-PTF_func <- function(sgwc){
+#Step 1. Pedotransfer function based on data provided in Engelbrecht et al. 2003
+PTF_func <- function(sgwc){ #input: soil gravimetric water content
   
   sgwc_T  <- c(0.78, 0.47, 0.34)
   matric_T <- c(0, -0.5, -3.5)
@@ -45,41 +53,33 @@ PTF_func <- function(sgwc){
   sgwc_T2 <- sgwc_T^2
   PTF <- lm(matric_T ~ sgwc_T + sgwc_T2)
   
-  
   matric <- coef(PTF)[3]*sgwc^2 + coef(PTF)[2]*sgwc + coef(PTF)[1]
   return(matric) #returns matric potential
 }
-
-
-#Step 1. Deriving the soil water retention curve at the experimental plots in Engelbrecht and Kursar, 2003
-
-# sgwc_T  <- c(0.78, 0.47, 0.34)
-# matric_T <- c(0, -0.5, -3.5)
-# d <- data.frame(sgwc_T = sgwc_T, matric_T = matric_T)
-# #plot(sgwc_T,matric_T)
-# 
-# sgwc_T2 <- sgwc_T^2
-# PTF <- lm(matric_T ~ sgwc_T + sgwc_T2)
 
 
 #Step 2. Replicating the time series data for soil gravimetric water content
 weeks <- c(4,8,10,12,14,16,18,20,22)
 sgwc <- c(0.48, 0.41,0.39,0.35,0.37,0.34,0.33,0.33,0.38)
 #plot(weeks, sgwc)
+
 #Step 3. Converting the soil moisture time series data to a matric potential (mm water suction)
-matric <- PTF_func(sgwc = sgwc) * 1e5 #converting matric potential (Mpa) to mm of H20 suction
+matric <- PTF_func(sgwc = sgwc) * 1e5 #converting Megapascals (Mpa) to mm of H20 suction
 #plot(weeks, matric)
+
 #creating a dataframe to store the moisture and (later) mortality data
 ts_wk <- data.frame(week = weeks, matric = matric)
+
 #adding the day of the experiment
 ts_wk$day <- ts_wk$week*7
 
-#Determing matric potential on each day
+#determing matric potential on each day
 matric_days <- predict(loess(matric~weeks), newdata = seq(from = 4, to = 22, length = 127))
 days <- 1:127 + 27
 ts_days <- data.frame(day = days, matric = matric_days)
 
 #determining the matric potential at psi_crit
+pft_names <- c("LD_DI", "LD_DT", "ST_DI", "ST_DT")
 psi_crit <- ts_days %>% filter(day %in% c(moisture_stress_points_pft$day)) %>% pull(matric) %>% rep(.,2)
 names(psi_crit) <- pft_names
 print("psi crit:")
@@ -90,43 +90,21 @@ plot(days, matric_days / 1e5, ylab = "soil matric potential (Mpa)",
      main = "Soil moisture observations \n Engelbrecht drought experiment")
 
 
-#defining a function to create deficit days for the 22 week period of the experiment
-def_func <- function(soil_moist, psi_crit.x = psi_crit[PFT], window){
-  def <- (abs(psi_crit.x) - abs(soil_moist))*-1
-  no_def <- def < 0 
-  def[no_def] <- 0
-  deficit_days <- c()
-  for(i in 1:length(def)){
-    deficit_days[i] <- ifelse(i < window, sum(def[1:i]), sum(def[(i-window):i]))
-  }
-  return(deficit_days)
-}
-
-
-#plot(def_func(thresh.x = thresh.xx[PFT], soil_moist = matric_days, window = 126))
-
-#creating deficit days for the drought intolerant PFTs over the 18 week period when soil moisture was measured.
-#deficit_days_DT <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedt"], window = 18*7)[126]
-#deficit_days_DI <- def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedi"], window = 18*7)[126]
-
-
-# DDs <- tibble(DDs = append(def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedt"], window = 18*7),
-#                            def_func(soil_moist = matric_days, thresh.x = thresh.xx["latedi"], window = 18*7)),
-#               pft = c(rep("DT",127),rep("DI",127)),
-#               day = rep(1:127,2))
-
+#calculating moisture deficit days for the 22 week period of the experiment
 DDs <- tibble(DDs = append(def_func(soil_moist = matric_days, psi_crit.x = psi_crit["LD_DT"], window = 18*7),
                            def_func(soil_moist = matric_days, psi_crit.x = psi_crit["LD_DI"], window = 18*7)),
               pft = c(rep("DT",127),rep("DI",127)),
               day = rep(1:127,2))
 
 pfts_nov_2018 <- pfts_nov_2018 %>% mutate_at(.vars = "Latin", .funs = as.character)
+#pfts_nov_2018 <- read_csv(file = "benchmarking/pft_assignments.csv")
 
-missing_sp <- seedling_mort_over_time %>%
-  left_join(pfts_nov_2018, by = "Latin") %>% 
-  filter(is.na(pft) == T) %>%
-  pull(Latin) %>% unique()
+# missing_sp <- seedling_mort_over_time %>%
+#   left_join(pfts_nov_2018, by = "Latin") %>% 
+#   filter(is.na(pft) == T) %>%
+#   pull(Latin) %>% unique()
 
+#calculating daily seedling mortality rates over Engelbrecht's manipulative drought experiment
 seedling_mort_over_time1 <- seedling_mort_over_time %>%
   left_join(pfts_nov_2018, by = "Latin") %>%
   mutate(pft=ifelse(Latin=="Pouteria unilocularis","ST_DT",pft)) %>%
@@ -155,7 +133,7 @@ seedling_mort_over_time1 <- seedling_mort_over_time %>%
   filter(M_daily >= 0, int_name != "22_0")
 
 
-#pfts for each of Engel's species
+#assigning each of Engelbrecht's species to PFTs
 seedling_mort_over_time %>%
   left_join(pfts_nov_2018, by = "Latin") %>%
   mutate(pft=ifelse(Latin=="Pouteria unilocularis","ST_DT",pft)) %>%
@@ -166,14 +144,14 @@ seedling_mort_over_time %>%
   )) %>% select(engelbrecht_id, pft) %>% distinct()
 
 
-#getting start and end week for each interval
+#getting start and end week for each interval of the manipulative drought experiment
 x <- str_split(seedling_mort_over_time1$int_name,pattern = "_")
 starts <- unlist(lapply(x, `[[`, 1))
 ends <- unlist(lapply(x, `[[`, 2))
 eng_start_date <- dmy("18-12-2000")
 
 
-
+#cleaning the data for statistical analysis 
 seedling_mort_over_time2 <- seedling_mort_over_time1 %>%
   ungroup() %>%
   mutate(start.week = as.numeric(starts), end.week = as.numeric(ends)) %>%
@@ -187,11 +165,11 @@ seedling_mort_over_time2 <- seedling_mort_over_time1 %>%
   drop_na()
 
 
-#graph showing deficit and mortality over time
+#graph showing moisture deficit days and mortality over time
 mortANDDD_overTime <- seedling_mort_over_time2 %>%
   ggplot(aes(day,DDs,color = pft)) +
   geom_point(size = 5) +
-  geom_line(mapping = aes(day, M_daily * 2631856462)) +
+  geom_line(mapping = aes(day, M_daily * 2631856462)) + #scaling factor to get mortality and moisture deficit days on the same graph
   geom_point(mapping = aes(day, M_daily * 2631856462)) +
   scale_y_continuous(
         "deficit days",
@@ -199,53 +177,39 @@ mortANDDD_overTime <- seedling_mort_over_time2 %>%
       ) +
   adams_theme
 
-
-#################
-#fitting models##
-#################
-
+#dividing the data into drought tolerant and drought intolerant PFTs
 DI_mort_data <- seedling_mort_over_time2 %>%
   filter(pft == "DI",
          day < 120) 
-
 DT_mort_data <- seedling_mort_over_time2 %>%
   filter(pft == "DT",
          day < 120) %>%
   mutate_at(.vars = c("M_daily","DDs"), .funs = function(x){x+0.00000000001})
 
 
-#log linear
-# DT_mod_lnLin <- lm(data = DT_mort_data, formula = log(M_daily) ~ DDs)
-# summary(DT_mod_lnLin)
-
-#quadratic
+#fitting quadratic statistical models that predict seedling mortality as a function of moisture deficit days
 DT_mod_Quad <- lm(data = DT_mort_data, formula = M_daily ~ DDs + I(DDs^2))
 summary(DT_mod_Quad)
 
 pred_data <- tibble(DDs = seq(0,1.1e7,length.out = 100))
-#pred_data$logLin <- exp(predict(DT_mod_lnLin, newdata = pred_data))
 pred_data$quad <- predict(DT_mod_Quad, newdata = pred_data)
-
-
-#the quadratic relationship is best for DT
-
 
 DI_mort_data <- seedling_mort_over_time2 %>%
   filter(pft == "DI",
          day < 120) 
 
-#quadratic
+
 DI_mod_Quad <- lm(data = DI_mort_data, formula = M_daily ~ DDs + I(DDs^2))
 summary(DT_mod_Quad)
 
 pred_data_DI <- tibble(DDs = seq(0,1.1e7,length.out = 100))
+
 pred_data_DI$quad <- predict(DI_mod_Quad, newdata = pred_data_DI)
 
 
-#############################
-####showing data and models##
-#############################
 
+#plotting seedling mortality predictions with observations
+#drought tolerant PFT
 DT_MDDs_vs_M <- DT_mort_data %>%
   ggplot(aes(DDs * 1e-5,M_daily* 1e3)) +
   geom_point(shape = 2, size = 3) +
@@ -261,6 +225,7 @@ DT_MDDs_vs_M <- DT_mort_data %>%
 
 #makePNG(fig = DT_MDDs_vs_M, file_name = "DT_MDDs_vs_Mort", path_to_output.x = paste0(path_to_output,"forMS/"),height = 4, width = 6, units = "in",res = 600)
 
+#drought intolerant pft
 DI_MDDs_vs_M <- DI_mort_data %>%
   ggplot(aes(DDs * 1e-5,M_daily * 1e3)) +
   geom_point(shape = 2, size = 3) +
@@ -275,7 +240,6 @@ DI_MDDs_vs_M <- DI_mort_data %>%
   theme(legend.position = c(0.25,0.75))
   # theme(legend.position = c(0.25,0.75)) +
   # guides(shape = "legend")
-
 
 MDDsVsM <- cowplot::plot_grid(DI_MDDs_vs_M, DT_MDDs_vs_M, labels = c("(a)","(b)"))
 #makePNG(fig =MDDsVsM, file_name = "MDDsVsM", path_to_output.x = paste0(path_to_output,"forMS/"),height = 5, width = 10, units = "in",res = 600)
@@ -297,15 +261,16 @@ print("c.H20:")
 print(c.H20)
 
 
-MDDs_crit <- rep(c(4.6e6,1.4e6),2) #this parameter avoids negative values of mortality to be calculated from the quadratic relationship between MDDs and M_H2O
+MDDs_crit <- rep(c(4.6e6,1.4e6),2) #this parameter is derived from visualizing the quadratic relationship
+#where mortality is 0 or < 0 up until a certain point.
 names(MDDs_crit) <- pft_names
 print("MDDs_crit:")
 print(MDDs_crit) #in units of m of H20 suction
 
 
-###########################################
-##visualizing moisture deficit days########
-###########################################
+##########################################################
+##visualizing the concept of moisture deficit days########
+##########################################################
 
 SMP_data <- read_csv('temp/SMP_data_for_deficit_graph.csv')
 
@@ -329,23 +294,7 @@ moisture_def_fig <- ggplot(SMP_data, aes(x = day, y = SMP/1e5)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size=5))
 
 
-
-
-
-
-
-#defining the new H20 mortality function 
-H20_mort <- function(deficit_days, pft.x){
-  PFT <- pft.x
-  
-  daily_mort_rate <- a.MH20[PFT] * deficit_days^2 + b.MH20[PFT] * deficit_days + c.MH20[PFT]
-  
-  if(deficit_days < MDDs_crit[PFT]){
-    daily_mort_rate <- 0
-  }
-  
-  return(daily_mort_rate)
-}
+#generating data to visualize the relationship between moisture deficit days and seedling mortality
 
 #create the pft col for the predictions data
 pft_col <- c()
@@ -366,7 +315,6 @@ data_for_H20_mort_fig <- pred_data %>%
   mutate(pft = factor(pft,levels = pft_names))
 
 
-
 Fig_seedling_mort_H20 <- data_for_H20_mort_fig %>%
   ggplot(aes(x = DDs / 1e5, y = M, color = pft, linetype = pft)) +
   geom_line(size = 2) +
@@ -384,109 +332,3 @@ Fig_seedling_mort_H20 <- data_for_H20_mort_fig %>%
   multipanel_theme
 
 print("made Fig_seedling_mort_H20")
-
-
-
-# 
-# 
-# 
-# 
-# HMort_data <- tibble()
-# for(i in pft_names){
-#   for(DD in seq(from = 0, to = max(DI_mort_data$DDs), length.out = 100)){
-#     
-#     PFT <- i
-#     temp <- tibble(
-#       H20M_daily = H20_mort2(deficit_days = DD,
-#                   pft.x = i),
-#       pft = i,
-#       DDs = DD)
-#     
-#     HMort_data <- rbind(HMort_data, temp)
-#   }
-# }
-# 
-# 
-# 
-# HMort_data %>%
-#   ggplot(aes(DDs,H20M_daily, color = pft)) +-
-#   geom_line()
-# 
-# 
-# 
-# DI_mort_data %>%
-#   ggplot(aes(DDs,M_daily)) +
-#   geom_point() +
-#   #geom_line(data = pred_data, mapping = aes(DDs,logLin)) +
-#   #geom_line(data = pred_data_DI, mapping = aes(DDs,quad), linetype = "solid") +
-#   geom_line(data = pred_data_DI, mapping = aes(DDs,new_mod), linetype = "dashed") +
-#   scale_y_continuous(limits = c(0,0.008)) +
-#   adams_theme
-# 
-# 
-# 
-# # #exponetial
-# # DT_mod_E <- lm(data = DT_mort_data, formula = M_daily ~ I(DDs^2)) 
-# # #power
-# # DT_mod_P <- lm(data = DT_mort_data, formula = log(M_daily) ~ DDs)
-# # summary(DT_mod)
-# 
-# 
-# #create predictions 
-# 
-# 
-# # DT_mort_data1 <- DT_mort_data %>%
-# #   mutate(predictions = predict(object = DT_mod, newdata = DT_mort_data))
-# 
-# DT_mort_data1 %>%
-#   mutate(predictions = predict(object = DI_mod, newdata = DI_mort_data)) %>%
-#   gather(c(M_daily,predictions), key = "type", value = "M") %>%
-#   ggplot(aes(DDs,M,color = type)) +
-#   geom_point()
-# 
-#   
-#   
-# DT_mort_data %>%
-#   rbind(DI_mort_data) %>%
-#   rename(obs = M_daily) %>%
-#   gather(c(obs,predictions),key = "type",value = "M_daily") %>%
-#   filter(pft == "DI") %>%
-#   ggplot(aes(DDs,M_daily,linetype = "type")) + 
-#   scale_linetype_manual(values = c("dashed","solid")) +
-#   #geom_point() + 
-#   geom_line() +
-#   adams_theme
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# ggplot(data = DDs, mapping = aes(x = day, y = DDs, color = pft)) +
-#   geom_line()
-# 
-# dr_mort_DI <- engelbrecht_mort_data %>%
-#   filter(PFT == "DI") %>%
-#   summarise(mort_rate = mean(pct_mort_drought))
-# 
-# dr_mort_DT <- engelbrecht_mort_data %>%
-#   filter(PFT == "DT") %>%
-#   summarise(mort_rate = mean(pct_mort_drought))
-# 
-# #fitting a linear model of mortality as a function of deficit days for DT and DI PFTs
-# DI_dr_data <- data.frame(def_days = c(0,deficit_days_DI), mort = c(0, dr_mort_DI$mort_rate))
-# DI_dr_lm <- lm(data = DI_dr_data, formula = mort~def_days)
-# 
-# DT_dr_data <- data.frame(def_days = c(0,deficit_days_DT), mort = c(0, dr_mort_DT$mort_rate))
-# DT_dr_lm <- lm(data = DT_dr_data, formula = mort~def_days)
-# 
-# P1H20 <- rep(c(coef(DI_dr_lm)[2], coef(DT_dr_lm)[2]),2) 
-# names(P1H20) <- pft_names
-# 
-# P2H20 <- rep(c(coef(DI_dr_lm)[1], coef(DT_dr_lm)[1]),2) #note P2H20 is essentially zero
-# names(P2H20) <- pft_names
-# 
-# 
-# print("P1H20 is:")
-# print(P1H20)

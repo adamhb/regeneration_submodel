@@ -1,8 +1,8 @@
-rm(list = ls())
-gc()
+#This script runs the Tree Recruitment Scheme under BASE meteorology
+#using data from ED2 for a simulation at Barro Colorado Island.
+#It runs the TRS with default parameter values and values tuned to BCI. 
 
-
-#load libraries
+#Load libraries
 library(ncdf4)
 library(ncdf.tools)
 library(magrittr)
@@ -48,13 +48,13 @@ write_csv(input_vars,"temp/input_vars.csv")
 
 source("create_output/create_output.R") #create submodel output
 
-
-
 write_csv(N_recs_per_year_pfts,"temp/N_recs_per_yr_default_params.csv")
 
 
+
+#run the same simulation as above, but with parameters tuned to BCI
 source("parameter_files/bci_parameters.R")
-#changes from default parameter values
+
 percent_light <- 0.02
 
 source("clean_input/prep_driver_data_ED2_bci.R")
@@ -70,39 +70,6 @@ write_csv(N_recs_per_year_pfts,"temp/N_recs_per_yr_bci_params.csv")
 
 
 
-
-
-
-
-
-
-# soil_moisture_period <- 120
-# 
-# total_length <- nrow(full_output)
-# n_segments <- floor(total_length / (soil_moisture_period * 4))
-# remainder <- total_length - ((soil_moisture_period * 4) * n_segments)
-# 
-# segment <- c()
-# for(i in 1:n_segments){
-#   segment <- append(segment,rep(i,(soil_moisture_period * 4)))
-# }
-# segment <- append(segment,rep(tail(segment,1),remainder))
-# 
-# soil_moisture_data <- full_output %>%
-#   arrange(date) %>% 
-#   add_column(segment = segment) %>% 
-#   as.tibble() %>% 
-#   group_by(segment,pft) %>%
-#   summarise(
-#     start_date = as.Date(min(date)),
-#     end_date = as.Date(max(date)),
-#     soil_moisture = mean(SMP),
-#     submodel = mean(R),
-#     ED2 = mean(ED2_R)) %>%
-#   gather(submodel:ED2,key = "model",value = "R")
-# 
-# source("create_output/figure_recruitment_versus_SMP.R")
-  
 
 
 

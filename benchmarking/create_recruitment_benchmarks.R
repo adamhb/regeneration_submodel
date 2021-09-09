@@ -1,29 +1,34 @@
-#benchmarks 11/18/2018
+#This script creates benchmarking data for recruitment at BCI
+#The calculations first rely on running the forestgeo benchmark driver developed by
+#Dan Johnson and Ryan Knox
 
-#first step is to run the forestgeo_benchmark_driver_AHB.r script
-#make sure that when that script is run the ctfs_at_settings.xml file has the correct settings
-#the above commands create the sp.Mlist and sp.Rlist_mindbh lists which are used for benchmarking
-#but those lists have all species in the inventory
+#The calcuations for recruitment rates from the BCI census data are based on
+#prior work by Kohyama et al., 2018.
 
-#step1
-#select just the species that we have pft designations for. These are all "canopy trees" according to Powell et al., 2018
+#Kohyama TS, Kohyama TI, Sheil D. 2018. Definition and estimation of vital rates from repeated 
+#censuses: Choices, comparisons and bias corrections focusing on trees. Methods in Ecology and 
+#Evolution 9: 809–821.
 
 write_benchmark_csv <- T
 
+library(tidyverse)
+library(lubridate)
+
+#make sure that when the script 'forestgeo_benchmark_driver_AHB.r' is run that the ctfs_at_settings.xml file has the appropriate settings
+source("benchmarking/forestgeo_benchmark_driver_AHB.r")
+
+source("benchmarking/assigning_pfts.R")
+source("create_output/figure_formatting.R")
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
-
-
-  library(tidyverse)
-  library(lubridate)
-  source("benchmarking/forestgeo_benchmark_driver_AHB.r")
-  source("benchmarking/assigning_pfts.R")
-  source("create_output/figure_formatting.R")
   
 load(paste0(path_to_benchmarking_data,"bcifull.RData"))
 load(paste0(path_to_benchmarking_data,"bci.full8.rdata"))
 pfts <- read_csv('benchmarking/pft_assignments.csv')
 
 
+
+#START cleaning the census data to prepare it for calculating recruitment
+#according to Kohyama et al. (2018) Eqn 11.
 bci.tree8.ahb <- bci.tree8 %>% mutate(bid = 8) %>%
   select(bid,sp,status,dbh,date,ExactDate,treeID) %>%
   mutate_at(.vars = "bid",.funs = as.numeric)
@@ -78,16 +83,18 @@ bci.full.ahb.1 <- bci.full.ahb %>%
                                            N2 = Si$N2))
     print(paste("done",i))
   }
+  #END cleaning the census data
+   
   
+  #Function to calculate recruitment rates
   rec_Kohyama <- function(Ma,Nt,Nst,N0){
       R <- Ma*(Nt-Nst)/(N0-Nst)
       return(R*1e4)
     }
  
-  #adjusting the recruitment to account for recruits that may have died before the census
-  #rec_data <- rec_data %>% mutate(R_adjust = R / (1 - M_rate))
   
-  #merging with the species for which we have pft designations
+  #Merging the recruitment observations dataframe with the species for which we have pft 
+  #assignments
   rec_data1 <- rec_data %>% 
     left_join(pfts_nov_2018, by = "sp") %>%
     drop_na(pft) %>% 
@@ -103,128 +110,8 @@ bci.full.ahb.1 <- bci.full.ahb %>%
  
   rec_data <- rec_data1
   
-  
-# str(rec_data1)
-#   
-#   mean_M_rate_area_per_pft <- rec_data1 %>%
-#     filter(int %in% c(6,7)) %>%
-#     drop_na(M_rate_area) %>%
-#     filter(M_rate_area != Inf) %>%
-#     group_by(pft) %>%
-#     summarise(Ma_pft = mean(M_rate_area, na.rm = T))
-# 
-#   
-#   
-#  rec_data2 <- rec_data1 %>%
-#     left_join(mean_M_rate_area_per_pft, by = "pft") %>%
-#     group_by(int,pft) %>%
-#     summarise(N1 = sum(N1),
-#               N2 = sum(N2),
-#               S = sum(S),
-#               int_length = mean(int_length, na.rm = T),
-#               M = sum(Ma_pft),
-#               R = sum(R)) %>%
-#    mutate(R_ha_yr = R / (50*int_length)) %>%
-#     mutate(R_Koh = unlist(pmap(list(Ma = M, Nt = N2, Nst = S, N0 = N1), .f = rec_Kohyama)))
-#     
-#  
-# 
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#  
-#   
-#   
-#   
-#   
-#   
-#   mean_M_rate_area_per_sp <- rec_data1 %>%
-#     #filter(int %in% c(6,7)) %>%
-#     group_by(Latin) %>%
-#     summarise(Ma = mean(M_rate_area)) %>%
-#     left_join(pfts, by = "Latin") %>%
-#     left_join(mean_M_rate_area_per_pft, by = "pft") %>%
-#     mutate(Ma2 = case_when(
-#       (Ma == Inf) ~ Ma_pft,
-#       is.na(Ma) ~ Ma_pft,
-#       TRUE ~ Ma
-#     )) %>%
-#     select(sp,Ma2)
-#   
-#   
-# #recruitment based on Kohyama  
-# # rec_Kohyama <- function(Ma,Nt,Nst,N0,t){
-# #     R <- Ma*(Nt-Nst)*(N0/Nst)^(1/t) / (N0-Nst)
-# #   return(R)
-# #   }  
-#   
-# rec_Kohyama <- function(Ma,Nt,Nst,N0){
-#   R <- Ma*(Nt-Nst)/(N0-Nst)
-#   return(R*1e4)
-# }
-# 
-# rec_data1 %>%
-#   left_join(mean_M_rate_area_per_sp, by = "sp") %>%
-#   mutate(R_ha_yr_original = R/(50*int_length)) %>% 
-#   mutate(R_Kohyama_ha_yr = unlist(pmap(list(Ma = Ma2, Nt = N2, Nst = S, N0 = N1), .f = rec_Kohyama))) %>% 
-#   filter(R_Kohyama_ha_yr != Inf) %>%
-#   group_by(int,pft) %>% 
-#   summarise(R_Kohyama_ha_yr_pft = sum(R_Kohyama_ha_yr, na.rm = T))
-#   
-# 
-# 
-# rec_data1 %>%
-#   left_join(mean_M_rate_area_per_sp, by = "sp") %>%
-#   mutate(R_a = pmap(list(Ma = Ma2, Nt = N2, Nst = S, N0 = N1, t = int_length), .f = rec_Kohyama))
-#   
-#   
-#   
-# df4 <- 
-#   tribble(~mean, ~sd, ~n,
-#           1,  0.03, 2,
-#           10, 0.1,  4,
-#           5,  0.1,  4)
-#   
-#   
-#   #pft-specific mortality rates
-#   # pft.level.M <- rec_data %>%
-#   #   filter(M_rate != Inf) %>%
-#   #   group_by(pft) %>%
-#   #   summarise(mrate.pft = mean(M_rate, na.rm = T))
-#   # 
-#   # write.csv(x = pft.level.M, "temp/mort_rates.csv")
-#   
-#  # N_dead_per_year_per_pft <- rec_data %>% group_by(int,pft) %>%
-#  #    drop_na(a,M_rate,R,R_adjust) %>%
-#  #    filter(M_rate != Inf) %>%
-#  #    summarise(a = sum(a)/50,
-#  #              m = mean(M_rate),
-#  #              r = sum(R)/50,
-#  #              ra = sum(R_adjust)/50) %>%
-#  #    mutate(n_dead = m*a) %>%
-#  #    group_by(pft) %>%
-#  #    summarise_if(.predicate = is.numeric, .funs = mean) #%>% pull(n_dead) %>% median()
-#  #              
-#  # write.csv( x = N_dead_per_year_per_pft , "temp/mort_rates.csv")
-#  # 
-#  
-#   
-#   #aggregating recruits to the pft level
-#   rec_data <- rec_data %>% group_by(int, pft) %>%
-#     summarise(R = sum(R_adjust, na.rm = T), time = mean(int_length, na.rm = T)) %>%
-#     mutate(rec_rate = R / (time * 50)) # to get units of recruits per ha per year
-# 
 
-
-#plotting
+#plotting the recruitment observations
 rec_benchmarks <- rec_data1 %>% ggplot(mapping = aes(x = int, y = R_Koh, color = pft)) +
   geom_point(size = 5) +
   geom_line() +
@@ -236,7 +123,9 @@ rec_benchmarks <- rec_data1 %>% ggplot(mapping = aes(x = int, y = R_Koh, color =
 
 makePNG(fig = rec_benchmarks, path_to_output.x = path_to_benchmarking_output, file_name = "rec_benchmarks")
 
-  
+
+#reshaping the recruitment benchmarks to be in a long format with a time axis so that
+#it can be plotted alongside model output.
 if(write_benchmark_csv == T){
   write_csv(rec_data,paste0(path_to_benchmarking_output,"rec_benchmarks_bci.csv"))  
 }
@@ -255,7 +144,7 @@ rec_benchmarks_with_dates <- tibble(int = int,
                                     int_start = as.Date(int_start,origin = "1960-01-01"), 
                                     int_end = as.Date(int_end,origin = "1960-01-01"))
 
-#expanding this
+
 int <- c()
 int_start <- c()
 int_end <- c()
@@ -277,33 +166,4 @@ if(write_benchmark_csv == T){
 }
 
 print("created benchmarks")
-# 
-# 
-# head(rec_data)
-# 
-# #converting to a format that can be graphed with output data from the submodel
-# 
-# dates <- as.Date(full_output$date)
-# pfts_in_output <- full_output$pft
-# length(pfts_in_output)
-# 
-# ints <- c()
-# 
-# ints[as.numeric(substr(as.character(dates),start = 1, stop = 4)) < 2005] <- 5
-# ints[as.numeric(substr(as.character(dates),start = 1, stop = 4)) >= 2005 & as.numeric(substr(as.character(dates),start = 1, stop = 4)) < 2010] <- 6
-# ints[as.numeric(substr(as.character(dates),start = 1, stop = 4)) >= 2010] <- 7
-# 
-# length(ints)
-# 
-# graphable_bench_data <- data.frame(date = dates, int = ints, pft = pfts_in_output)
-# graphable_bench_data <- merge(graphable_bench_data, rec_data, by = c("int","pft"))
-# 
-# graphable_bench_data_all_pfts <- graphable_bench_data %>% group_by(date) %>% summarise(R_total = sum(R), time = mean(time)) %>% mutate(total_rec = R_total/ (time * 50))
-# 
-# 
-# str(graphable_bench_data)
-# 
-# ggplot(data = graphable_bench_data, mapping = aes(x = date, y = rec_rate, color = pft)) + geom_point()
-
-
 

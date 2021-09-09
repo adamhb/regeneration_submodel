@@ -1,5 +1,5 @@
-#source("create_output/figures_for_MS/visualize_process_functions.R")
-#source("create_output/figures_for_MS/benchmark_figure_BCI_2008to2014.R")
+source("create_output/figures_for_MS/visualize_process_functions.R")
+source("create_output/figures_for_MS/benchmark_figure_BCI_2008to2014.R")
 source("create_output/figures_for_MS/recruitment_versus_light.R")
 source("create_output/figures_for_MS/recruitment_vs_SMP.R")
 #source("create_output/figures_for_MS/ENSO_figs.R")

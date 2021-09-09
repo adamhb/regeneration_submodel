@@ -1,3 +1,6 @@
+#This script runs the Tree Recruitment Scheme with meteorology data
+#that includes a synthetic El Nino every 20 years.
+
 rm(list = ls())
 gc()
 

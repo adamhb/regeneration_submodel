@@ -1,4 +1,6 @@
-library(tidyverse)
+#This script calculates observed mean soil moisture in the Lutz catchment
+#between 2008 and 2014
+
 source('utils/supporting_funcs.R')
 
 PTF_func <- function(sgwc){

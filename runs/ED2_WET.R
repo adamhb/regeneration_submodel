@@ -1,3 +1,5 @@
+#This script runs the Tree Recruitment Scheme under WET meteorology (wetter than 
+#observed) using data from ED2 for a simulation at Barro Colorado Island.
 
 
 #load libraries

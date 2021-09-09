@@ -1,3 +1,8 @@
+#This script runs the Tree Recruitment Scheme in 20 different patches
+#that vary in canopy structure to demonstrate the TRS's recruitment sensitivity to
+#patch-level conditions.
+#It does this using data from ED2 for a simulation at Barro Colorado Island.
+
 rm(list = ls())
 gc()
 
@@ -35,6 +40,7 @@ path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 model_area <- 10000 #area in square meters
 
 #source parameter values
+percent_light <- 0.02
 source("parameter_files/bci_parameters.R") #changed this to BCI params; was bci_params_ed2_default
 
 source("clean_input/prep_driver_data_ED2_bci.R")
