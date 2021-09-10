@@ -49,7 +49,7 @@ a.ML <- c(-0.033231702, -0.033231702, -0.009897694, -0.009897694)
 b.ML <- c(-3.836400, -3.836400, -7.154063, -7.154063) 
 names(a.ML) <- pft_names
 names(b.ML) <- pft_names
-W_ML <- 64
+W_ML <- 64 #this parameter also gets applied to recruitment
 
 #moisture-based seedling mortality
 a.MH20 <- c(1.036938e-16, 4.070565e-17, 1.036938e-16, 4.070565e-17) 
@@ -61,7 +61,7 @@ names(c.MH20) <- pft_names
 psi_crit <- rep(c(-175912.9, -251995.7),2)
 names(psi_crit) <- pft_names
 W_psi <- 18*7 
-MDDs_crit <- rep(c(4.6e6,1.4e6),2)
+MDDs_crit <- rep(c(4.6e6,1.4e6),2) #these units are in mm H20 suction
 names(MDDs_crit) <- pft_names
 
 #background seedling mortality
