@@ -1,33 +1,30 @@
 #This script creates benchmarking data for recruitment at BCI
-#The calculations first rely on running the forestgeo benchmark driver developed by
-#Dan Johnson and Ryan Knox
 
-#The calcuations for recruitment rates from the BCI census data are based on
+#The calculations for recruitment rates from the BCI census data are based on
 #prior work by Kohyama et al., 2018.
 
 #Kohyama TS, Kohyama TI, Sheil D. 2018. Definition and estimation of vital rates from repeated 
 #censuses: Choices, comparisons and bias corrections focusing on trees. Methods in Ecology and 
 #Evolution 9: 809–821.
-
+m2_per_ha <- 1e4
 write_benchmark_csv <- T
 
 library(tidyverse)
 library(lubridate)
 
-#make sure that when the script 'forestgeo_benchmark_driver_AHB.r' is run that the ctfs_at_settings.xml file has the appropriate settings
-source("benchmarking/forestgeo_benchmark_driver_AHB.r")
-
-source("benchmarking/assigning_pfts.R")
 source("create_output/figure_formatting.R")
+source("utils/supporting_funcs.R")
+source("utils/system_settings.R")
+
 path_to_benchmarking_output <- "~/cloud/gdrive/rec_submodel/output/benchmarking/"
+path_to_benchmarking_data <- "~/cloud/gdrive/rec_submodel/data/observations/"
   
 load(paste0(path_to_benchmarking_data,"bcifull.RData"))
 load(paste0(path_to_benchmarking_data,"bci.full8.rdata"))
-pfts <- read_csv('benchmarking/pft_assignments.csv')
+pfts <- read_csv('benchmarking/pft_assignments.csv') %>%
+  select(sp, pft, Latin)
 
-
-
-#START cleaning the census data to prepare it for calculating recruitment
+#Clean the census data to prepare it for calculating recruitment
 #according to Kohyama et al. (2018) Eqn 11.
 bci.tree8.ahb <- bci.tree8 %>% mutate(bid = 8) %>%
   select(bid,sp,status,dbh,date,ExactDate,treeID) %>%
@@ -39,81 +36,98 @@ bci.full.ahb <- bci.full %>%
 
 bci.full.ahb.1 <- bci.full.ahb %>%
   rbind(bci.tree8.ahb) %>%
-  #filter(bid > 5) %>%
   left_join(pfts, by = "sp") %>% 
-  select(-X1) %>%
+  select(-8) %>%
   mutate_at(.vars = "dbh",.funs = function(x){x/10}) %>% #convert to cm
   drop_na(Latin)
 
-  rec_data <- data.frame()
-  
-  for(i in 1:7){
-    
-    Si <- tibble()
-    
-    for(spp in names(sp.Rlist_mindbh[[i]]$R)){
-      
-      N1 <- bci.full.ahb.1 %>%
-        filter(bid == i, status == "A", sp == spp, dbh < 5) %>% nrow()
-      
-      IDs_alive1 <- bci.full.ahb.1 %>%
-        filter(bid == i, status == "A", sp == spp, dbh < 5) %>% pull(treeID)
-      
-      N2 <- bci.full.ahb.1 %>%
-        filter(bid == i+1, status == "A", sp == spp, dbh < 5) %>% nrow()
-      
-      IDs_alive2 <- bci.full.ahb.1 %>%
-        filter(bid == i+1, status == "A", sp == spp, dbh < 5) %>% pull(treeID)
-      
-      Stmp <- tibble(sp = spp, Ns = sum(IDs_alive2 %in% IDs_alive1), N1 = N1, N2 = N2)
-      
-      Si <- rbind(Si,Stmp)
-    }
-    
-    
-    rec_data <- rbind(rec_data, data.frame(int = rep(i, length(sp.Rlist_mindbh[[i]]$R)), 
-                                           sp = names(sp.Rlist_mindbh[[i]]$R), 
-                                           R = sp.Rlist_mindbh[[i]]$R, 
-                                           int_length = sp.Rlist_mindbh[[i]]$time, 
-                                           M_rate = sp.Mlist[[i]]$rate[1:300,1],#))
-                                           #N1 = as.numeric(sp.Alist[[i]]$abund$all[1:300]),
-                                           #N2 = as.numeric(sp.Alist[[i+1]]$abund$all[1:300]),
-                                           S = Si$Ns,
-                                           N1 = Si$N1,
-                                           N2 = Si$N2))
-    print(paste("done",i))
-  }
-  #END cleaning the census data
-   
-  
-  #Function to calculate recruitment rates
-  rec_Kohyama <- function(Ma,Nt,Nst,N0){
-      R <- Ma*(Nt-Nst)/(N0-Nst)
-      return(R*1e4)
-    }
- 
-  
-  #Merging the recruitment observations dataframe with the species for which we have pft 
-  #assignments
-  rec_data1 <- rec_data %>% 
-    left_join(pfts_nov_2018, by = "sp") %>%
-    drop_na(pft) %>% 
-    mutate(M_rate_area = M_rate * N1 / (5e4*int_length)) %>% 
-    mutate(R_Koh = unlist(pmap(list(Ma = M_rate_area, Nt = N2, Nst = S, N0 = N1), .f = rec_Kohyama))) %>%
-    mutate(R_ha_yr = R / (50*int_length)) %>%
-    filter(R_Koh != Inf) %>%
-    group_by(int,pft) %>%
-    summarise(R_Koh = sum(R_Koh, na.rm = T),
-              R_ha_yr = sum(R_ha_yr, na.rm = T)) %>%
-    mutate(rec_rate = R_Koh)
-    
- 
-  rec_data <- rec_data1
-  
+#calculate per area mortality and recruitment rates
+cen_ints <- length(unique(bci.full.ahb.1$bid)) - 1
+species <- unique(bci.full.ahb.1$sp)
+dem_data <- tibble()
 
-#plotting the recruitment observations
-rec_benchmarks <- rec_data1 %>% ggplot(mapping = aes(x = int, y = R_Koh, color = pft)) +
+for(i in 1:cen_ints){
+  for(spp in species){
+    
+    cen_start <- bci.full.ahb.1 %>%
+      filter(bid == i, status == "A", sp == spp, dbh < 5)
+    cen_end <- bci.full.ahb.1 %>%
+      filter(bid == i+1, status == "A", sp == spp, dbh < 5)
+    
+    N1 <- nrow(cen_start)
+    N2 <- nrow(cen_end)
+    
+    IDs_alive1 <- cen_start %>% pull(treeID)
+    IDs_alive2 <- cen_end %>% pull(treeID)
+    Ns <- sum(IDs_alive2 %in% IDs_alive1)
+    
+    interval_start <- cen_start %>% pull(ExactDate) %>% ymd() %>% mean(na.rm = T)
+    interval_end <- cen_end %>% pull(ExactDate) %>% ymd() %>% mean(na.rm = T)
+    interval_length <- as.numeric(difftime(time1 = interval_end, time2 = interval_start, units = "auto") / 365)
+    
+    Stmp <- tibble(sp = spp, 
+                   Ns = Ns, 
+                   N1 = N1, 
+                   N2 = N2,
+                   int_start = interval_start,
+                   int_end =  interval_end,
+                   interval_length = interval_length,
+                   int = i)
+    dem_data <- rbind(dem_data,Stmp)
+  }
+  print(paste("done",i))
+}
+
+write_csv(dem_data,"benchmarking/dem_data_raw.csv")
+
+mort_Kohyama <- function(N1,Ns,int_length,A = 5e5){
+  M = (N1/A) * ( 1- (Ns / N1)^(1/int_length) ) 
+  return(M)
+}
+
+rec_Kohyama <- function(Ma,N2,Ns,N1){
+  R <- Ma*(N2-Ns)/(N1-Ns)
+  return(R)
+}
+
+dem_data1 <- dem_data %>%
+  mutate(M_Koh = unlist(pmap(list(N1 = N1, Ns = Ns, int_length = interval_length), .f = mort_Kohyama))) %>%
+  mutate(R_Koh = unlist(pmap(list(Ma = M_Koh, N2 = N2, Ns = Ns, N1 = N1), .f = rec_Kohyama))) %>% 
+  mutate(Nd = N1 - Ns) %>%
+  mutate(Nr = N2 + Nd - N1) %>%
+  select(int,sp,N1,N2,Ns,Nd,Nr,int_start,int_end,interval_length, M_Koh, R_Koh) %>%
+  drop_na(M_Koh, R_Koh)
+
+dem_data2 <- dem_data1 %>%
+  left_join(pfts,by = "sp") %>%
+  drop_na(pft) 
+
+write_csv(dem_data2,"benchmarking/dem_data_clean.csv")
+
+
+ggplot(dem_data2,aes((Nr/interval_length),R_Koh * 5e5)) + geom_point() 
+
+per_ha_rec_rates_per_pft_per_int <- dem_data2 %>%
+  mutate(r_basic_per_ha_per_yr = Nr / (50*interval_length)) %>%
+  group_by(pft,int) %>%
+  summarise(R_Koh_ha_yr = sum(R_Koh, na.rm = T) * m2_per_ha,
+            R_no_mort_adjust_ha_yr = sum(r_basic_per_ha_per_yr))
+
+write_csv(per_ha_rec_rates_per_pft_per_int, "benchmarking/obs_per_ha_rec_rates_per_pft_per_int.csv")
+
+per_ha_rec_rates_per_pft_per_int_2005_2015 <- per_ha_rec_rates_per_pft_per_int %>%
+  filter(int %in% c(6,7)) %>%
+  group_by(pft) %>%
+  summarise(R_Koh_ha_yr = mean(R_Koh_ha_yr),
+            R_no_mort_adjust_ha_yr = mean(R_no_mort_adjust_ha_yr))
+  
+write_csv(per_ha_rec_rates_per_pft_per_int_2005_2015, "per_ha_rec_rates_per_pft_per_int_2005_2015.csv")
+
+
+rec_benchmarks_over_time <- per_ha_rec_rates_per_pft_per_int %>% 
+  ggplot(mapping = aes(x = int, y = R_Koh_ha_yr, color = pft)) +
   geom_point(size = 5) +
+  geom_point(aes(int,R_no_mort_adjust_ha_yr,color = pft)) +
   geom_line() +
   scale_color_manual(values = pft.cols) +
   ylab(label = "recruitment rate (# ind. per ha yr)") +
@@ -121,14 +135,10 @@ rec_benchmarks <- rec_data1 %>% ggplot(mapping = aes(x = int, y = R_Koh, color =
   theme_minimal() +
   adams_theme
 
-makePNG(fig = rec_benchmarks, path_to_output.x = path_to_benchmarking_output, file_name = "rec_benchmarks")
-
+makePNG(fig = rec_benchmarks_over_time, path_to_output.x = path_to_benchmarking_output, file_name = "rec_benchmarks")
 
 #reshaping the recruitment benchmarks to be in a long format with a time axis so that
 #it can be plotted alongside model output.
-if(write_benchmark_csv == T){
-  write_csv(rec_data,paste0(path_to_benchmarking_output,"rec_benchmarks_bci.csv"))  
-}
 
 int <- c()
 int_start <- c()
@@ -136,13 +146,13 @@ int_end <- c()
 
 for(i in 1:7){
   int[i] <- i
-  int_start[i] <- mean(sp.Rlist_mindbh[[i]]$date1,na.rm = T)
-  int_end[i] <- mean(sp.Rlist_mindbh[[i]]$date2,na.rm = T)
+  int_start[i] <- mean(dem_data2 %>% filter(int == i) %>% pull(int_start), na.rm = T)
+  int_end[i] <- mean(dem_data2 %>% filter(int == i) %>% pull(int_end), na.rm = T)
 }
 
 rec_benchmarks_with_dates <- tibble(int = int, 
-                                    int_start = as.Date(int_start,origin = "1960-01-01"), 
-                                    int_end = as.Date(int_end,origin = "1960-01-01"))
+                                    int_start = int_start, 
+                                    int_end = int_end)
 
 
 int <- c()
@@ -150,7 +160,7 @@ int_start <- c()
 int_end <- c()
 
 dates_tib <- tibble()
-for(i in 1:(ncens-1)){
+for(i in 1:7){
   date.t <-seq.Date(from = rec_benchmarks_with_dates$int_start[i], to = rec_benchmarks_with_dates$int_end[i], by = 1)
   int.t <- rep(i,length(date))
   tmp <- tibble(date = date.t,
@@ -159,11 +169,12 @@ for(i in 1:(ncens-1)){
 }  
 
 rec_benchmarks_with_dates_long <- dates_tib %>%
-  left_join(rec_data, by = "int") 
+  left_join(dem_data2, by = "int") 
 
-if(write_benchmark_csv == T){
-  write_csv(rec_benchmarks_with_dates_long, path = "benchmarking/bci_rec_benchmarks_long.csv")
-}
+write_csv(rec_benchmarks_with_dates_long, path = "benchmarking/bci_rec_benchmarks_long.csv")
 
 print("created benchmarks")
 
+
+longForm <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
+str(longForm)
