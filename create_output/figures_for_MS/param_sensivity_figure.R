@@ -1,5 +1,5 @@
 source('utils/supporting_funcs.R')
-from_new_data <- TRUE
+from_new_data <- FALSE
 print("creating parameter sensitivity figure...")
 
 #generate param sensitivity data
@@ -41,14 +41,21 @@ param_sens_fig <- param_sens_data1 %>%
   scale_x_discrete(labels = parse(text = fig_labels)) +
   theme_minimal() +
   adams_theme +
-  xlab("parameter") +
+  xlab("Parameter") +
   ylab("% change in recruitment rate")
 
 makePNG(fig = param_sens_fig, path_to_output.x = path_to_MS_figures, file_name = "param_sens_BASE", height = 7)
 print("FINISHED making parameter sensitivity figure")
 
 
+PNGheight = 5
+PNGwidth = 8 #usually 8
+PNGunits = "in"
+PNGres = 100
 
+pdf(file = paste0(path_to_MS_figures,"param_sens.pdf"), width = 8, height = 7)
+param_sens_fig
+dev.off()
 
 
 

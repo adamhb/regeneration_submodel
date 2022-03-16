@@ -81,8 +81,8 @@ names(b_TR) <- pft_names
 C2B <- 2 #carbon to biomass ratio used in ED2
 seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
 F_repro_ED2 <- 0.1
-seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
-
+#seedling_mortality <- 0.95 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
+seedling_mortality <- 1 - (0.05^(1/30.4)) #converting from monthly to daily mortality rate
 #########################################
 #record the paramater values of this run#
 #########################################

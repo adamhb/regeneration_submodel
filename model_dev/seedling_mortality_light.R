@@ -152,8 +152,8 @@ viz_light_mort <- light_mort_data %>%
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "daily light stress \n seedling mortality rate") +
-  xlab(label = expression(atop(paste("forest floor light [MJ PAR m"^"-2","]"),"cum. sum prior 2 months"))) +
+  ylab(label = "Daily light stress \n seedling mortality rate") +
+  xlab(label = expression(atop(paste("Forest floor light [MJ PAR m"^"-2","]"),"cum. sum prior 2 months"))) +
   #xlab(expression(atop("solar rad. at seedling layer", paste("[MJ m"^"-2"," day"^"-1","]")))) +
   labs(title = "Light & \n seedling mortality") +
   geom_vline(xintercept = mean_bci_understory * W_ML, linetype = "dotted") +

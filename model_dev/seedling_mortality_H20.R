@@ -321,8 +321,8 @@ Fig_seedling_mort_H20 <- data_for_H20_mort_fig %>%
   scale_color_manual(values = pft.cols) +
   #annotate(geom = "text", x = 0, y = 0.035, label = "d", size = subplot_heading_size) +
   scale_linetype_manual(values=c("solid", "solid","dashed","dashed"))+
-  ylab(label = "daily moisture stress \n seedling mortality rate") +
-  xlab(label = "moisture deficit days [MPa days]") +
+  ylab(label = "Daily moisture stress \n seedling mortality rate") +
+  xlab(label = "Moisture deficit days [MPa days]") +
   labs(title = "Moisture & \n seedling mortality") +
   theme_minimal() +
   # geom_vline(xintercept = mean_bci, linetype = "dotted") +

@@ -139,8 +139,8 @@ emerg_vs_SMP_fig <- emerg_data %>%
   scale_y_continuous(limits = c(0,0.25)) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "dashed","solid","dashed"))+
-  ylab(label = "daily fraction of \n seedbank emerging") +
-  xlab(label = "mean soil matric potential \n [MPa] in prior two weeks") +
+  ylab(label = "Daily fraction of \n seedbank emerging") +
+  xlab(label = "Mean soil matric potential \n [MPa] in prior two weeks") +
   labs(title = "Moisture & \n seedling emergence") +
   theme_minimal() +
   multipanel_theme

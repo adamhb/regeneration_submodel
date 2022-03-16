@@ -1,5 +1,5 @@
 library(tidyverse)
-from_new_data <- T
+from_new_data <- F
 if(file.exists("temp/recruitment_vs_light.csv") == FALSE | from_new_data == T){
   source('runs/ED2_run_light_demo.R')
 }else{
@@ -27,10 +27,13 @@ if(file.exists("temp/recruitment_vs_light.csv") == FALSE | from_new_data == T){
 }
 print("making recruitment versus light figure...")
 
+#write_csv(summary_data, "temp/r_vs_light_summary_data.csv")
+
 source("create_output/figure_formatting.R")
 
 #import benchmarking data
 bench <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
+
 
 bench4graph <- bench %>%
   mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
@@ -46,6 +49,12 @@ bench4graph <- bench %>%
   group_by(pft) %>% summarise(R = mean(BCI_obs), se_R = sd(BCI_obs)/sqrt(length(BCI_obs))) %>%
   mutate(light = 2) %>%
   mutate(model = "BCI obs.") 
+
+bench_data <- read_csv("benchmarking/per_ha_rec_rates_per_pft_per_int_2005_2015.csv") %>%
+  select(-R_no_mort_adjust_ha_yr) %>% 
+  mutate(light = 2)
+#pick up here with adding the "model name" or do this back in benchmarking
+#write_csv(N_recs_per_year_pfts, path = "temp/outofbox_bench.csv")
 
 
 psize <- 5
@@ -126,8 +135,8 @@ gather(submodel:ED2, key = "model", value = "R") %>%
   #geom_point() +
   geom_point(size = psize, stroke = 1) +
   geom_line(show.legend = F) +
-  geom_point(data = bench4graph, mapping = aes(x = light, y = R, color = pft, shape = model), size = psize, stroke = 2, position = pd) +
-  
+  geom_point(data = bench_data, mapping = aes(x = light, y = R, color = pft, shape = model), 
+             size = psize + 3, stroke = 2, position = position_dodge(width = 0.2)) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
   scale_color_manual(values = pft.cols) +
   #scale_shape_manual(values = c(10,1,2)) +
@@ -136,7 +145,7 @@ gather(submodel:ED2, key = "model", value = "R") %>%
                 labels = round(lseq(from = 1, to = 100,length.out = 5)),
                 limits = c(1,100)) +
   #scale_y_continuous(limits = c(0,500), breaks = seq(0,500,100)) +
-  scale_y_log10(limits = c(5,500)) +
+  scale_y_log10(limits = c(1,305), breaks = as.integer(lseq(1,301,length.out = 6))) +
   rec.y.axis +
   #ylab(expression(paste('recruitment rate ',"(# indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab("light at seedling layer [% TOC]") +
@@ -191,7 +200,9 @@ gather(submodel:ED2, key = "model", value = "R") %>%
                )) %>%
                filter(model == "TRS"), mapping = aes(x = mean_pct_light * 2e6, y = R*2e6, color = pft, shape = model), size = psize) +
   geom_line(show.legend = F) +
-  geom_point(data = bench4graph, mapping = aes(x = light, y = R, color = pft, shape = model), size = psize, stroke = 2) +
+  #geom_point(data = bench4graph, mapping = aes(x = light, y = R, color = pft, shape = model), size = psize + 1, stroke = 2) +
+  geom_point(data = bench_data, mapping = aes(x = light, y = R, color = pft, shape = model), 
+             size = psize + 3, stroke = 2, position = position_dodge(width = 0.2)) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, position = pd, show.legend = F) +
   scale_color_manual(values = pft.cols) +
   #scale_shape_manual(values = c(10,1,2)) +
@@ -241,7 +252,7 @@ plot2 <- Rvsl_ED2
 test_plot.x <- plot_grid(plot1, plot2,
                         rel_widths = c(2.2,2), labels = c("(a)","(b)"), label_x = -0.02, label_size = 24)
 
-test_plot <- ggdraw(add_sub(test_plot.x, "light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), 
+test_plot <- ggdraw(add_sub(test_plot.x, "Light at seedling layer [% TOC]", vpadding=grid::unit(1,"lines"), 
                             size = axis_size))
 test_plot
 

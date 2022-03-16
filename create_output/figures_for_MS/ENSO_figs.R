@@ -36,7 +36,7 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
                #date_breaks = "5 year", 
                labels = date_format("%y")) +
   scale_shape_manual(values = c(24,21)) +
-  scale_y_continuous(limits = c(0,80), breaks = c(0,20,40,60,80)) +
+  scale_y_continuous(limits = c(0,45), breaks = c(0,10,20,30,40)) +
   #scale_y_log10(limits = c(0,360), breaks = lseq(from = )) +
   geom_vline(xintercept = as.Date("2009-01-01"), linetype = "dotted", alpha = 0.4, color = "black") +
   #annotate(geom = "text", x = as.Date("2005-01-01"), y = 350, label = "a", size = 8) +
@@ -44,14 +44,14 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   #scale_linetype_manual(values = c("dotted","dashed")) +
   #scale_y_log10(labels = c(0,10,100)) +
   #scale_y_continuous(limits = c(0,300)) + 
-  ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
-  xlab(bquote('simulation year'))+
+  ylab(expression(paste("No. recruits"," [ha"^"-1"," yr"^"-1","]")))+
+  xlab(bquote('Simulation year'))+
   #labs(title = paste("ENSO",percent_light * 100,makePNG(fig = ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_shorterm")"% light")) +
   facet_wrap(~model) +
   long_term_sim_theme +
   adams_guides +
   #guides(shape=FALSE) +
-  theme(legend.position = c(.75,.2), 
+  theme(legend.position = c(.75,.75), 
   legend.text = element_text (size = 12),
   legend.spacing.x = unit(0.2, 'cm'),
   legend.spacing.y = unit(0.2, 'cm'), #this changes the spacing between groups of legend symbols
@@ -66,7 +66,7 @@ ENSO_long_term <- N_recs_per_year_pfts %>%
   color_guide
   
 
-makePNG(fig = ENSO_long_term, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_long_term")
+makePNG(fig = ENSO_long_term, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_long_term", res = 500)
 
 
 
@@ -86,12 +86,12 @@ ENSO <- full_output %>%
   #scale_y_log10() +
   #scale_linetype_manual(values = c("dashed","solid")) +
   #year_axis +
-  ylab(expression(atop('daily recruitment rate',paste(" [N ha"^"-1"," year"^"-1","]"))))+
-  #scale_y_continuous(limits = c(0,355), breaks = c(0,50,100,150,200,250,300,350)) +
+  ylab(expression(atop('Daily recruitment rate',paste(" [No. ha"^"-1"," year"^"-1","]"))))+
+  scale_y_continuous(limits = c(0,50), breaks = c(0,20,40)) +
   scale_x_date(limits = c(as.Date("2028-10-01"),as.Date("2029-10-01")), 
                date_breaks = "2 months", 
                labels = date_format("%b")) +
-  xlab("month of simulation yrs 29/30")+
+  xlab("Month of simulation yrs 29/30")+
   #labs(title = paste('Recruitment across \n an ENSO event at',percent_light * 100,"% light")) +
   scale_color_manual(values = pft.cols) +
   #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
@@ -111,7 +111,7 @@ ENSO <- full_output %>%
          shape = guide_legend(override.aes = list(size=3)),
          fill=guide_legend(title="PFT"))
   
-makePNG(fig = ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_shorterm")
+makePNG(fig = ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_shorterm", res = 500)
 # muiltipanel.ENSO <- plot_grid(ENSO_long_term, ENSO, align = 'v', axis = 'l')
 # 
 # muiltipanel.ENSO.anno  <- ggdraw(add_sub(test_plot.x, "light at seedling layer (% TOC)", vpadding=grid::unit(1,"lines"), size = axis_size ))
@@ -126,9 +126,49 @@ makePNG(fig = ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_nam
 # dev.off()
 
 
+SMP_over_seasonal_ENSO <- full_output %>%
+  rename(submodel = R, ED2 = ED2_R) %>%
+  gather(c(submodel,ED2), key = "model", value = "R") %>%
+  mutate(model = case_when(
+    model == "submodel" ~ "TRS",
+    model == "ED2" ~ "ED2" 
+  )) %>%
+  mutate(model = factor(model,levels = c("TRS","ED2"))) %>%
+  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+  filter(model == "TRS") %>%
+  #arrange(desc(pft)) %>% 
+  ggplot(aes(x = as.Date(date), y = SMP/1e5, color = pft)) +
+  #custom_line +
+  geom_line(position=position_dodge(width = 1)) +
+  #scale_y_log10() +
+  #scale_linetype_manual(values = c("dashed","solid")) +
+  #year_axis +
+  ylab(label = "SMP [MPa]") +
+  #scale_y_continuous(limits = c(0,355), breaks = c(0,50,100,150,200,250,300,350)) +
+  scale_x_date(limits = c(as.Date("2028-10-01"),as.Date("2029-10-01")), 
+               date_breaks = "2 months", 
+               labels = date_format("%b")) +
+  xlab("month of simulation yrs 29/30")+
+  #labs(title = paste('Recruitment across \n an ENSO event at',percent_light * 100,"% light")) +
+  scale_color_manual(values = pft.cols) +
+  #geom_line(mapping = aes(x = as.Date(date), y = SMP)) +
+  #facet_wrap(~model) +
+  long_term_sim_theme +
+  adams_guides +
+  theme(legend.position = "none",
+        #legend.direction = "horizontal",
+        legend.box.background = element_rect(colour = "black"),
+        legend.text = element_text(size = 12),
+        legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm"),
+        legend.spacing.y = unit(0.005,"cm"),
+        legend.spacing.x = unit(0.01,"cm"),
+        legend.key.size = unit(0.5, "cm"),
+        panel.spacing = unit(0.01, "lines"))+
+  guides(color = guide_legend(override.aes = list(size=3)),
+         shape = guide_legend(override.aes = list(size=3)),
+         fill=guide_legend(title="PFT"))
 
-
-
+makePNG(fig = SMP_over_seasonal_ENSO, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "ENSO_shortermSMP")
 
 
 # require(gridExtra)

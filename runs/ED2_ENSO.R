@@ -6,12 +6,12 @@ gc()
 
 #load libraries
 library(ncdf4)
-library(ncdf.tools)
+#library(ncdf.tools)
 library(magrittr)
 library(tidyverse)
 library(lubridate)
 library(scales)
-library(plotrix)
+#library(plotrix)
 library(ggplot2)
 library(reshape2)
 
@@ -48,7 +48,7 @@ if(emulate_ED2 == T){
 
 source("model/regeneration_submodel.R")
 
-
+write_csv(full_output,'model_data_output/model_output_ENSO_scenario.csv')
 
 source("create_output/create_output.R")
   

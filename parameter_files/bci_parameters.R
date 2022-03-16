@@ -31,7 +31,7 @@ a_RA <- c(0.0058, 0.0059, 0.0042, 0.0049)
 names(a_RA) <- pft_names
 F_repro <- c(0.1,0.1,0.1,0.1)#the fraction of carbon for growth and reproduction that gets allocated to reproduction
 names(F_repro) <- pft_names
-F_seed <- 0.5 * 0.89 #the fraction of reproductive carbon that is seed; was .82
+F_seed <- 0.5 * 0.48 #the fraction of reproductive carbon that is seed; was .82
 
 
 #seed bank dynamics
@@ -82,7 +82,7 @@ names(b_TR) <- pft_names
 C2B <- 2 #carbon to biomass ratio used in ED2
 seed_rain <- 0.01 #kg C per month per m2 ./init/ed_params.f90:3278/3279
 F_repro_ED2 <- 0.1
-seedling_mortality <- 0.96 # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
+seedling_mortality <-  1 - (0.05^(1/30.4) * 0.015)  # mortality rate in every time step. Taken from ED2 code: ./init/ed_params.f90:2089
 
 #########################################
 #record the paramater values of this run#

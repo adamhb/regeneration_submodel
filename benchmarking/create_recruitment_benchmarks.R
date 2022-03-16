@@ -104,8 +104,11 @@ dem_data2 <- dem_data1 %>%
 
 write_csv(dem_data2,"benchmarking/dem_data_clean.csv")
 
+dem_data2  <- read_csv('benchmarking/dem_data_clean.csv')
 
+#correlation between Koh rates and basic r rates.
 ggplot(dem_data2,aes((Nr/interval_length),R_Koh * 5e5)) + geom_point() 
+
 
 per_ha_rec_rates_per_pft_per_int <- dem_data2 %>%
   mutate(r_basic_per_ha_per_yr = Nr / (50*interval_length)) %>%
@@ -116,12 +119,15 @@ per_ha_rec_rates_per_pft_per_int <- dem_data2 %>%
 write_csv(per_ha_rec_rates_per_pft_per_int, "benchmarking/obs_per_ha_rec_rates_per_pft_per_int.csv")
 
 per_ha_rec_rates_per_pft_per_int_2005_2015 <- per_ha_rec_rates_per_pft_per_int %>%
+  ungroup() %>%
   filter(int %in% c(6,7)) %>%
   group_by(pft) %>%
-  summarise(R_Koh_ha_yr = mean(R_Koh_ha_yr),
-            R_no_mort_adjust_ha_yr = mean(R_no_mort_adjust_ha_yr))
+  summarise(R = mean(R_Koh_ha_yr),
+            se_R = sd(R_Koh_ha_yr) / sqrt(length(R_Koh_ha_yr)),
+            R_no_mort_adjust_ha_yr = mean(R_no_mort_adjust_ha_yr)) %>%
+  mutate(model = "BCI obs.")
   
-write_csv(per_ha_rec_rates_per_pft_per_int_2005_2015, "per_ha_rec_rates_per_pft_per_int_2005_2015.csv")
+write_csv(per_ha_rec_rates_per_pft_per_int_2005_2015, "benchmarking/per_ha_rec_rates_per_pft_per_int_2005_2015.csv")
 
 
 rec_benchmarks_over_time <- per_ha_rec_rates_per_pft_per_int %>% 
@@ -137,44 +143,35 @@ rec_benchmarks_over_time <- per_ha_rec_rates_per_pft_per_int %>%
 
 makePNG(fig = rec_benchmarks_over_time, path_to_output.x = path_to_benchmarking_output, file_name = "rec_benchmarks")
 
+
+
+
 #reshaping the recruitment benchmarks to be in a long format with a time axis so that
 #it can be plotted alongside model output.
 
-int <- c()
-int_start <- c()
-int_end <- c()
-
-for(i in 1:7){
-  int[i] <- i
-  int_start[i] <- mean(dem_data2 %>% filter(int == i) %>% pull(int_start), na.rm = T)
-  int_end[i] <- mean(dem_data2 %>% filter(int == i) %>% pull(int_end), na.rm = T)
-}
-
-rec_benchmarks_with_dates <- tibble(int = int, 
-                                    int_start = int_start, 
-                                    int_end = int_end)
-
-
-int <- c()
-int_start <- c()
-int_end <- c()
-
-dates_tib <- tibble()
-for(i in 1:7){
-  date.t <-seq.Date(from = rec_benchmarks_with_dates$int_start[i], to = rec_benchmarks_with_dates$int_end[i], by = 1)
-  int.t <- rep(i,length(date))
-  tmp <- tibble(date = date.t,
-                int = int.t)
-  dates_tib <- rbind(dates_tib,tmp)
-}  
-
-rec_benchmarks_with_dates_long <- dates_tib %>%
-  left_join(dem_data2, by = "int") 
-
-write_csv(rec_benchmarks_with_dates_long, path = "benchmarking/bci_rec_benchmarks_long.csv")
-
-print("created benchmarks")
-
-
-longForm <- read_csv("benchmarking/bci_rec_benchmarks_long.csv")
-str(longForm)
+# intDates <- dem_data2 %>%
+#   group_by(int) %>%
+#   summarise(int_start = mean.Date(int_start),
+#             int_end = mean.Date(int_end)) 
+# 
+# 
+# dates1 <- seq.Date(intDates$int_start[1],intDates$int_end[7],by = "day")
+# pft_id <- c(rep(pft_names[1],length(dates1)),rep(pft_names[2],length(dates1)),rep(pft_names[3],length(dates1)),rep(pft_names[4],length(dates1)))
+# dates2 <- rep(dates1,4)
+# 
+# rec_benchmarks_with_dates_long <- tibble(date = dates2, pft = pft_id) %>%
+#   mutate(int = case_when(
+#     date %in% seq.Date(intDates$int_start[1],intDates$int_end[1],by = "day") ~ 1,
+#     date %in% seq.Date(intDates$int_start[2],intDates$int_end[2],by = "day") ~ 2,
+#     date %in% seq.Date(intDates$int_start[3],intDates$int_end[3],by = "day") ~ 3,
+#     date %in% seq.Date(intDates$int_start[4],intDates$int_end[4],by = "day") ~ 4,
+#     date %in% seq.Date(intDates$int_start[5],intDates$int_end[5],by = "day") ~ 5,
+#     date %in% seq.Date(intDates$int_start[6],intDates$int_end[6],by = "day") ~ 6,
+#     date %in% seq.Date(intDates$int_start[2],intDates$int_end[7],by = "day") ~ 7,
+#   )) %>%
+#   left_join(per_ha_rec_rates_per_pft_per_int, by = c("pft","int")) %>%
+#   mutate(rec_rate = R_Koh_ha_yr)
+# 
+# write_csv(rec_benchmarks_with_dates_long, file = "benchmarking/bci_rec_benchmarks_long.csv")
+# 
+# print("created benchmarks")

@@ -1,0 +1,9 @@
+pft,type,total_res_time(pft.x = p)[i]
+LD_DI,total,57.40660054589511
+LD_DI,transitioning,737.2849010729135
+LD_DT,total,57.259389163467524
+LD_DT,transitioning,727.1711901244607
+ST_DI,total,387.3310276329119
+ST_DI,transitioning,738.756838959966
+ST_DT,total,420.44157479356494
+ST_DT,transitioning,729.0339595275879

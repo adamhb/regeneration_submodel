@@ -8,12 +8,10 @@ gc()
 
 #load libraries
 library(ncdf4)
-library(ncdf.tools)
 library(magrittr)
 library(tidyverse)
 library(lubridate)
 library(scales)
-library(plotrix)
 library(ggplot2)
 library(reshape2)
 

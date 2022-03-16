@@ -29,6 +29,9 @@ bench_data <- bench4graph %>%
   mutate(simYr = 10, model = "BCI obs.") %>%
   dplyr::select(model, pft, R, se_R)
 
+bench_data <- read_csv("benchmarking/per_ha_rec_rates_per_pft_per_int_2005_2015.csv") %>%
+  select(-R_no_mort_adjust_ha_yr)
+  #pick up here with adding the "model name" or do this back in benchmarking
 #write_csv(N_recs_per_year_pfts, path = "temp/outofbox_bench.csv")
 
 
@@ -41,6 +44,9 @@ addline_format <- function(x,...){
 
 N_recs_per_year_BCI_params <- read_csv("temp/N_recs_per_yr_bci_params.csv") %>% mutate(t_vs_u = "tuned")
 N_recs_per_year_default_params <- read_csv("temp/N_recs_per_yr_default_params.csv") %>% mutate(t_vs_u = "untuned")
+
+
+
 
 benchmark_fig_data <- N_recs_per_year_default_params %>%
   rbind(N_recs_per_year_BCI_params) %>% 
@@ -59,20 +65,26 @@ benchmark_fig_data <- N_recs_per_year_default_params %>%
   #filter(model %in% c("ED2 untuned","TRS untuned","BCI obs."))
   #filter(model %in% c("BCI obs.","ED2 tuned","TRS tuned"))
 
+#tuning factors
+#TRS
+benchmark_fig_data %>% filter(model %in% c("BCI obs.","TRS untuned")) %>% group_by(model) %>% summarise(x = mean(R))
+#ED2
+benchmark_fig_data %>% filter(model %in% c("BCI obs.","ED2 untuned")) %>% group_by(model) %>% summarise(x = mean(R))
+
 
 benchmark_fig <- benchmark_fig_data %>%
   ggplot(mapping = aes(x = model, y = R, color = pft)) +
-  geom_point(size = psize, stroke = 1, alpha = 1, shape = 1, position = position_dodge(width = 0.1)) +
+  geom_point(size = psize, stroke = 1, alpha = 1, shape = 1, position = position_dodge(width = 0.2)) +
   scale_color_manual(values = pft.cols) +
-  scale_y_log10(limits = c(1,300), breaks = round(lseq(from = 1, to = 300,length.out = 7)),labels = round(lseq(from = 2, to = 300,length.out = 7))) +
+  scale_y_log10(limits = c(1,1650), breaks = round(lseq(from = 1, to = 1600,length.out = 7)),labels = round(lseq(from = 2, to = 1600,length.out = 7))) +
   scale_x_discrete(breaks=unique(levels(benchmark_fig_data$model)), 
                    labels=addline_format(unique(levels(benchmark_fig_data$model)))) +
   geom_errorbar(aes(ymin= (R - se_R), ymax = (R + se_R)), width=0, show.legend = F,
-                position = position_dodge(width = 0.1)) +
-  ylab(expression(paste("N recruits"," [ha"^"-1"," yr"^"-1","]")))+
+                position = position_dodge(width = 0.2)) +
+  ylab(expression(paste("No. recruits"," [ha"^"-1"," yr"^"-1","]")))+
   xlab(bquote('model'))+
   adams_theme_benchFig +
-  theme(legend.position = c(0.15,0.2),
+  theme(legend.position = c(0.75,0.75),
         legend.direction = "vertical",
         legend.background = element_rect(fill = "white"),
         legend.margin = margin(0.1,0.1,0.1,0.1, unit="cm"),
@@ -83,13 +95,14 @@ benchmark_fig <- benchmark_fig_data %>%
         axis.title.x = element_blank()) +
   guides(color = guide_legend(override.aes = list(shape = 15)),
          fill=guide_legend(title="PFT"))
-benchmark_fig
-
 
 
 makePNG(fig = benchmark_fig, path_to_output.x = paste0(path_to_output,"forMS/"), 
         file_name = "benchmark_fig_tuned",width = 6)
 
+pdf(file = "figures/Fig4.pdf", width = 6, height = 6)
+benchmark_fig
+dev.off()
 
 print("FINISHED making benchmarking figure!")
 

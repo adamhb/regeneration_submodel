@@ -51,7 +51,7 @@ dateFromFile <- function(filename){
 
 
 makePNG <- function(fig, path_to_output.x = path_to_output, file_name = "unamed_graph",
-                    height=PNGheight,  width=PNGwidth, units=PNGunits, res = PNGres){
+                    height=PNGheight,  width=PNGwidth, units=PNGunits, res = 600){
   
 #fig = SMP_fig
 #  file_name = "sMP_fig"
@@ -60,7 +60,7 @@ makePNG <- function(fig, path_to_output.x = path_to_output, file_name = "unamed_
     sub(pattern = ":", replacement = "-") %>%
     sub(pattern = " ", replacement = "-")
   
-  png(paste0(path_to_output.x,file_name,"_",model_run_time_stamp,".png"), height=height, width=width, units=units, res = res)
+  png(paste0(path_to_output.x,file_name,"_",model_run_time_stamp,".png"), height=height, width=width, units=units, res = 600)
   print(fig)
   dev.off()
 }

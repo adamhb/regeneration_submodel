@@ -1,5 +1,5 @@
 source("utils/supporting_funcs.R")
-from_new_data <- T
+from_new_data <- F
 print("creating recruitment vs. SMP figure...")
 
 
@@ -22,27 +22,30 @@ source("create_output/figure_formatting.R")
 #   mutate(SMP = Lutz.smp) %>%
 #   mutate(model = "BCI obs.")
 
-bench4graph <- bench %>%
-  mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
-  filter(date > start_date,
-         date < end_date) %>%
-  group_by(pft,int) %>%
-  summarise(BCI_obs = mean(rec_rate),
-            start_dateB = min(date),
-            end_dateB = max(date),
-            date = mean(date)) %>%
-  mutate(model = "BCI obs.") %>%
-  filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
-  group_by(pft) %>% summarise(R = mean(BCI_obs), se_R = sd(BCI_obs)/sqrt(length(BCI_obs))) %>%
-  mutate(SMP = Lutz.smp) %>%
-  mutate(model = "BCI obs.") 
+# bench4graph <- bench %>%
+#   mutate(year = substring(text = as.character(date), first = 1, last = 4)) %>%
+#   filter(date > start_date,
+#          date < end_date) %>%
+#   group_by(pft,int) %>%
+#   summarise(BCI_obs = mean(rec_rate),
+#             start_dateB = min(date),
+#             end_dateB = max(date),
+#             date = mean(date)) %>%
+#   mutate(model = "BCI obs.") %>%
+#   filter(date > as.Date(as.numeric(as.Date(start_date)) + 365*3, origin = "1970-01-01")) %>%
+#   group_by(pft) %>% summarise(R = mean(BCI_obs), se_R = sd(BCI_obs)/sqrt(length(BCI_obs))) %>%
+#   mutate(SMP = Lutz.smp) %>%
+#   mutate(model = "BCI obs.") 
 
-
+bench_data <- read_csv("benchmarking/per_ha_rec_rates_per_pft_per_int_2005_2015.csv") %>%
+  select(-R_no_mort_adjust_ha_yr) %>% 
+  mutate(light = 2) %>%
+  mutate(SMP = Lutz.smp) 
 
 
 summary_data <- read_csv('temp/SMP_summary_data.csv')
-summary_data %>%
-  filter(pft %in% c("ST_DT","LD_DT") )
+# summary_data %>%
+#   filter(pft %in% c("ST_DT","LD_DT") )
 
 
 se_df <- summary_data %>%
@@ -68,13 +71,15 @@ Rvsmp_TRS <- summary_data %>%
   )) %>%
   ggplot(mapping = aes(x = SMP_avg/1e5, y = R * 365, color = pft, shape = model)) +
   geom_point(size = psize, stroke = 1) +
-  geom_point(data = bench4graph, mapping = aes(x = SMP/1e5, y = R, color = pft), size = psize, stroke = 2) +
+  #geom_point(data = bench4graph, mapping = aes(x = SMP/1e5, y = R, color = pft), size = psize, stroke = 2) +
+  geom_point(data = bench_data, mapping = aes(x = SMP/1e5, y = R, color = pft),
+             size = psize + 3, stroke = 2, position = position_dodge(width = 0.2)) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, show.legend = F) +
   scale_shape_manual(values = c(10,24,21)) +
   scale_color_manual(values = pft.cols) +
   scale_x_continuous(limits = c(-2.5,0)) +
   scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), labels = lseq(from = 1,to = 280,length.out = 7), breaks = lseq(from = 1,to = 300,length.out = 7)) + 
-  ylab(expression(paste('N recruits [ha'^'-1','yr'^'-1',"]"))) +
+  ylab(expression(paste('No. recruits [ha'^'-1','yr'^'-1',"]"))) +
   #ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
   #xlab(paste0("20-yr mean patch-level \n soil matric potential (MPa)")) +
   adams_theme +
@@ -91,15 +96,14 @@ Rvsmp_ED2 <- summary_data %>%
   filter(model != "submodel") %>%
   ggplot(mapping = aes(x = SMP_avg/1e5, y = R * 365, color = pft, shape = model)) +
   geom_point(size = psize, stroke = 1) +
-  geom_point(data = bench4graph, mapping = aes(x = SMP/1e5, y = R, color = pft), size = psize, stroke = 2) +
+  geom_point(data = bench_data, mapping = aes(x = SMP/1e5, y = R, color = pft),
+             size = psize + 3, stroke = 2, position = position_dodge(width = 0.2)) +
   geom_errorbar(aes(ymin= (R * 365) - (sd * 365), ymax = (R * 365) + (sd * 365)), width=0, show.legend = F) +
   scale_shape_manual(values = c(10,21,24)) +
   scale_color_manual(values = pft.cols) +
   scale_x_continuous(limits = c(-2.5,0)) +
-  scale_y_continuous(trans=scales::pseudo_log_trans(base = 10), 
-                     labels = lseq(from = 1,to = 250,length.out = 7), 
-                     breaks = lseq(from = 1,to = 300,length.out = 7)) + 
-  ylab(expression(paste('N recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
+  scale_y_continuous(limits = c(5,30), breaks = c(5,10,15,20,25,30)) +
+  ylab(expression(paste('No. recruits ha'^'-1','yr'^'-1'))) + # indv. ha"^"-1", "yr"^"-1", ")"))) +
   xlab(paste0("20-yr mean patch-level \n soil matric potential [MPa]")) +
   adams_theme +
   theme(legend.position = "none",
@@ -109,13 +113,15 @@ Rvsmp_ED2 <- summary_data %>%
   guides(color = guide_legend(override.aes = list(shape = 15)))
 
 rvssmp <- plot_grid(Rvsmp_TRS, Rvsmp_ED2,
-                         rel_widths = c(2,2), labels = c("(c)","(d)"), label_x = -0.02, label_size = 24)
+                         rel_widths = c(2,2), labels = c("(c)","(d)"), label_x = 0.2, label_size = 24)
 
-rvssmp
+rvssmp <- plot_grid(Rvsmp_TRS, Rvsmp_ED2,
+                    rel_widths = c(2,2))
+
 rvssmp2 <- ggdraw(add_sub(rvssmp, "20-yr mean patch-level \n soil matric potential [MPa]",
                           vpadding=grid::unit(1,"lines"),
                           size = axis_size ))
-
+rvssmp2
 PNGwidth <- 9
 makePNG(fig = rvssmp2, path_to_output.x = paste0(path_to_output,"forMS/"), file_name = "rec_vs_smp")
 

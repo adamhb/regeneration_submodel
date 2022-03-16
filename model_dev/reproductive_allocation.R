@@ -8,6 +8,8 @@ source('utils/supporting_funcs.R')
 source('runs/generate_input_data.R')
 source('model/process_funcs.R')
 
+#sizes <- 1:1500
+
 #load the BCI Tree reproduction dataset
 #available here: 
 #The Barro Colorado Island Tree Reproduction Dataset is openly available through the 
@@ -153,9 +155,9 @@ RA2 <- RA %>%
   mutate(augs = purrr::map(.x = model,.f = adams_augment)) %>%
   mutate(coefs = purrr::map(.x = model,.f = coef)) %>%
   tidyr::unnest(cols = data,augs) %>%
-  tidyr::unnest(cols = coefs) %>%
-  select(pft,Latin,sp,grform,rep,dbh,.fitted,.se.fit,repdbh_mm,repmindbhmm,coefs) %>%
-  rename(rep_fitted = .fitted, se = .se.fit)
+  tidyr::unnest(cols = coefs) %>% 
+  dplyr::select(pft,Latin,sp,grform,rep,dbh,.fitted,.sigma,repdbh_mm,repmindbhmm,coefs) %>%
+  rename(rep_fitted = .fitted, se = .sigma) #was se.fit
 
 #Plotting the reproductive allocation curves
 curves_allsp <- RA2 %>%
@@ -216,8 +218,8 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
   geom_line(size = 2) +
   scale_color_manual(values = pft.cols) +
   scale_linetype_manual(values=c("solid", "solid","solid","solid")) +
-  ylab(expression(atop(paste("fraction of ",C[g+r]),"allocated to reproduction"))) +
-  xlab("cohort dbh [mm]") +
+  ylab(expression(atop(paste("Fraction of ",C[g+r]),"allocated to reproduction"))) +
+  xlab("Cohort dbh [mm]") +
   #annotate(geom = "text", x = 0, y = 0.1, label = "a", size = subplot_heading_size) +
   labs(title = "Size & \n reproductive allocation") +
   theme_minimal() +
@@ -226,7 +228,7 @@ F_repro_fig <- tibble(F_alloc = c(efrac(N = 1000, co_dbh_ind = sizes, PFT = pft_
   theme(legend.position = c(0.75,0.25), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
   guides(color = guide_legend(override.aes = list(size=8)))
 
-makePNG(fig = F_repro_fig, path_to_output.x = paste0(path_to_output,"model_dev_figs/"), file_name = "reproductive_allocation")
+makePNG(fig = F_repro_fig, path_to_output.x = paste0(path_to_output,"model_dev_figs/"), file_name = "reproductive_allocation", res = 600)
 print("made F_repro_fig")
 
 

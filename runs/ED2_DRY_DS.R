@@ -1,12 +1,10 @@
 
 #load libraries
 library(ncdf4)
-library(ncdf.tools)
 library(magrittr)
 library(tidyverse)
 library(lubridate)
 library(scales)
-library(plotrix)
 library(ggplot2)
 library(reshape2)
 
@@ -27,6 +25,12 @@ soil_layer <- 15 # 15 is 6 cm, 16 is 2 cm deep
 driver_data_path <- "~/cloud/gdrive/rec_submodel/data/ED2_dryDS/analy_dry75/"
 path_to_output <- "~/cloud/gdrive/rec_submodel/output/"
 
+if(high_light == T){
+  percent_light <- 0.2
+}else{
+  percent_light <- 0.02
+}
+
 #source parameter values
 source("parameter_files/bci_parameters.R")
 
@@ -44,6 +48,9 @@ if(emulate_ED2 == T){
 }
 
 source("model/regeneration_submodel.R")
+
+write_csv(full_output,'model_data_output/model_output_DRY-DS_scenario.csv')
+
 source("create_output/create_output.R")
 
 

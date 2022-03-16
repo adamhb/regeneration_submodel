@@ -71,7 +71,9 @@ understory_greater_than_20cm <- bci.full %>%
   #filter(grform != "U" & grform != "M") %>%
   select(sp) %>% distinct(sp) %>% left_join(bci.spptable) %>% pull(Latin) %>% tibble() %>% drop_na()
 names(understory_greater_than_20cm) <- "Latin"
-#write_csv(x = understory_greater_than_20cm, path = "understory_greater_than_20cm.csv")
+#write_csv(x = understory_greater_than_20cm, path = "~/cloud/gdrive/FATES/Earth-System-Model-Tools/data/understory_greater_than_20cm.csv")
+
+
 
 
 #Defining canopy species according to Powell et al. 2018
